@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.suql.devicecollect.mapper.UserMapper">
+
+    <sql id="Base_Column_List">
+        u_id AS id,
+        u_account AS account,
+        u_password AS password,
+        u_nick_name AS nickName,
+        u_create_time AS createTime
+    </sql>
+
+    <select id="getUserByAccount" resultType="com.suql.devicecollect.model.UserInfo">
+        select
+        <include refid="Base_Column_List" />
+        from xy_dc_userinfo
+        <where>
+            u_account = #{account}
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="getUserById" resultType="com.suql.devicecollect.model.UserInfo">
+        select
+        <include refid="Base_Column_List" />
+        from xy_dc_userinfo
+        <where>
+            u_id = #{id}
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="getMaxId" resultType="string">
+        select
+            MAX(u_id)
+        from
+            xy_dc_userinfo
+    </select>
+
+    <insert id="saveUserInfo" parameterType="com.suql.devicecollect.model.UserInfo">
+        insert xy_dc_userinfo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                u_id,
+            </if>
+            <if test="account != null">
+                u_account,
+            </if>
+            <if test="password != null">
+                u_password,
+            </if>
+            <if test="nickName != null">
+                u_nick_name,
+            </if>
+            <if test="createTime != null">
+                u_create_time
+            </if>
+        </trim>
+    </insert>
+</mapper>

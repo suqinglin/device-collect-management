@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.suql.devicecollect.mapper.DeviceDescribeMapper">
+
+    <sql id="Base_Column_List">
+        DDB_ID AS id,
+        DDB_Describe AS smallDescribe,
+        DDB_TypeValue AS typeValue,
+        DDB_State AS state,
+        DDB_BigDescribe AS bigDescribe
+    </sql>
+
+    <select id="getDeviceDescribeInfoByDescribe" resultType="com.suql.devicecollect.model.DeviceDescribeInfo" parameterType="string">
+        select
+        <include refid="Base_Column_List" />
+        from xy_devicedescribeinfo
+        <where>
+            DDB_Describe = #{describe}
+        </where>
+        LIMIT 1
+    </select>
+
+</mapper>

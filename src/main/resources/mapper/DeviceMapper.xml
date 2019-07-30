@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.suql.devicecollect.mapper.DeviceMapper">
+
+    <sql id="Base_Column_List">
+        d_id AS id,
+        d_uuid AS uuid,
+        d_mac AS macNum,
+        d_sn AS snNum,
+        d_model AS model,
+        d_hw_version AS hwVersion,
+        d_fw_version AS fwVersion,
+        d_manufacturer AS manufacturer,
+        d_tool_id AS tooId,
+        d_create_time AS createTime,
+        d_user_id AS userId,
+        d_token AS token
+    </sql>
+
+    <select id="getDeviceByUuid" resultType="com.suql.devicecollect.model.DeviceInfo">
+        select
+        <include refid="Base_Column_List" />
+        from xy_dc_deviceinfo
+        <where>
+            d_uuid = #{uuid}
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="getDeviceByMac" resultType="com.suql.devicecollect.model.DeviceInfo">
+        select
+        <include refid="Base_Column_List" />
+        from xy_dc_deviceinfo
+        <where>
+            d_mac = #{mac}
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="getMaxMacNum" resultType="string">
+        select
+            MAX(d_mac)
+        from
+            xy_dc_deviceinfo
+    </select>
+
+    <select id="getMaxSnNum" resultType="string">
+        select
+            MAX(d_sn)
+        from
+            xy_dc_deviceinfo
+        where
+            d_model = #{model}
+    </select>
+
+    <select id="getMaxId" resultType="string">
+        select
+            MAX(d_id)
+        from
+            xy_dc_deviceinfo
+    </select>
+
+    <insert id="saveDeviceInfo" parameterType="com.suql.devicecollect.model.DeviceInfo">
+        insert xy_dc_deviceinfo
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">
+                    d_id,
+                </if>
+                <if test="uuid != null">
+                    d_uuid,
+                </if>
+                <if test="macNum != null">
+                    d_mac,
+                </if>
+                <if test="snNum != null">
+                    d_sn,
+                </if>
+                <if test="model != null">
+                    d_model,
+                </if>
+                <if test="hwVersion != null">
+                    d_hw_version,
+                </if>
+                <if test="manufacturer != null">
+                    d_manufacturer,
+                </if>
+                <if test="toolId != null">
+                    d_tool_id,
+                </if>
+                <if test="createTime != null">
+                    d_create_time,
+                </if>
+                <if test="userId != null">
+                    d_user_id,
+                </if>
+                <if test="token != null">
+                    d_token
+                </if>
+            </trim>
+        <trim prefix="value (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="uuid != null">
+                #{uuid},
+            </if>
+            <if test="macNum != null">
+                #{macNum},
+            </if>
+            <if test="snNum != null">
+                #{snNum},
+            </if>
+            <if test="model != null">
+                #{model},
+            </if>
+            <if test="hwVersion != null">
+                #{hwVersion},
+            </if>
+            <if test="manufacturer != null">
+                #{manufacturer},
+            </if>
+            <if test="toolId != null">
+                #{toolId},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="userId != null">
+                #{userId},
+            </if>
+            <if test="token != null">
+                #{token}
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.suql.devicecollect.model.DeviceInfo">
+        update xy_dc_deviceinfo
+        <set>
+            <if test="uuid != null">
+                d_uuid = #{uuid},
+            </if>
+            <if test="macNum != 0">
+                d_mac = #{macNum},
+            </if>
+            <if test="snNum != 0">
+                d_sn = #{snNum},
+            </if>
+            <if test="model != null">
+                d_model = #{model},
+            </if>
+            <if test="hwVersion != null">
+                d_hw_version = #{hwVersion},
+            </if>
+            <if test="fwVersion != null">
+                d_fw_version = #{fwVersion},
+            </if>
+            <if test="manufacturer != null">
+                d_manufacturer = #{manufacturer},
+            </if>
+            <if test="toolId != null">
+                d_tool_id = #{toolId},
+            </if>
+            <if test="createTime != 0">
+                d_create_time = #{createTime},
+            </if>
+            <if test="userId != 0">
+                d_user_id = #{userId},
+            </if>
+            <if test="token != null">
+                d_token = #{token}
+            </if>
+        </set>
+        where d_id = #{id}
+    </update>
+
+    <delete id="deleteDeviceByMac">
+        delete from xy_dc_deviceinfo where d_mac = #{macNum}
+    </delete>
+</mapper>
