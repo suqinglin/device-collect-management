@@ -3,9 +3,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.1.137/xy_unmannedhotel120?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    url: jdbc:mysql://120.92.33.104/xy_unmanedhotel_1.4?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
     username: root
-    password: xyzh2018
+    password: xy2018
   # thymeleaf
   thymeleaf:
     cache: false
