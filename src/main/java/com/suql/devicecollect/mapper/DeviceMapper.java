@@ -4,6 +4,7 @@ import com.suql.devicecollect.model.DeviceInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Mapper
 public interface DeviceMapper {
@@ -23,4 +24,8 @@ public interface DeviceMapper {
     void update(DeviceInfo deviceInfo);
 
     void deleteDeviceByMac(BigInteger mac);
+
+    List<String> getModelGroup();
+
+    List<DeviceInfo> findListByModel(DeviceInfo deviceInfo);
 }

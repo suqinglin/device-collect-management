@@ -1,6 +1,10 @@
 package com.suql.devicecollect.service;
 
 import com.suql.devicecollect.model.DeviceInfo;
+import com.suql.devicecollect.response.Page;
+import com.suql.devicecollect.response.Pageable;
+
+import java.util.List;
 
 public interface DeviceService {
 
@@ -21,4 +25,10 @@ public interface DeviceService {
     void updateDevice(DeviceInfo deviceInfo);
 
     void deleteDeviceByMac(String mac);
+
+    List<String> getModelGroup();
+
+    Page<DeviceInfo> findListByModel(Pageable pageable, String model, String sn);
+
+    void deleteDevices(List<String> macs);
 }

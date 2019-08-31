@@ -13,4 +13,12 @@ public interface ManufMapper {
     String getMaxId();
 
     List<ManufInfo> getManufList();
+
+    ManufInfo findById(long id);
+
+    void edit(ManufInfo manufInfo);
+
+    void modifyPwd(ManufInfo manufInfo);
+
+    void deleteById(long id);
 }

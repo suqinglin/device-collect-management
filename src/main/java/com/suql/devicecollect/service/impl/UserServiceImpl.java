@@ -1,13 +1,20 @@
 package com.suql.devicecollect.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.suql.devicecollect.mapper.UserMapper;
 import com.suql.devicecollect.model.UserInfo;
+import com.suql.devicecollect.response.Page;
+import com.suql.devicecollect.response.Pageable;
 import com.suql.devicecollect.service.UserService;
 import com.suql.devicecollect.utils.DoNetUnicodeUtils;
+import com.suql.devicecollect.utils.Md5Util;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -49,5 +56,42 @@ public class UserServiceImpl implements UserService {
         userInfo.setNickName(nickName);
         userInfo.setCreateTime(System.currentTimeMillis());
         userMapper.saveUserInfo(userInfo);
+    }
+
+    @Override
+    public Page<UserInfo> getUserList(Pageable pageable) {
+        PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize());
+        List<UserInfo> userInfoList = userMapper.getUserList();
+        PageInfo<UserInfo> pageInfo = new PageInfo<>(userInfoList);
+        return new Page<>(userInfoList, pageInfo.getTotal(), pageable);
+    }
+
+    @Override
+    public void modifyPwd(int id, String newPwd) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(id);
+        userInfo.setPassword(Md5Util.toMd5(newPwd));
+        userMapper.modifyPwd(userInfo);
+    }
+
+    @Override
+    public void editUser(int id, String account, String nickName) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(id);
+        if (!StringUtils.isEmpty(account)) {
+            userInfo.setAccount(account);
+        }
+        if (!StringUtils.isEmpty(nickName)) {
+            userInfo.setNickName(nickName);
+        }
+        userInfo.setCreateTime(System.currentTimeMillis());
+        userMapper.editUser(userInfo);
+    }
+
+    @Override
+    public void deleteUsers(List<Integer> userIds) {
+        for (int userId: userIds) {
+            userMapper.deleteUserById(userId);
+        }
     }
 }

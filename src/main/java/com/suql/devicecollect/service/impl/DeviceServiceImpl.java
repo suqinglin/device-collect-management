@@ -1,14 +1,19 @@
 package com.suql.devicecollect.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.suql.devicecollect.Constants;
 import com.suql.devicecollect.mapper.DeviceMapper;
 import com.suql.devicecollect.model.DeviceInfo;
+import com.suql.devicecollect.response.Page;
+import com.suql.devicecollect.response.Pageable;
 import com.suql.devicecollect.service.DeviceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
+import java.util.List;
 
 @Service
 public class DeviceServiceImpl implements DeviceService {
@@ -131,5 +136,39 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public void deleteDeviceByMac(String mac) {
         deviceMapper.deleteDeviceByMac(new BigInteger(mac, 16));
+    }
+
+    @Override
+    public List<String> getModelGroup() {
+        return deviceMapper.getModelGroup();
+    }
+
+    @Override
+    public Page<DeviceInfo> findListByModel(Pageable pageable, String model, String sn) {
+        long snNum;
+        if (StringUtils.isEmpty(sn)) {
+            snNum = -1;
+        } else {
+            try {
+                snNum = Integer.valueOf(sn);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                snNum = -1;
+            }
+        }
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setModel(model);
+        deviceInfo.setSnNum(snNum);
+        PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize());
+        List<DeviceInfo> deviceInfoList = deviceMapper.findListByModel(deviceInfo);
+        PageInfo<DeviceInfo> pageInfo = new PageInfo<>(deviceInfoList);
+        return new Page<>(deviceInfoList, pageInfo.getTotal(), pageable);
+    }
+
+    @Override
+    public void deleteDevices(List<String> macs) {
+        for (String mac : macs) {
+            deviceMapper.deleteDeviceByMac(new BigInteger(mac, 16));
+        }
     }
 }

@@ -51,6 +51,12 @@ public class RandomTest {
         logger.info("result {}", ePwd);
     }
 
+    @Test
+    public void test4() {
+
+        System.out.println("----------------" + String.format("%010d", Integer.valueOf("945")));
+    }
+
     public static byte[] sendCommandEncrypt(String cmd) {
 //        cmd = cmd + " ";
         byte[] buf = cmd.getBytes(StandardCharsets.US_ASCII);

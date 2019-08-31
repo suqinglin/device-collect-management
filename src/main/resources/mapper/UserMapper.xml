@@ -37,6 +37,12 @@
             xy_dc_userinfo
     </select>
 
+    <select id="getUserList" resultType="com.suql.devicecollect.model.UserInfo">
+        select
+        <include refid="Base_Column_List" />
+        from xy_dc_userinfo
+    </select>
+
     <insert id="saveUserInfo" parameterType="com.suql.devicecollect.model.UserInfo">
         insert xy_dc_userinfo
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -56,5 +62,56 @@
                 u_create_time
             </if>
         </trim>
+        <trim prefix="value (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="account != null">
+                #{account},
+            </if>
+            <if test="password != null">
+                #{password},
+            </if>
+            <if test="nickName != null">
+                #{nickName},
+            </if>
+            <if test="createTime != null">
+                #{createTime}
+            </if>
+        </trim>
     </insert>
+
+    <update id="editUser" parameterType="com.suql.devicecollect.model.UserInfo">
+        update xy_dc_userinfo
+        <set>
+            <if test="account != null">
+                u_account = #{account},
+            </if>
+            <if test="nickName != null">
+                u_nick_name = #{nickName}
+            </if>
+        </set>
+        <where>
+            u_id = #{id}
+        </where>
+    </update>
+
+    <update id="modifyPwd" parameterType="com.suql.devicecollect.model.DeviceInfo">
+        update xy_dc_userinfo
+        <set>
+            <if test="password != null">
+                u_password = #{password}
+            </if>
+        </set>
+        <where>
+            u_id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteUserById" parameterType="int">
+        delete from xy_dc_userinfo
+        <where>
+            u_id = #{id}
+        </where>
+    </delete>
 </mapper>

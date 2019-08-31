@@ -4,6 +4,8 @@ import com.suql.devicecollect.model.DeviceInfo;
 import com.suql.devicecollect.model.PrintDeviceBean;
 import com.suql.devicecollect.print.PrintService;
 import com.suql.devicecollect.request.*;
+import com.suql.devicecollect.response.Page;
+import com.suql.devicecollect.response.Pageable;
 import com.suql.devicecollect.response.ResponseCode;
 import com.suql.devicecollect.response.ResponseData;
 import com.suql.devicecollect.service.DeviceDescribeService;
@@ -19,6 +21,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/device")
 public class DeviceController {
@@ -176,5 +179,45 @@ public class DeviceController {
             devices.append("\r\n").append(remark).append("#").append(mac).append("#").append(sn);
         }
         return devices.toString();
+    }
+
+    @GetMapping("/modelGroup")
+    public ResponseData modelGroup() {
+        try {
+            List<String> models = deviceService.getModelGroup();
+            ResponseData responseData = ResponseData.success();
+            responseData.addData("models", models);
+            return responseData;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseData.error();
+        }
+    }
+
+    @PostMapping("/listByModel")
+    public ResponseData findListByModel(@RequestBody RxDeviceListByModel rxDeviceListByModel) {
+        try {
+            Pageable pageable = new Pageable(rxDeviceListByModel.getPageIndex(), rxDeviceListByModel.getPageSize());
+            Page<DeviceInfo> deviceList = deviceService.findListByModel(pageable, rxDeviceListByModel.getModel(), rxDeviceListByModel.getSn());
+            ResponseData responseData = ResponseData.success();
+            responseData.addData("deviceList", deviceList.getList());
+            responseData.addData("count", deviceList.getTotal());
+            return responseData;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseData.error();
+        }
+    }
+
+    @PostMapping("/deleteDevices")
+    public ResponseData deleteDevices(@RequestBody RxDeleteDevices rxDeleteDevices) {
+
+        try {
+            deviceService.deleteDevices(rxDeleteDevices.getMacs());
+            return ResponseData.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseData.error();
+        }
     }
 }

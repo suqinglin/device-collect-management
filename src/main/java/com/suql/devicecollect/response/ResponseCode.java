@@ -32,7 +32,7 @@ public enum ResponseCode implements BaseEnum {
     ERROR_PWD_LONG("1002003", "密码太长"),
     ERROR_PWD_RESET_NOT_ALLOWED("1002004", "不允许重置密码"),
     ERROR_PWD_RESET("1002005", "重置密码错误"),
-    ERROR_PWD_NOTAGREE("1002006", "修改密码时输入的旧密码与原始密码不符"),
+    ERROR_PWD_NOTAGREE("1002006", "旧密码与原始密码不符"),
 
     ERROR_CFMPWD_EMPTY("1003000", "请输入确认密码"),
     ERROR_CFMPWD_NOTAGREE("1003001", "密码输入不一致"),
@@ -44,7 +44,7 @@ public enum ResponseCode implements BaseEnum {
     ERROR_ACCOUNT_INACTIVE("1004003", "账户待激活"),
     ERROR_ACCOUNT_LOCK("1004004", "账户已锁定"),
     ERROR_ACCOUNT_CANCELLED("1004005", "账户已注销"),
-    ERROR_ACCOUNT_EXIST("1004006", "账户已存在(已激活)"),
+    ERROR_ACCOUNT_EXIST("1004006", "账户已存在"),
     ERROR_ACCOUNT_NOT_LOGIN("1004007", "账户没有登录"),
     ERROR_ACCOUNT_NOT_EXIST("1004008", "账户不存在"),
     ERROR_ACCOUNT_AUTH("1004009", "不合法的凭证类型"),
@@ -56,11 +56,11 @@ public enum ResponseCode implements BaseEnum {
     ERROR_DEVICE_NO_GW("1006002", "设备没有绑定网关盒子"),
     ERROR_DEVICE_NOT_EXIST("1006003", "设备不存在"),
     ERROR_DEVICE_MODEL_NOT_EXIST("1006004", "设备型号不存在"),
-
+    // 厂商相关
+    ERROR_MANUF_NOT_EXIST("1007001", "厂商不存在"),
     ERROR_REQUEST_LIMIT("1009001", "请求次数太频繁"),
     ERROR_NOT_FOUNT("1009002", "记录不存在"),
     ERROR_EXIST("1009003", "该名称已经存在"),
-
 
     /***********************************************************************
      * SUCCESS

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.suql.devicecollect</groupId>
 	<artifactId>device-collect-management</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>device-collect-management</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -87,6 +87,12 @@
 			<groupId>com.google.zxing</groupId>
 			<artifactId>core</artifactId>
 			<version>3.2.1</version>
+		</dependency>
+		<!-- 分页查询 -->
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper-spring-boot-starter</artifactId>
+			<version>1.2.7</version>
 		</dependency>
 	</dependencies>
 

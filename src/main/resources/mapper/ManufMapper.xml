@@ -24,6 +24,9 @@
             <if test="address != null">
                 m_address,
             </if>
+            <if test="password != null">
+                m_password,
+            </if>
             <if test="createTime != 0">
                 m_create_time,
             </if>
@@ -32,6 +35,29 @@
             </if>
             <if test="state != 0">
                 m_state
+            </if>
+        </trim>
+        <trim prefix="value (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="address != null">
+                #{address},
+            </if>
+            <if test="password != null">
+                #{password},
+            </if>
+            <if test="createTime != 0">
+                #{createTime},
+            </if>
+            <if test="createUserId != 0">
+                #{createUserId},
+            </if>
+            <if test="state != 0">
+                #{state}
             </if>
         </trim>
     </insert>
@@ -49,4 +75,48 @@
         from xy_dc_manufature
         where m_state = 1
     </select>
+
+    <select id="findById" parameterType="long" resultType="com.suql.devicecollect.model.ManufInfo">
+        select
+        <include refid="Base_Column_List" />
+        from xy_dc_manufature
+        <where>
+            m_id = #{id}
+        </where>
+    </select>
+
+    <update id="edit" parameterType="com.suql.devicecollect.model.ManufInfo">
+        update xy_dc_manufature
+        <set>
+            <if test="name != null">
+                m_name = #{name},
+            </if>
+            <if test="address != null">
+                m_address = #{address}
+            </if>
+        </set>
+        <where>
+            m_id = #{id}
+        </where>
+    </update>
+
+    <update id="modifyPwd" parameterType="com.suql.devicecollect.model.ManufInfo">
+        update xy_dc_manufature
+        <set>
+            <if test="password != null">
+                m_password = #{password}
+            </if>
+        </set>
+        <where>
+            m_id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        delete from xy_dc_manufature
+        <where>
+            m_id = #{id}
+        </where>
+    </delete>
+
 </mapper>

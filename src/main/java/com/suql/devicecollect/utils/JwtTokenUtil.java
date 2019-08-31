@@ -20,8 +20,8 @@ public class JwtTokenUtil {
      */
     public static final String JWT_KEY = "secret_key";
 
-    @Value("${spring.application.name}")
-    public static String applicationName;
+//    @Value("${spring.application.name}")
+    public static String applicationName = "device-collect-management";
 
     /**
      * 生成jwt

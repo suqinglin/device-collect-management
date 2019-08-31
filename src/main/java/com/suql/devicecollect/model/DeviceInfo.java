@@ -57,11 +57,18 @@ public class DeviceInfo {
     private long createTime;
 
     /**
-     * 创建者ID
+     * 生产者ID
      */
     @Getter
     @Setter
     private long userId;
+
+    /**
+     * 生产者姓名
+     */
+    @Getter
+    @Setter
+    private String userName;
 
     @Getter
     @Setter

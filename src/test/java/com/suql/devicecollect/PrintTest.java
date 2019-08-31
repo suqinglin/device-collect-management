@@ -14,7 +14,8 @@ public class PrintTest {
     public void printQR() {
         printService = new PrintServiceImpl();
 //        String path = printService.createQrCodeByMac("FRM_", "FFFFDC2C28000048", "000000072");
-        String path = printService.createTestQrCode("GWF_#76A47AD99493", "GWF_#76A47AD99493");
+//        String path = printService.createTestQrCode("507264436c720d0a".toUpperCase(), "Clear Torken");
+        String path = printService.createTestQrCode("GWF_#4CB6BB768992", "GWF_#4CB6BB768992");
         printService.print(path);
     }
 
