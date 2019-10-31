@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +81,8 @@ public class DeviceController {
         }
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("token", device.getToken());
+//        responseData.addData("uuid", device.getUuid());
+        responseData.addData("model", device.getModel());
         return responseData;
     }
 
@@ -129,6 +132,41 @@ public class DeviceController {
         return responseData;
     }
 
+    @PostMapping("/saveManyu2Lock")
+    public ResponseData saveManyu2Lock(@RequestBody RxSaveManyu2Lock rxSaveManyu2Lock) {
+        Long userId = appBean.getCurrentUserId();
+        if (userId == null) {
+            return ResponseData.error(ResponseCode.ERROR_ACCOUNT_NOT_LOGIN);
+        }
+        try {
+            DeviceInfo deviceInfo = deviceService.getDeviceInfoByMac(rxSaveManyu2Lock.getMac());
+            if (deviceInfo != null) {
+                deviceInfo.setUuid(rxSaveManyu2Lock.getUuid());
+                deviceInfo.setMacNum(new BigInteger(rxSaveManyu2Lock.getMac(), 16));
+                deviceInfo.setToken(rxSaveManyu2Lock.getToken());
+                deviceInfo.setModel(rxSaveManyu2Lock.getModel());
+                deviceInfo.setHwVersion(rxSaveManyu2Lock.getHwVer());
+                deviceInfo.setFwVersion(rxSaveManyu2Lock.getFwVer());
+                deviceInfo.setCreateTime(System.currentTimeMillis() / 1000);
+                deviceInfo.setState(3);
+                deviceService.updateDevice(deviceInfo);
+            } else {
+                deviceService.saveManyuLock2(
+                        rxSaveManyu2Lock.getUuid(),
+                        rxSaveManyu2Lock.getMac(),
+                        rxSaveManyu2Lock.getModel(),
+                        rxSaveManyu2Lock.getToken(),
+                        rxSaveManyu2Lock.getHwVer(),
+                        rxSaveManyu2Lock.getFwVer()
+                );
+            }
+            return new ResponseData(ResponseCode.SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseData(ResponseCode.ERROR);
+        }
+    }
+
     @PostMapping("/getPrintData")
     public ResponseData getPrintData(@RequestBody RxGetPrintData rxGetPrintData) {
         String model = rxGetPrintData.getModel();
@@ -163,7 +201,7 @@ public class DeviceController {
     }
 
     @PostMapping("/print")
-    public String print(String model, int count) {
+        public String print(String model, int count) {
         String remark = deviceDescribeService.getDeviceRemarkByDescribe(model);
         if (StringUtils.isEmpty(remark)) {
             return "设备型号不存在";

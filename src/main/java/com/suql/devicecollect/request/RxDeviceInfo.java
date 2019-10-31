@@ -65,4 +65,8 @@ public class RxDeviceInfo {
     @Getter
     @Setter
     private String token;
+
+    @Getter
+    @Setter
+    private String originalMac;
 }

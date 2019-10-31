@@ -16,6 +16,7 @@ spring:
     host: 120.92.114.123
     port: 6379
     database: 1
+    password: xyzh2019
   # application name
   application:
     name: device-collect-management

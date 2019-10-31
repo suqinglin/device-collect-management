@@ -34,22 +34,23 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public String getNextMac() {
-        if (deviceMapper.getMaxMacNum() == null) {
+        String newMacNun = deviceMapper.getNewMacNum();
+        if (newMacNun== null) {
             return Constants.MAC_START + "000001";
         } else {
-            BigInteger maxMacNum = new BigInteger(deviceMapper.getMaxMacNum());
-            return String.format("%016X", maxMacNum.add(BigInteger.ONE));
+            BigInteger newMacNum = new BigInteger(newMacNun);
+            return String.format("%016X", newMacNum);
         }
     }
 
     @Override
     public String getNextSn(String model) {
-        String maxSnNum = deviceMapper.getMaxSnNum(model);
+        String newSnNum = deviceMapper.getNewSn(model);
         long nextSn;
-        if (maxSnNum == null) {
+        if (newSnNum == null) {
             nextSn = 1;
         } else {
-            nextSn = Long.valueOf(maxSnNum) + 1;
+            nextSn = Long.valueOf(newSnNum);
         }
         return String.format("%010d", nextSn);
     }
@@ -83,6 +84,7 @@ public class DeviceServiceImpl implements DeviceService {
         deviceInfo.setToken(token);
         deviceInfo.setModel(model);
         deviceInfo.setCreateTime(System.currentTimeMillis() / 1000);
+        deviceInfo.setState(1);
         deviceMapper.saveDeviceInfo(deviceInfo);
     }
 
@@ -170,5 +172,25 @@ public class DeviceServiceImpl implements DeviceService {
         for (String mac : macs) {
             deviceMapper.deleteDeviceByMac(new BigInteger(mac, 16));
         }
+    }
+
+    @Override
+    public void saveManyuLock2(String uuid, String mac, String model, String token, String hwVer, String fwVer) {
+
+        long id = 0;
+        if (deviceMapper.getMaxId() != null) {
+            id = Long.valueOf(deviceMapper.getMaxId()) + 1;
+        }
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setUuid(uuid);
+        deviceInfo.setId(id);
+        deviceInfo.setMacNum(new BigInteger(mac, 16));
+        deviceInfo.setToken(token);
+        deviceInfo.setModel(model);
+        deviceInfo.setHwVersion(hwVer);
+        deviceInfo.setFwVersion(fwVer);
+        deviceInfo.setCreateTime(System.currentTimeMillis() / 1000);
+        deviceInfo.setState(3);
+        deviceMapper.saveDeviceInfo(deviceInfo);
     }
 }

@@ -81,6 +81,9 @@
                 <if test="hwVersion != null">
                     d_hw_version,
                 </if>
+                <if test="fwVersion != null">
+                    d_fw_version,
+                </if>
                 <if test="manufacturer != null">
                     d_manufacturer,
                 </if>
@@ -94,7 +97,10 @@
                     d_user_id,
                 </if>
                 <if test="token != null">
-                    d_token
+                    d_token,
+                </if>
+                <if test="state != 0">
+                    d_state
                 </if>
             </trim>
         <trim prefix="value (" suffix=")" suffixOverrides=",">
@@ -116,6 +122,9 @@
             <if test="hwVersion != null">
                 #{hwVersion},
             </if>
+            <if test="fwVersion != null">
+                #{fwVersion},
+            </if>
             <if test="manufacturer != null">
                 #{manufacturer},
             </if>
@@ -129,7 +138,10 @@
                 #{userId},
             </if>
             <if test="token != null">
-                #{token}
+                #{token},
+            </if>
+            <if test="state != 0">
+                #{state}
             </if>
         </trim>
     </insert>
@@ -224,4 +236,47 @@
         </set>
         where d_mac = #{macNum}
     </update>
+
+    <select id="getNewSn" parameterType="string" resultType="string">
+        <!-- 优先补空缺的，没有再追加 -->
+        <!--SELECT
+        d.d_sn + 1 AS snNum
+        from
+        (
+        SELECT d_sn from xy_dc_deviceinfo where d_model = #{model}
+        )d
+        where
+        d.d_sn + 1 not in
+        (
+        SELECT d_sn from xy_dc_deviceinfo where d_model = #{model} AND d_state = 1
+        )
+        LIMIT 1-->
+        <!-- 只追加，不补空缺 -->
+        SELECT
+        MAX(d.d_sn) + 1 AS snNum
+        FROM
+        xy_dc_deviceinfo d
+        WHERE
+        d.d_model = #{model}
+    </select>
+
+    <select id="getNewMacNum" resultType="string">
+        <!-- 优先补空缺的，没有再追加 -->
+        <!--SELECT MIN(mac) AS macNum
+        FROM (
+            SELECT
+                d.d_mac + 1 AS mac
+            FROM (
+                SELECT d_mac from xy_dc_deviceinfo
+            )d
+            where d.d_mac + 1 not in (
+                SELECT d_mac from xy_dc_deviceinfo where d_state = 1
+            )
+        )m-->
+        <!-- 只追加，不补空缺 -->
+        SELECT
+        MAX(d.d_mac + 1) AS mac
+        FROM
+        xy_dc_deviceinfo d
+    </select>
 </mapper>

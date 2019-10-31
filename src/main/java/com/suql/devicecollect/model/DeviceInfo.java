@@ -16,6 +16,7 @@ public class DeviceInfo {
     private String uuid;
 
     @Getter
+    @Setter
     private String mac;
 
     @Getter
@@ -77,6 +78,10 @@ public class DeviceInfo {
     private BigInteger macNum;
 
     private long snNum;
+
+    @Getter
+    @Setter
+    private int state;
 
     public void setMacNum(BigInteger macNum) {
         this.macNum = macNum;

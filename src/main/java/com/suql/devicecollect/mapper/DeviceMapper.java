@@ -3,6 +3,7 @@ package com.suql.devicecollect.mapper;
 import com.suql.devicecollect.model.DeviceInfo;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -28,4 +29,8 @@ public interface DeviceMapper {
     List<String> getModelGroup();
 
     List<DeviceInfo> findListByModel(DeviceInfo deviceInfo);
+
+    String getNewSn(String model);
+
+    String getNewMacNum();
 }

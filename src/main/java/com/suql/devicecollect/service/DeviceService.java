@@ -31,4 +31,10 @@ public interface DeviceService {
     Page<DeviceInfo> findListByModel(Pageable pageable, String model, String sn);
 
     void deleteDevices(List<String> macs);
+
+    /**
+     * 曼瑜锁2号版本的设备，由于程序问题，不能扫码生产，但仍需将读取到的设备信息保存到服务器端数据库
+     * 为区分正常设备的数据，state为3
+     */
+    void saveManyuLock2(String uuid, String mac, String model, String token, String hwVer, String fwVer);
 }
