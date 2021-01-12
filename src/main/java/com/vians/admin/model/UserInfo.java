@@ -22,12 +22,17 @@ public class UserInfo {
     @Setter
     private String password;
 
+    @Getter
+    @Setter
+    private String userName;
+
     public UserInfo() {
     }
 
-    public UserInfo(long id, String phone, String password, String nickName, long createTime) {
+    public UserInfo(long id, String phone, String password, String userName) {
         this.id = id;
         this.phone = phone;
         this.password = password;
+        this.userName = userName;
     }
 }

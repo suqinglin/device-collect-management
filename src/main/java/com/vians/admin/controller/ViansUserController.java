@@ -1,10 +1,15 @@
 package com.vians.admin.controller;
 
+import com.vians.admin.model.RoleInfo;
+import com.vians.admin.model.UserDetailInfo;
 import com.vians.admin.request.RxLogin;
+import com.vians.admin.request.query.UserQuery;
+import com.vians.admin.response.Page;
 import com.vians.admin.response.ResponseCode;
 import com.vians.admin.response.ResponseData;
 import com.vians.admin.security.UserDetailsImpl;
 import com.vians.admin.service.RedisService;
+import com.vians.admin.service.UserService;
 import com.vians.admin.utils.JwtTokenUtil;
 import com.vians.admin.web.AppBean;
 import org.slf4j.Logger;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -33,6 +39,9 @@ public class ViansUserController {
 
     @Autowired
     private AppBean appBean;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/login")
     public ResponseData login(@Valid @RequestBody RxLogin login) {
@@ -75,6 +84,29 @@ public class ViansUserController {
         Long userId = appBean.getCurrentUserId();
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("userId", userId);
+        return responseData;
+    }
+
+    @PostMapping("/list")
+    public ResponseData getUserList(@RequestBody UserQuery userQuery) {
+        Page<UserDetailInfo> roomInfoPage = userService.getUserList(userQuery);
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        responseData.addData("list", roomInfoPage.getList());
+        responseData.addData("total", roomInfoPage.getTotal());
+        return responseData;
+    }
+
+    @PostMapping("/add")
+    public ResponseData addUser(@RequestBody UserDetailInfo userInfo) {
+        userService.addUser(userInfo);
+        return new ResponseData(ResponseCode.SUCCESS);
+    }
+
+    @PostMapping("/roles")
+    public ResponseData getRoles() {
+        List<RoleInfo> roles = userService.getRoles();
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        responseData.addData("roles", roles);
         return responseData;
     }
 }

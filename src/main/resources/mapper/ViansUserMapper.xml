@@ -5,7 +5,8 @@
     <sql id="Base_Column_List">
         u_id AS id,
         u_phone AS phone,
-        u_password AS password
+        u_password AS password,
+        u_name AS name
     </sql>
 
     <select id="getUserByPhone" resultType="com.vians.admin.model.UserInfo">
@@ -18,6 +19,16 @@
         LIMIT 1
     </select>
 
+    <select id="getUserByName" resultType="com.vians.admin.model.UserInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_user
+        <where>
+            u_name = #{name}
+        </where>
+        LIMIT 1
+    </select>
+
     <select id="getUserById" resultType="com.vians.admin.model.UserInfo">
         select
         <include refid="Base_Column_List" />
@@ -26,6 +37,145 @@
             u_id = #{id}
         </where>
         LIMIT 1
+    </select>
+
+    <insert id="addUser" parameterType="com.vians.admin.model.UserDetailInfo">
+        INSERT INTO vi_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                u_name,
+            </if>
+            <if test="gender != 0">
+                u_gender,
+            </if>
+            <if test="cardId != null">
+                u_card_id,
+            </if>
+            <if test="roleId != 0">
+                u_role_id,
+            </if>
+            <if test="phone != null">
+                u_phone,
+            </if>
+            <if test="password != null">
+                u_password,
+            </if>
+            <if test="email != null">
+                u_email,
+            </if>
+            <if test="address != null">
+                u_address,
+            </if>
+            <if test="organization != null">
+                u_organization,
+            </if>
+            <if test="workNumber != null">
+                u_work_number,
+            </if>
+            <if test="department != null">
+                u_department,
+            </if>
+            <if test="duty != null">
+                u_duty,
+            </if>
+            <if test="projectId != 0">
+                u_project_id,
+            </if>
+            <if test="createTime != null">
+                u_create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="gender != 0">
+                #{gender},
+            </if>
+            <if test="cardId != null">
+                #{cardId},
+            </if>
+            <if test="roleId != 0">
+                #{roleId},
+            </if>
+            <if test="phone != null">
+                #{phone},
+            </if>
+            <if test="password != null">
+                #{password},
+            </if>
+            <if test="email != null">
+                #{email},
+            </if>
+            <if test="address != null">
+                #{address},
+            </if>
+            <if test="organization != null">
+                #{organization},
+            </if>
+            <if test="workNumber != null">
+                #{workNumber},
+            </if>
+            <if test="department != null">
+                #{department},
+            </if>
+            <if test="duty != null">
+                #{duty},
+            </if>
+            <if test="projectId != 0">
+                #{projectId},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="getRoles" resultType="com.vians.admin.model.RoleInfo">
+        SELECT
+            r.r_id AS id,
+            r.r_name AS roleName
+        FROM vi_role r
+    </select>
+
+    <select id="getUserList" resultType="com.vians.admin.model.UserDetailInfo">
+        SELECT
+            u.u_id AS id,
+            u.u_name AS userName,
+            u.u_gender AS gender,
+            u.u_card_id AS cardId,
+            u.u_phone AS phone,
+            r.r_id AS roleId,
+            r.r_name AS roleName,
+            p.p_id AS projectId,
+            p.p_name AS projectName,
+            u.u_organization AS organization,
+            u.u_department AS department,
+            u.u_work_number AS workNumber,
+            u.u_duty AS duty,
+            u.u_create_time AS createTime
+        FROM vi_user u
+                 INNER JOIN vi_role r ON u.u_role_id = r.r_id
+                 INNER JOIN vi_project p ON u.u_project_id = p.p_id
+        WHERE
+            <if test="name != null">
+                u.u_name like concat('%', #{name}, '%')
+            </if>
+            <if test="gender != 0">
+                AND u.u_gender = #{gender}
+            </if>
+            <if test="cardId != null">
+                AND u.u_card_id like concat('%',#{cardId}, '%')
+            </if>
+            <if test="phone != null">
+                AND u.u_phone like concat('%',#{phone}, '%')
+            </if>
+            <if test="roleId != 0">
+                AND u.u_role_id = #{roleId}
+            </if>
+            <if test="projectId != 0">
+                AND u.u_project_id = #{projectId}
+            </if>
     </select>
 
 </mapper>
