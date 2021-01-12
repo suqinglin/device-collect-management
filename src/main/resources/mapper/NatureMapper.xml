@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.NatureMapper">
+
+    <select id="getProjectNatures" resultType="com.vians.admin.model.NatureInfo">
+        select
+            pn.pn_id AS id,
+            pn.pn_name AS natureName
+        from vi_project_nature pn
+    </select>
+
+    <select id="getCommunityNatures" parameterType="long" resultType="com.vians.admin.model.NatureInfo">
+        select
+            cn.cn_id AS id,
+            cn.cn_name AS natureName
+        from vi_community_nature cn
+        where cn.cn_project_nature_id = (
+            select p.p_project_nature_id
+            from vi_project p
+            where p.p_id = #{projectId}
+            )
+    </select>
+
+    <select id="getBuildingNatures" parameterType="long" resultType="com.vians.admin.model.NatureInfo">
+        select
+            bn.bn_id AS id,
+            bn.bn_name AS natureName
+        from vi_building_nature bn
+        where bn.bn_project_nature_id = (
+            select p.p_project_nature_id
+            from vi_project p
+            where p.p_id = #{projectId}
+            )
+    </select>
+
+    <select id="getUnitNatures" parameterType="long" resultType="com.vians.admin.model.NatureInfo">
+        select
+            un.un_id AS id,
+            un.un_name AS natureName
+        from vi_unit_nature un
+        where un.un_project_nature_id = (
+            select p.p_project_nature_id
+            from vi_project p
+            where p.p_id = #{projectId}
+            )
+    </select>
+
+    <select id="getFloorNatures" parameterType="long" resultType="com.vians.admin.model.NatureInfo">
+        select
+            fn.fn_id AS id,
+            fn.fn_name AS natureName
+        from vi_floor_nature fn
+        where fn.fn_project_nature_id = (
+            select p.p_project_nature_id
+            from vi_project p
+            where p.p_id = #{projectId}
+            )
+    </select>
+
+    <select id="getRoomNatures" parameterType="long" resultType="com.vians.admin.model.NatureInfo">
+        select
+            rn.rn_id AS id,
+            rn.rn_name AS natureName
+        from vi_room_nature rn
+        where rn.rn_project_nature_id = (
+            select p.p_project_nature_id
+            from vi_project p
+            where p.p_id = #{projectId}
+            )
+    </select>
+</mapper>

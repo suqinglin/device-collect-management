@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.ProjectMapper">
+
+    <sql id="Base_Column_List">
+        p_id AS id,
+        p_address AS address,
+        p_name AS projectName,
+        p_project_nature_id AS natureId,
+        p_create_user_id AS createUserId,
+        p_create_time AS createTime
+    </sql>
+
+    <select id="getProjectList" resultType="com.vians.admin.model.ProjectInfo">
+        SELECT
+            p.p_id AS id,
+            p.p_address AS address,
+            p.p_name AS projectName,
+            pn.pn_name AS natureName,
+            p.p_project_nature_id AS natureId,
+            u.u_name AS createUserName,
+            p.p_create_time AS createTime,
+            (SELECT COUNT(c.c_id) FROM vi_community c where c.c_project_id = p.p_id GROUP BY p.p_id DESC LIMIT 1) AS communityCount
+        FROM
+            (
+                vi_project p
+                    INNER JOIN vi_project_nature pn ON p.p_project_nature_id = pn.pn_id
+                )
+                INNER JOIN vi_user u ON p.p_create_user_id = u.u_id
+            <where>
+                <if test="projectName != null and projectName != ''">
+                    p.p_name like CONCAT('%',#{projectName},'%')
+                </if>
+            </where>
+        GROUP BY
+            p.p_id
+    </select>
+
+    <select id="getAllProjects" resultType="com.vians.admin.model.ProjectInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_project
+    </select>
+
+    <select id="getProjectByName" resultType="com.vians.admin.model.ProjectInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_project
+        where p_name = #{projectName}
+        limit 1
+    </select>
+
+    <select id="getProjectById" resultType="com.vians.admin.model.ProjectInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_project
+        where p_id = #{id}
+        limit 1
+    </select>
+
+    <insert id="addProject"
+            parameterType="com.vians.admin.model.ProjectInfo">
+        insert into vi_project (p_name, p_address, p_project_nature_id, p_create_user_id, p_create_time)
+        values (#{projectName}, #{address}, #{natureId}, #{createUserId}, #{createTime})
+    </insert>
+
+    <delete id="deleteProject" parameterType="long">
+        DELETE from vi_project where p_id = #{id}
+    </delete>
+
+    <update id="editProject" parameterType="com.vians.admin.model.ProjectInfo">
+        update vi_project
+        <set>
+            <if test="projectName != null">
+                p_name = #{projectName},
+            </if>
+            <if test="address != null">
+                p_address = #{address},
+            </if>
+            <if test="natureId != null">
+                p_project_nature_id = #{natureId},
+            </if>
+            <if test="updateTime != null">
+                p_update_time = #{updateTime},
+            </if>
+        </set>
+        <where>
+            p_id = #{id}
+        </where>
+    </update>
+</mapper>

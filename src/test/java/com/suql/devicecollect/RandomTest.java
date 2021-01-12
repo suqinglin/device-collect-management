@@ -1,6 +1,6 @@
 package com.suql.devicecollect;
 
-import com.suql.devicecollect.utils.DoNetUnicodeUtils;
+import com.vians.admin.utils.DoNetUnicodeUtils;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;

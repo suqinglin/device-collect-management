@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.ViansUserMapper">
+
+    <sql id="Base_Column_List">
+        u_id AS id,
+        u_phone AS phone,
+        u_password AS password
+    </sql>
+
+    <select id="getUserByPhone" resultType="com.vians.admin.model.UserInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_user
+        <where>
+            u_phone = #{phone}
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="getUserById" resultType="com.vians.admin.model.UserInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_user
+        <where>
+            u_id = #{id}
+        </where>
+        LIMIT 1
+    </select>
+
+</mapper>

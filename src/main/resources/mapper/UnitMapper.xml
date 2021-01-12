@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.UnitMapper">
+
+    <sql id="Base_Column_List">
+        u_id AS id,
+        u_name AS unitName,
+        u_unit_nature_id AS natureId,
+        u_building_id AS buildingId,
+        u_create_user_id AS createUserId,
+        u_create_time AS createTime
+    </sql>
+
+    <select id="getUnitList" resultType="com.vians.admin.model.UnitInfo">
+        SELECT
+            unit.u_id AS id,
+            unit.u_name AS unitName,
+            un.un_name AS natureName,
+            un.un_id AS natureId,
+            u.u_name AS createUserName,
+            unit.u_create_time AS createTime,
+            b.b_name AS buildingName,
+            b.b_id AS buildingId,
+            (SELECT COUNT(f.f_id) FROM vi_floor f WHERE f.f_unit_id = unit.u_id GROUP BY unit.u_id DESC LIMIT 1) AS floorCount
+        FROM
+            ((
+                vi_unit unit
+                    INNER JOIN vi_unit_nature un ON unit.u_unit_nature_id = un.un_id
+                )
+                INNER JOIN vi_user u ON unit.u_create_user_id = u.u_id
+                )
+                INNER JOIN vi_building b ON unit.u_building_id = b.b_id
+        WHERE
+            <if test="unitName != null">
+                unit.u_name like CONCAT('%',#{unitName},'%')
+            </if>
+            <if test="buildingId != 0">
+                AND unit.u_building_id = #{buildingId}
+            </if>
+    </select>
+
+    <select id="getUnitByNameInBuilding" resultType="com.vians.admin.model.UnitInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_unit
+        where u_name = #{unitName} and u_building_id = #{buildingId}
+        limit 1
+    </select>
+
+    <select id="getUnitById" resultType="com.vians.admin.model.UnitInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_unit
+        where u_id = #{id}
+        limit 1
+    </select>
+
+    <select id="getUnitsByBuildingId" resultType="com.vians.admin.model.UnitInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_unit
+        where u_building_id = #{id}
+    </select>
+
+    <insert id="addUnit"
+            parameterType="com.vians.admin.model.UnitInfo">
+        insert into vi_unit(u_name, u_unit_nature_id, u_building_id, u_create_user_id, u_create_time)
+        values (#{unitName}, #{natureId}, #{buildingId}, #{createUserId}, #{createTime})
+    </insert>
+
+    <delete id="deleteUnit" parameterType="long">
+        delete from vi_unit where u_id = #{id}
+    </delete>
+
+    <update id="editUnit" parameterType="com.vians.admin.model.UnitInfo">
+        update vi_unit
+        <set>
+            <if test="unitName != null">
+                u_name = #{unitName},
+            </if>
+            <if test="buildingId != 0">
+                u_building_id = #{buildingId},
+            </if>
+            <if test="natureId != 0">
+                u_unit_nature_id = #{natureId},
+            </if>
+            <if test="updateTime != null">
+                u_update_time = #{updateTime},
+            </if>
+        </set>
+        <where>
+            u_id = #{id}
+        </where>
+    </update>
+</mapper>

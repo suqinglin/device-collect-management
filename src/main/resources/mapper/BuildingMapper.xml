@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.BuildingMapper">
+
+    <sql id="Base_Column_List">
+        b_id AS id,
+        b_name AS buildingName,
+        b_building_nature_id AS natureId,
+        b_community_id AS communityId,
+        b_create_user_id AS createUserId,
+        b_create_time AS createTime
+    </sql>
+
+    <select id="getBuildingList" resultType="com.vians.admin.model.BuildingInfo">
+        SELECT
+            b.b_id AS id,
+            b.b_name AS buildingName,
+            bn.bn_name AS natureName,
+            bn.bn_id AS natureId,
+            u.u_name AS createUserName,
+            b.b_create_time AS createTime,
+            c.c_name AS communityName,
+            c.c_id AS communityId,
+            (SELECT COUNT(unit.u_id) FROM vi_unit unit WHERE unit.u_building_id = b.b_id GROUP BY b.b_id DESC LIMIT 1) AS unitCount
+        FROM
+            vi_building b
+            INNER JOIN vi_building_nature bn ON b.b_building_nature_id = bn.bn_id
+            INNER JOIN vi_user u ON b.b_create_user_id = u.u_id
+            INNER JOIN vi_community c ON b.b_community_id = c.c_id
+        <where>
+            <if test="buildingName != null">
+                b.b_name like CONCAT('%',#{buildingName},'%')
+            </if>
+            <if test="communityId != 0">
+                AND b.b_community_id = #{communityId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getBuildingByNameInCommunity" resultType="com.vians.admin.model.BuildingInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_building
+        where b_name = #{buildingName} and b_community_id = #{communityId}
+        limit 1
+    </select>
+
+    <select id="getBuildingById" resultType="com.vians.admin.model.BuildingInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_building
+        where b_id = #{id}
+        limit 1
+    </select>
+
+    <select id="getBuildingsByCommunityId" resultType="com.vians.admin.model.BuildingInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_building
+        where b_community_id = #{id}
+    </select>
+
+    <insert id="addBuilding"
+            parameterType="com.vians.admin.model.BuildingInfo">
+        insert into vi_building(b_name, b_building_nature_id, b_community_id, b_create_user_id, b_create_time)
+        values (#{buildingName}, #{natureId}, #{communityId}, #{createUserId}, #{createTime})
+    </insert>
+
+    <delete id="deleteBuilding" parameterType="long">
+        delete from vi_building where b_id = #{id}
+    </delete>
+
+    <update id="editBuilding" parameterType="com.vians.admin.model.BuildingInfo">
+        update vi_building
+        <set>
+            <if test="buildingName != null">
+                b_name = #{buildingName},
+            </if>
+            <if test="communityId != 0">
+                b_community_id = #{communityId},
+            </if>
+            <if test="natureId != 0">
+                b_building_nature_id = #{natureId},
+            </if>
+            <if test="updateTime != null">
+                b_update_time = #{updateTime},
+            </if>
+        </set>
+        <where>
+            b_id = #{id}
+        </where>
+    </update>
+</mapper>

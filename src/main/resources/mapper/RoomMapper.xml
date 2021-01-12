@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.RoomMapper">
+
+    <sql id="Base_Column_List">
+        r_id AS id,
+        r_name AS roomName,
+        r_room_nature_id AS natureId,
+        r_room_model_id AS roomModelId,
+        r_floor_id AS floorId,
+        r_area AS area,
+        r_state AS state,
+        r_create_user_id AS createUserId,
+        r_create_time AS createTime
+    </sql>
+
+    <select id="getRoomList" resultType="com.vians.admin.model.RoomInfo">
+        SELECT
+            r.r_id AS id,
+            r.r_name AS roomName,
+            rn.rn_name AS natureName,
+            rn.rn_id AS natureId,
+            rm.rm_name AS roomModelName,
+            rm.rm_id AS roomModelId,
+            r.r_area AS area,
+            r.r_state AS state,
+            f.f_name AS floorName,
+            f.f_id AS floorId,
+            ( SELECT COUNT( rd.rd_id ) FROM vi_room_device rd WHERE rd.rd_room_id = r.r_id ORDER BY r.r_id DESC LIMIT 1 ) AS deviceCount,
+            ( SELECT COUNT( ru.ru_id ) FROM vi_room_user ru WHERE ru.ru_room_id = r.r_id ORDER BY r.r_id DESC LIMIT 1 ) AS userCount,
+            r.r_create_time AS createTime,
+            u.u_name AS createUserName
+        FROM
+            vi_room r
+                INNER JOIN vi_room_nature rn ON r.r_room_nature_id = rn.rn_id
+                INNER JOIN vi_room_model rm ON r.r_room_model_id = rm.rm_id
+                INNER JOIN vi_user u ON r.r_create_user_id = u.u_id
+                INNER JOIN vi_floor f ON r.r_floor_id = f.f_id
+        WHERE
+            <if test="roomName != null">
+                r.r_name like CONCAT('%',#{roomName},'%')
+            </if>
+            <if test="floorId != 0">
+                AND r.r_floor_id = #{floorId}
+            </if>
+    </select>
+
+    <select id="getRoomModels" resultType="com.vians.admin.model.RoomModelInfo">
+        SELECT
+            rm.rm_id AS id,
+            rm.rm_name AS modelName
+        FROM
+            vi_room_model rm
+    </select>
+
+    <select id="getRoomByNameInFloor" resultType="com.vians.admin.model.RoomInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_room
+        where r_name = #{roomName} and r_floor_id = #{floorId}
+        limit 1
+    </select>
+
+    <select id="getRoomById" resultType="com.vians.admin.model.RoomInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_room
+        where r_id = #{id}
+        limit 1
+    </select>
+
+    <insert id="addRoom"
+            parameterType="com.vians.admin.model.RoomInfo">
+        insert into vi_room(r_name, r_room_nature_id, r_room_model_id, r_floor_id, r_area, r_state, r_create_user_id, r_create_time)
+        values (#{roomName}, #{natureId}, #{roomModelId}, #{floorId}, #{area}, #{state}, #{createUserId}, #{createTime})
+    </insert>
+
+    <delete id="deleteRoom" parameterType="long">
+        delete from vi_room where r_id = #{id}
+    </delete>
+
+    <update id="editRoom" parameterType="com.vians.admin.model.RoomInfo">
+        update vi_room
+        <set>
+            <if test="roomName != null">
+                r_name = #{roomName},
+            </if>
+            <if test="natureId != 0">
+                r_room_nature_id = #{natureId},
+            </if>
+            <if test="roomModelId != 0">
+                r_room_model_id = #{roomModelId},
+            </if>
+            <if test="floorId != 0">
+                r_floor_id = #{floorId},
+            </if>
+            <if test="area != null">
+                r_area = #{area},
+            </if>
+            <if test="state != null">
+                r_state = #{state},
+            </if>
+            <if test="updateTime != null">
+                r_update_time = #{updateTime},
+            </if>
+        </set>
+        <where>
+            r_id = #{id}
+        </where>
+    </update>
+</mapper>

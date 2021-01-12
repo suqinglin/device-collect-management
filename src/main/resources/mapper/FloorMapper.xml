@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.FloorMapper">
+
+    <sql id="Base_Column_List">
+        f_id AS id,
+        f_name AS floorName,
+        f_floor_nature_id AS natureId,
+        f_unit_id AS unitId,
+        f_create_user_id AS createUserId,
+        f_create_time AS createTime
+    </sql>
+
+    <select id="getFloorList" resultType="com.vians.admin.model.FloorInfo">
+        SELECT
+            f.f_id AS id,
+            f.f_name AS floorName,
+            fn.fn_name AS natureName,
+            fn.fn_id AS natureId,
+            u.u_name AS createUserName,
+            f.f_create_time AS createTime,
+            unit.u_name AS unitName,
+            unit.u_id AS unitId,
+            (SELECT COUNT(r.r_id) FROM vi_room r WHERE r.r_floor_id = f.f_id GROUP BY f.f_id DESC LIMIT 1) AS roomCount
+        FROM
+            ((
+                vi_floor f
+                    INNER JOIN vi_floor_nature fn ON f.f_floor_nature_id = fn.fn_id
+                )
+                INNER JOIN vi_user u ON f.f_create_user_id = u.u_id
+                )
+                INNER JOIN vi_unit unit ON f.f_unit_id = unit.u_id
+        WHERE
+            <if test="floorName != null">
+                f.f_name like CONCAT('%',#{floorName},'%')
+            </if>
+            <if test="unitId != 0">
+                AND f.f_unit_id = #{unitId}
+            </if>
+    </select>
+
+    <select id="getFloorByNameInUnit" resultType="com.vians.admin.model.FloorInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_floor
+        where f_name = #{floorName} and f_unit_id = #{unitId}
+        limit 1
+    </select>
+
+    <select id="getFloorById" resultType="com.vians.admin.model.FloorInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_floor
+        where f_id = #{id}
+        limit 1
+    </select>
+
+    <select id="getFloorsByUnitId" resultType="com.vians.admin.model.FloorInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_floor
+        where f_unit_id = #{id}
+    </select>
+
+    <insert id="addFloor"
+            parameterType="com.vians.admin.model.FloorInfo">
+        insert into vi_floor(f_name, f_floor_nature_id, f_unit_id, f_create_user_id, f_create_time)
+        values (#{floorName}, #{natureId}, #{unitId}, #{createUserId}, #{createTime})
+    </insert>
+
+    <delete id="deleteFloor" parameterType="long">
+        delete from vi_floor where f_id = #{id}
+    </delete>
+
+    <update id="editFloor" parameterType="com.vians.admin.model.FloorInfo">
+        update vi_floor
+        <set>
+            <if test="floorName != null">
+                f_name = #{floorName},
+            </if>
+            <if test="unitId != 0">
+                f_unit_id = #{unitId},
+            </if>
+            <if test="natureId != 0">
+                f_floor_nature_id = #{natureId},
+            </if>
+            <if test="updateTime != null">
+                f_update_time = #{updateTime},
+            </if>
+        </set>
+        <where>
+            f_id = #{id}
+        </where>
+    </update>
+</mapper>
