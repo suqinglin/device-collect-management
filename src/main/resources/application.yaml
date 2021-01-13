@@ -7,7 +7,8 @@ spring:
     time-zone: GMT+8
   datasource:
     hikari:
-      max-lifetime: 540000
+      max-lifetime: 30000
+      maximum-pool-size: 50
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://192.168.1.137/xy_unmannedhotel120?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
 #    url: jdbc:mysql://120.92.33.104/xy_unmanedhotel_1.4?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC

@@ -28,8 +28,9 @@
             INNER JOIN vi_user u ON b.b_create_user_id = u.u_id
             INNER JOIN vi_community c ON b.b_community_id = c.c_id
         <where>
+            1 = 1
             <if test="buildingName != null">
-                b.b_name like CONCAT('%',#{buildingName},'%')
+                AND b.b_name like CONCAT('%',#{buildingName},'%')
             </if>
             <if test="communityId != 0">
                 AND b.b_community_id = #{communityId}

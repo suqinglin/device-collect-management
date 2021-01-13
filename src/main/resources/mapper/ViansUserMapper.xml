@@ -42,7 +42,7 @@
     <insert id="addUser" parameterType="com.vians.admin.model.UserDetailInfo">
         INSERT INTO vi_user
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="name != null">
+            <if test="userName != null">
                 u_name,
             </if>
             <if test="gender != 0">
@@ -86,8 +86,8 @@
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="name != null">
-                #{name},
+            <if test="userName != null">
+                #{userName},
             </if>
             <if test="gender != 0">
                 #{gender},
@@ -131,6 +131,61 @@
         </trim>
     </insert>
 
+    <update id="editUser" parameterType="com.vians.admin.model.UserDetailInfo">
+        UPDATE vi_user
+        <set>
+            <if test="userName != null">
+                u_name = #{userName},
+            </if>
+            <if test="gender != 0">
+                u_gender = #{gender},
+            </if>
+            <if test="cardId != null">
+                u_card_id = #{cardId},
+            </if>
+            <if test="roleId != 0">
+                u_role_id = #{roleId},
+            </if>
+            <if test="phone != null">
+                u_phone = #{phone},
+            </if>
+            <if test="password != null">
+                u_password = #{password},
+            </if>
+            <if test="email != null">
+                u_email = #{email},
+            </if>
+            <if test="address != null">
+                u_address = #{address},
+            </if>
+            <if test="organization != null">
+                u_organization = #{organization},
+            </if>
+            <if test="workNumber != null">
+                u_work_number = #{workNumber},
+            </if>
+            <if test="department != null">
+                u_department = #{department},
+            </if>
+            <if test="duty != null">
+                u_duty = #{duty},
+            </if>
+            <if test="projectId != 0">
+                u_project_id = #{projectId},
+            </if>
+            <if test="updateTime != null">
+                u_update_time = #{updateTime},
+            </if>
+        </set>
+        <where>
+            u_id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteUser" parameterType="long">
+        delete from vi_user where u_id = #{id}
+    </delete>
+
     <select id="getRoles" resultType="com.vians.admin.model.RoleInfo">
         SELECT
             r.r_id AS id,
@@ -158,8 +213,9 @@
                  INNER JOIN vi_role r ON u.u_role_id = r.r_id
                  INNER JOIN vi_project p ON u.u_project_id = p.p_id
         WHERE
+            1 = 1
             <if test="name != null">
-                u.u_name like concat('%', #{name}, '%')
+                AND u.u_name like concat('%', #{name}, '%')
             </if>
             <if test="gender != 0">
                 AND u.u_gender = #{gender}

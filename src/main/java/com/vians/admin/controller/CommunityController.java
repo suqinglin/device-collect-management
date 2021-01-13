@@ -90,10 +90,11 @@ public class CommunityController {
 
     @PostMapping("/edit")
     public ResponseData editCommunity(@RequestBody RxCommunity community) {
-        if (!StringUtils.isEmpty(community.getCommunityName())
-                && !communityService.getCommunityById(community.getId()).getCommunityName().equals(community.getCommunityName())
-                && communityService.getCommunityByNameInProject(community.getCommunityName(), community.getProjectId()) != null) {
-            return new ResponseData(ResponseCode.ERROR_COMMUNITY_NAME_EXIST);
+        if (!StringUtils.isEmpty(community.getCommunityName())) {
+            CommunityInfo ci = communityService.getCommunityByNameInProject(community.getCommunityName(), community.getProjectId());
+            if (ci != null && ci.getId() != community.getId()) {
+                return new ResponseData(ResponseCode.ERROR_COMMUNITY_NAME_EXIST);
+            }
         }
         CommunityInfo communityInfo = new CommunityInfo();
         communityInfo.setId(community.getId());

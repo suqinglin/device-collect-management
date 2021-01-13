@@ -1,20 +1,17 @@
-package com.vians.admin.model;
+package com.vians.admin.request;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-
-import java.util.Date;
 
 /**
- * @ClassName UserDetailInfo
+ * @ClassName RxUser
  * @Description TODO
  * @Author su qinglin
- * @Date 2021/1/12 14:13
+ * @Date 2021/1/13 17:43
  * @Version 1.0
  **/
-@ToString
-public class UserDetailInfo {
+public class RxUser {
+
 
     @Getter
     @Setter
@@ -71,20 +68,4 @@ public class UserDetailInfo {
     @Getter
     @Setter
     private String projectName;
-
-    @Getter
-    @Setter
-    private Date createTime;
-
-    @Getter
-    @Setter
-    private Date updateTime;
-
-    @Getter
-    @Setter
-    private String email;
-
-    @Getter
-    @Setter
-    private String address;
 }

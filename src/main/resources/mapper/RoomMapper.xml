@@ -37,8 +37,9 @@
                 INNER JOIN vi_user u ON r.r_create_user_id = u.u_id
                 INNER JOIN vi_floor f ON r.r_floor_id = f.f_id
         WHERE
+            1 = 1
             <if test="roomName != null">
-                r.r_name like CONCAT('%',#{roomName},'%')
+                AND r.r_name like CONCAT('%',#{roomName},'%')
             </if>
             <if test="floorId != 0">
                 AND r.r_floor_id = #{floorId}

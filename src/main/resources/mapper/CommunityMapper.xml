@@ -31,8 +31,9 @@
                 )
                 INNER JOIN vi_project p ON c.c_project_id = p.p_id
         WHERE
+            1 = 1
             <if test="communityName != null">
-                c.c_name like CONCAT('%',#{communityName},'%')
+                AND c.c_name like CONCAT('%',#{communityName},'%')
             </if>
             <if test="projectId != 0">
                 AND c.c_project_id = #{projectId}

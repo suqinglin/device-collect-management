@@ -84,10 +84,11 @@ public class RoomController {
 
     @PostMapping("/edit")
     public ResponseData editRoom(@RequestBody RxRoom room) {
-        if (!StringUtils.isEmpty(room.getRoomName())
-                && !roomService.getRoomById(room.getId()).getRoomName().equals(room.getRoomName())
-                && roomService.getRoomByNameInFloor(room.getRoomName(), room.getFloorId()) != null) {
-            return new ResponseData(ResponseCode.ERROR_ROOM_NAME_EXIST);
+        if (!StringUtils.isEmpty(room.getRoomName())) {
+            RoomInfo ri = roomService.getRoomByNameInFloor(room.getRoomName(), room.getFloorId());
+            if (ri != null && ri.getId() != room.getId()) {
+                return new ResponseData(ResponseCode.ERROR_ROOM_NAME_EXIST);
+            }
         }
         RoomInfo roomInfo = new RoomInfo();
         roomInfo.setId(room.getId());

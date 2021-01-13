@@ -31,8 +31,9 @@
                 )
                 INNER JOIN vi_unit unit ON f.f_unit_id = unit.u_id
         WHERE
+            1 = 1
             <if test="floorName != null">
-                f.f_name like CONCAT('%',#{floorName},'%')
+                AND f.f_name like CONCAT('%',#{floorName},'%')
             </if>
             <if test="unitId != 0">
                 AND f.f_unit_id = #{unitId}

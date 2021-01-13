@@ -53,4 +53,18 @@ public class UserServiceImpl implements UserService {
     public List<RoleInfo> getRoles() {
         return userMapper.getRoles();
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void editUser(UserDetailInfo userDetailInfo) {
+        userDetailInfo.setUpdateTime(new Date());
+        userMapper.editUser(userDetailInfo);
+        System.out.println("================userDetailInfo=" + userDetailInfo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteUser(long id) {
+        userMapper.deleteUser(id);
+    }
 }

@@ -31,8 +31,9 @@
                 )
                 INNER JOIN vi_building b ON unit.u_building_id = b.b_id
         WHERE
+            1 = 1
             <if test="unitName != null">
-                unit.u_name like CONCAT('%',#{unitName},'%')
+                AND unit.u_name like CONCAT('%',#{unitName},'%')
             </if>
             <if test="buildingId != 0">
                 AND unit.u_building_id = #{buildingId}

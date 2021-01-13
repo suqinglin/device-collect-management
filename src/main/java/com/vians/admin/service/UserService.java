@@ -21,4 +21,8 @@ public interface UserService {
     void addUser(UserDetailInfo userInfo);
 
     List<RoleInfo> getRoles();
+
+    void editUser(UserDetailInfo userDetailInfo);
+
+    void deleteUser(long id);
 }

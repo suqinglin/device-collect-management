@@ -90,10 +90,11 @@ public class UnitController {
 
     @PostMapping("/edit")
     public ResponseData editUnit(@RequestBody RxUnit unit) {
-        if (!StringUtils.isEmpty(unit.getUnitName())
-                && !unitService.getUnitById(unit.getId()).getUnitName().equals(unit.getUnitName())
-                && unitService.getUnitByNameInBuilding(unit.getUnitName(), unit.getBuildingId()) != null) {
-            return new ResponseData(ResponseCode.ERROR_UNIT_NAME_EXIST);
+        if (!StringUtils.isEmpty(unit.getUnitName())) {
+            UnitInfo ui = unitService.getUnitByNameInBuilding(unit.getUnitName(), unit.getBuildingId());
+            if (ui != null && ui.getId() != unit.getId()) {
+                return new ResponseData(ResponseCode.ERROR_UNIT_NAME_EXIST);
+            }
         }
         UnitInfo unitInfo = new UnitInfo();
         unitInfo.setId(unit.getId());

@@ -23,4 +23,8 @@ public interface ViansUserMapper {
     void addUser(UserDetailInfo userInfo);
 
     List<RoleInfo> getRoles();
+
+    void editUser(UserDetailInfo userInfo);
+
+    void deleteUser(long id);
 }

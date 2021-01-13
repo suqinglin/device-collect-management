@@ -90,10 +90,11 @@ public class BuildingController {
 
     @PostMapping("/edit")
     public ResponseData editBuilding(@RequestBody RxBuilding building) {
-        if (!StringUtils.isEmpty(building.getBuildingName())
-                && !buildingService.getBuildingById(building.getId()).getBuildingName().equals(building.getBuildingName())
-                && buildingService.getBuildingByNameInCommunity(building.getBuildingName(), building.getCommunityId()) != null) {
-            return new ResponseData(ResponseCode.ERROR_BUILDING_NAME_EXIST);
+        if (!StringUtils.isEmpty(building.getBuildingName())) {
+            BuildingInfo bi = buildingService.getBuildingByNameInCommunity(building.getBuildingName(), building.getCommunityId());
+            if (bi != null && bi.getId() != building.getId()) {
+                return new ResponseData(ResponseCode.ERROR_BUILDING_NAME_EXIST);
+            }
         }
         BuildingInfo buildingInfo = new BuildingInfo();
         buildingInfo.setId(building.getId());

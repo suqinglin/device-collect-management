@@ -88,10 +88,11 @@ public class FloorController {
 
     @PostMapping("/edit")
     public ResponseData editFloor(@RequestBody RxFloor floor) {
-        if (!StringUtils.isEmpty(floor.getFloorName())
-                && !floorService.getFloorById(floor.getId()).getFloorName().equals(floor.getFloorName())
-                && floorService.getFloorByNameInUnit(floor.getFloorName(), floor.getUnitId()) != null) {
-            return new ResponseData(ResponseCode.ERROR_FLOOR_NAME_EXIST);
+        if (!StringUtils.isEmpty(floor.getFloorName())) {
+            FloorInfo fi = floorService.getFloorByNameInUnit(floor.getFloorName(), floor.getUnitId());
+            if (fi != null && fi.getId() != floor.getId()) {
+                return new ResponseData(ResponseCode.ERROR_FLOOR_NAME_EXIST);
+            }
         }
         FloorInfo floorInfo = new FloorInfo();
         floorInfo.setId(floor.getId());

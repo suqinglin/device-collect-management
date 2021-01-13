@@ -28,8 +28,9 @@
                 )
                 INNER JOIN vi_user u ON p.p_create_user_id = u.u_id
             <where>
+                1 = 1
                 <if test="projectName != null and projectName != ''">
-                    p.p_name like CONCAT('%',#{projectName},'%')
+                    AND p.p_name like CONCAT('%',#{projectName},'%')
                 </if>
             </where>
         GROUP BY

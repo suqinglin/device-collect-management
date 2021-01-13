@@ -88,12 +88,12 @@ public class ProjectController {
     @PostMapping("/edit")
     public ResponseData editProject(@RequestBody RxProject project) {
 
-        if (!StringUtils.isEmpty(project.getProjectName())
-            && !projectService.getProjectById(project.getId()).getProjectName().equals(project.getProjectName())
-            && projectService.getProjectByName(project.getProjectName()) != null) {
-            return new ResponseData(ResponseCode.ERROR_PROJECT_NAME_EXIST);
+        if (!StringUtils.isEmpty(project.getProjectName())) {
+            ProjectInfo pi = projectService.getProjectByName(project.getProjectName());
+            if (pi != null && pi.getId() != project.getId()) {
+                return new ResponseData(ResponseCode.ERROR_PROJECT_NAME_EXIST);
+            }
         }
-
         ProjectInfo projectInfo = new ProjectInfo();
         projectInfo.setId(project.getId());
         projectInfo.setProjectName(project.getProjectName());
