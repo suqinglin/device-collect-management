@@ -6,33 +6,36 @@ import lombok.Setter;
 /**
  * 设备信息表
  */
-public class Device {
+public class DeviceDetailInfo extends DeviceBaseInfo {
+
 
     @Getter
     @Setter
-    private String MAC;
+    private String projectName;
 
     @Getter
     @Setter
-    private String GwMac;
+    private String communityName;
 
     @Getter
     @Setter
-    private String Device;
+    private String buildingName;
 
     @Getter
     @Setter
-    private String Active;
+    private String unitName;
 
     @Getter
     @Setter
-    private String Feature;
+    private String floorName;
 
     @Getter
     @Setter
-    private String Index;
+    private String roomName;
 
     @Getter
     @Setter
-    private String Name;
+    private long roomId;
+
+
 }

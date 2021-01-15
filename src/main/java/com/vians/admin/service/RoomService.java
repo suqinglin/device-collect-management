@@ -29,4 +29,6 @@ public interface RoomService {
     RoomInfo getRoomByNameInFloor(String roomName, long floorId);
 
     RoomInfo getRoomById(long id);
+
+    List<RoomInfo> getRoomsByFloorId(long id);
 }

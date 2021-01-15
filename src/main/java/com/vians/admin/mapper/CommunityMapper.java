@@ -28,5 +28,5 @@ public interface CommunityMapper {
 
     CommunityInfo getCommunityById(long id);
 
-    List<CommunityInfo> getCommunitiesByProjectId(long id);
+    List<CommunityInfo> getCommunitiesByProjectId(@Param("id") long id);
 }

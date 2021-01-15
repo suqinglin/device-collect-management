@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.suql.devicecollect</groupId>
-	<artifactId>device-collect-management</artifactId>
+	<artifactId>deviceDetailInfo-collect-management</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
-	<name>device-collect-management</name>
+	<name>deviceDetailInfo-collect-management</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>

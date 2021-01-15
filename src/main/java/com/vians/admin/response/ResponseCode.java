@@ -30,7 +30,7 @@ public enum ResponseCode implements BaseEnum {
     ERROR_ACCOUNT_NOT_LOGIN("1004007", "账户没有登录"),
     ERROR_ACCOUNT_NOT_EXIST("1004008", "账户不存在"),
     ERROR_ACCOUNT_AUTH("1004009", "不合法的凭证类型"),
-
+    // API错误
     ERROR_API_INVALID_GATEWAY("1001000", "无效的网关"),
     ERROR_API_INVALID_UUID("1001001", "无效的 UUID"),
     ERROR_API_INVALID_USER("1001002", "无效的用户"),
@@ -49,6 +49,9 @@ public enum ResponseCode implements BaseEnum {
     ERROR_DEVICE_NOT_EXIST("1006003", "设备不存在"),
     ERROR_DEVICE_MODEL_NOT_EXIST("1006004", "设备型号不存在"),
     ERROR_DEVICE_CRC_ERROR("1006005", "CRC检验错误"),
+    ERROR_DEVICE_PHYSIC_NOT_GET_TOKEN("1006006", "物理账号未获取到Token"),
+    ERROR_DEVICE_PHYSIC_NOT_LOGIN("1006007", "物理账号未登录"),
+    ERROR_DEVICE_GET_DEVICE_FAILURE("1006008", "获取设备失败"),
     // 项目错误
     ERROR_PROJECT_NAME_EXIST("1007001", "项目名称已存在"),
     // 小区错误

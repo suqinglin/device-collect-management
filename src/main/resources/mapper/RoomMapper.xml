@@ -16,6 +16,7 @@
 
     <select id="getRoomList" resultType="com.vians.admin.model.RoomInfo">
         SELECT
+            CONCAT(p.p_name, c.c_name, b.b_name, unit.u_name, f.f_name, r.r_name) AS roomFullName,
             r.r_id AS id,
             r.r_name AS roomName,
             rn.rn_name AS natureName,
@@ -26,7 +27,7 @@
             r.r_state AS state,
             f.f_name AS floorName,
             f.f_id AS floorId,
-            ( SELECT COUNT( rd.rd_id ) FROM vi_room_device rd WHERE rd.rd_room_id = r.r_id ORDER BY r.r_id DESC LIMIT 1 ) AS deviceCount,
+            ( SELECT COUNT( d.d_id ) FROM vi_device d WHERE d.d_room_id = r.r_id ORDER BY r.r_id DESC LIMIT 1 ) AS deviceCount,
             ( SELECT COUNT( ru.ru_id ) FROM vi_room_user ru WHERE ru.ru_room_id = r.r_id ORDER BY r.r_id DESC LIMIT 1 ) AS userCount,
             r.r_create_time AS createTime,
             u.u_name AS createUserName
@@ -35,15 +36,30 @@
                 INNER JOIN vi_room_nature rn ON r.r_room_nature_id = rn.rn_id
                 INNER JOIN vi_room_model rm ON r.r_room_model_id = rm.rm_id
                 INNER JOIN vi_user u ON r.r_create_user_id = u.u_id
-                INNER JOIN vi_floor f ON r.r_floor_id = f.f_id
+                LEFT JOIN vi_floor f ON r.r_floor_id = f.f_id
+                LEFT JOIN vi_unit unit ON f.f_unit_id = unit.u_id
+                LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
+                LEFT JOIN vi_community c ON b.b_community_id = c.c_id
+                LEFT JOIN vi_project p ON c.c_project_id = p.p_id
         WHERE
             1 = 1
-            <if test="roomName != null">
+            <if test="roomName != null and roomName != ''">
                 AND r.r_name like CONCAT('%',#{roomName},'%')
             </if>
             <if test="floorId != 0">
                 AND r.r_floor_id = #{floorId}
             </if>
+    </select>
+
+    <select id="getRoomsByFloorId" resultType="com.vians.admin.model.RoomInfo">
+        select
+        <include refid="Base_Column_List" />
+        from vi_room
+        where
+        1 = 1
+        <if test="id != 0">
+            and r_floor_id = #{id}
+        </if>
     </select>
 
     <select id="getRoomModels" resultType="com.vians.admin.model.RoomModelInfo">
@@ -83,7 +99,7 @@
     <update id="editRoom" parameterType="com.vians.admin.model.RoomInfo">
         update vi_room
         <set>
-            <if test="roomName != null">
+            <if test="roomName != null and roomName != ''">
                 r_name = #{roomName},
             </if>
             <if test="natureId != 0">
@@ -95,13 +111,13 @@
             <if test="floorId != 0">
                 r_floor_id = #{floorId},
             </if>
-            <if test="area != null">
+            <if test="area != null and area != ''">
                 r_area = #{area},
             </if>
-            <if test="state != null">
+            <if test="state != null and state != ''">
                 r_state = #{state},
             </if>
-            <if test="updateTime != null">
+            <if test="updateTime != null and updateTime != ''">
                 r_update_time = #{updateTime},
             </if>
         </set>

@@ -72,16 +72,16 @@
     <update id="editProject" parameterType="com.vians.admin.model.ProjectInfo">
         update vi_project
         <set>
-            <if test="projectName != null">
+            <if test="projectName != null and projectName != ''">
                 p_name = #{projectName},
             </if>
-            <if test="address != null">
+            <if test="address != null and address != ''">
                 p_address = #{address},
             </if>
-            <if test="natureId != null">
+            <if test="natureId != null and natureId != ''">
                 p_project_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null">
+            <if test="updateTime != null and updateTime != ''">
                 p_update_time = #{updateTime},
             </if>
         </set>

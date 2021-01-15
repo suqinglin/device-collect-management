@@ -26,4 +26,149 @@
         </where>
         LIMIT 1
     </select>
+
+    <insert id="addDevice" parameterType="com.vians.admin.model.DeviceBaseInfo">
+        insert into vi_device(d_mac, d_gw_mac, d_model, d_name, d_feature, d_active, d_index, d_create_user_id, d_create_time)
+        values (#{MAC}, #{GwMac}, #{Device}, #{Name}, #{Feature}, #{Active}, #{Index}, #{userId}, #{createTime})
+        on duplicate key
+            update d_gw_mac = values(d_gw_mac),
+                   d_model = values(d_model),
+                   d_name = values(d_name),
+                   d_feature = values(d_feature),
+                   d_active = values(d_active),
+                   d_index = values(d_index),
+                   d_create_user_id = values(d_create_user_id)
+    </insert>
+
+    <select id="getDeviceList"
+            parameterType="com.vians.admin.request.query.DeviceQuery"
+            resultType="com.vians.admin.model.DeviceDetailInfo">
+        SELECT
+            d.d_id AS id,
+            d.d_mac AS MAC,
+            d.d_gw_mac AS GwMac,
+            d.d_model AS Device,
+            d.d_name AS NAME,
+            d.d_feature AS Feature,
+            d.d_active AS Active,
+            d.d_index AS idx,
+            d.d_create_user_id AS userId,
+            d.d_create_time AS createTime,
+            d.d_ele AS ele,
+            p.p_name AS projectName,
+            c.c_name AS communityName,
+            b.b_name AS buildingName,
+            unit.u_name AS unitName,
+            f.f_name AS floorName,
+            r.r_name AS roomName,
+            u.u_name AS createUserName
+        FROM
+            vi_device d
+                LEFT JOIN vi_user u ON d.d_create_user_id = u.u_id
+                LEFT JOIN vi_room r ON d.d_room_id = r.r_id
+                LEFT JOIN vi_floor f ON r.r_floor_id = f.f_id
+                LEFT JOIN vi_unit unit ON f.f_unit_id = unit.u_id
+                LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
+                LEFT JOIN vi_community c ON b.b_community_id = c.c_id
+                LEFT JOIN vi_project p ON c.c_project_id = p.p_id
+        WHERE
+            1 = 1
+            <if test="projectId != 0">
+                AND p.p_id = #{projectId}
+            </if>
+            <if test="communityId != 0">
+                AND c.c_id = #{communityId}
+            </if>
+            <if test="buildingId != 0">
+                AND b.b_id = #{buildingId}
+            </if>
+            <if test="unitId != 0">
+                AND unit.u_id = #{unitId}
+            </if>
+            <if test="floorId != 0">
+                AND f.f_id = #{floorId}
+            </if>
+            <if test="roomId != 0">
+                AND r.r_id = #{roomId}
+            </if>
+            <if test="deviceModel != null and deviceModel != ''">
+                AND d.d_model = #{deviceModel}
+            </if>
+            <if test="deviceName != null and deviceName != ''">
+                AND d.d_name like CONCAT('%',#{deviceName},'%')
+            </if>
+            <if test="deviceFeature != null and deviceFeature != ''">
+                AND d.d_feature = #{deviceFeature}
+            </if>
+            <if test="deviceMac != null and deviceMac != ''">
+                AND d.d_mac = #{deviceMac}
+            </if>
+            <if test="gwMac != null and gwMac != ''">
+                AND d.d_gw_mac = #{gwMac}
+            </if>
+    </select>
+
+    <select id="getFreeDevices" resultType="com.vians.admin.model.DeviceBaseInfo">
+        SELECT
+            d.d_id AS id,
+            d.d_mac AS MAC,
+            d.d_gw_mac AS GwMac,
+            d.d_model AS Device,
+            d.d_name AS NAME,
+            d.d_feature AS Feature,
+            d.d_active AS Active,
+            d.d_index AS idx,
+            d.d_create_user_id AS userId,
+            d.d_create_time AS createTime,
+            d.d_ele AS ele,
+            u.u_name AS createUserName
+        FROM
+            vi_device d
+                LEFT JOIN vi_user u ON d.d_create_user_id = u.u_id
+    </select>
+
+    <select id="getBindedDevice" resultType="com.vians.admin.model.DeviceBaseInfo">
+        SELECT
+            d.d_id AS id,
+            d.d_mac AS MAC,
+            d.d_gw_mac AS GwMac,
+            d.d_model AS Device,
+            d.d_name AS NAME,
+            d.d_feature AS Feature,
+            d.d_active AS Active,
+            d.d_index AS idx,
+            d.d_create_user_id AS userId,
+            d.d_create_time AS createTime,
+            d.d_ele AS ele,
+            u.u_name AS bindUserName
+        FROM
+            vi_device d
+                LEFT JOIN vi_user u ON d.d_bind_user_id = u.u_id
+        WHERE d.d_room_id = #{roomId}
+    </select>
+
+    <update id="bindDevice">
+        update
+            vi_device
+        set
+            d_room_id = #{roomId},
+            d_bind_time = #{bindTime},
+            d_bind_user_id = #{userId},
+            d_update_time = #{bindTime}
+        where
+            d_id = #{deviceId}
+    </update>
+
+    <update id="unbindDevice" parameterType="long">
+        update
+            vi_device
+        set
+            d_room_id = null
+        where
+            d_id = #{id}
+    </update>
+
+    <delete id="deleteDevice" parameterType="long">
+        delete from vi_device where d_id = #{id}
+    </delete>
 </mapper>

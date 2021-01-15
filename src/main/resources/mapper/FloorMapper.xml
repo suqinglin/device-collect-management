@@ -32,7 +32,7 @@
                 INNER JOIN vi_unit unit ON f.f_unit_id = unit.u_id
         WHERE
             1 = 1
-            <if test="floorName != null">
+            <if test="floorName != null and floorName != ''">
                 AND f.f_name like CONCAT('%',#{floorName},'%')
             </if>
             <if test="unitId != 0">
@@ -60,7 +60,11 @@
         select
         <include refid="Base_Column_List" />
         from vi_floor
-        where f_unit_id = #{id}
+        where
+        1 = 1
+        <if test="id != 0">
+            and f_unit_id = #{id}
+        </if>
     </select>
 
     <insert id="addFloor"
@@ -76,7 +80,7 @@
     <update id="editFloor" parameterType="com.vians.admin.model.FloorInfo">
         update vi_floor
         <set>
-            <if test="floorName != null">
+            <if test="floorName != null and floorName != ''">
                 f_name = #{floorName},
             </if>
             <if test="unitId != 0">
@@ -85,7 +89,7 @@
             <if test="natureId != 0">
                 f_floor_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null">
+            <if test="updateTime != null and updateTime != ''">
                 f_update_time = #{updateTime},
             </if>
         </set>

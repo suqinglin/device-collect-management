@@ -7,7 +7,7 @@ spring:
     time-zone: GMT+8
   datasource:
     hikari:
-      max-lifetime: 30000
+      max-lifetime: 120000
       maximum-pool-size: 50
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://192.168.1.137/xy_unmannedhotel120?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
@@ -42,9 +42,9 @@ pagehelper:
   helper-dialect: mysql
 logging:
   level:
-    com.suql.devicecollect.mapper: debug
+    com.vians.admin.mapper: debug
 system:
   url: http://admin.szvians.cn:8087
-  physicUser: 17783613686
+  physicUser: 18580250664
   physicPsw: 123456
 

@@ -29,7 +29,7 @@
             INNER JOIN vi_community c ON b.b_community_id = c.c_id
         <where>
             1 = 1
-            <if test="buildingName != null">
+            <if test="buildingName != null and buildingName != ''">
                 AND b.b_name like CONCAT('%',#{buildingName},'%')
             </if>
             <if test="communityId != 0">
@@ -58,7 +58,11 @@
         select
         <include refid="Base_Column_List" />
         from vi_building
-        where b_community_id = #{id}
+        where
+        1 = 1
+        <if test="id != 0">
+            and b_community_id = #{id}
+        </if>
     </select>
 
     <insert id="addBuilding"
@@ -74,7 +78,7 @@
     <update id="editBuilding" parameterType="com.vians.admin.model.BuildingInfo">
         update vi_building
         <set>
-            <if test="buildingName != null">
+            <if test="buildingName != null and buildingName != ''">
                 b_name = #{buildingName},
             </if>
             <if test="communityId != 0">
@@ -83,7 +87,7 @@
             <if test="natureId != 0">
                 b_building_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null">
+            <if test="updateTime != null and updateTime != ''">
                 b_update_time = #{updateTime},
             </if>
         </set>

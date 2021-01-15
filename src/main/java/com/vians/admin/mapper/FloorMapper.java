@@ -29,5 +29,5 @@ public interface FloorMapper {
 
     FloorInfo getFloorById(long id);
 
-    List<FloorInfo> getFloorsByUnitId(long id);
+    List<FloorInfo> getFloorsByUnitId(@Param("id")long id);
 }

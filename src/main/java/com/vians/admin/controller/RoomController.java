@@ -102,6 +102,14 @@ public class RoomController {
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
+    @PostMapping("/all")
+    public ResponseData getRoomsByFloorId(@RequestBody RxId rxId) {
+        List<RoomInfo> rooms = roomService.getRoomsByFloorId(rxId.getId());
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        responseData.addData("rooms", rooms);
+        return responseData;
+    }
+
     @PostMapping("/delete")
     public ResponseData deleteRoom(@RequestBody RxId delete) {
         roomService.deleteRoom(delete.getId());

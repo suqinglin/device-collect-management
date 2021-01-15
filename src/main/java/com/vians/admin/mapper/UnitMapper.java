@@ -28,5 +28,5 @@ public interface UnitMapper {
 
     UnitInfo getUnitById(long id);
 
-    List<UnitInfo> getUnitsByBuildingId(long id);
+    List<UnitInfo> getUnitsByBuildingId(@Param("id")long id);
 }

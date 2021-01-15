@@ -32,7 +32,7 @@
                 INNER JOIN vi_project p ON c.c_project_id = p.p_id
         WHERE
             1 = 1
-            <if test="communityName != null">
+            <if test="communityName != null and communityName != ''">
                 AND c.c_name like CONCAT('%',#{communityName},'%')
             </if>
             <if test="projectId != 0">
@@ -60,7 +60,11 @@
         select
         <include refid="Base_Column_List" />
         from vi_community
-        where c_project_id = #{id}
+        where
+        1 = 1
+        <if test="id != 0">
+            and c_project_id = #{id}
+        </if>
     </select>
 
     <insert id="addCommunity"
@@ -76,7 +80,7 @@
     <update id="editCommunity" parameterType="com.vians.admin.model.CommunityInfo">
         update vi_community
         <set>
-            <if test="communityName != null">
+            <if test="communityName != null and communityName != ''">
                 c_name = #{communityName},
             </if>
             <if test="projectId != 0">
@@ -85,7 +89,7 @@
             <if test="natureId != 0">
                 c_community_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null">
+            <if test="updateTime != null and updateTime != ''">
                 c_update_time = #{updateTime},
             </if>
         </set>

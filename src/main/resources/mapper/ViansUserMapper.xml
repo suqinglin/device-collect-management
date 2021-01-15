@@ -42,90 +42,90 @@
     <insert id="addUser" parameterType="com.vians.admin.model.UserDetailInfo">
         INSERT INTO vi_user
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="userName != null">
+            <if test="userName != null and userName != ''">
                 u_name,
             </if>
             <if test="gender != 0">
                 u_gender,
             </if>
-            <if test="cardId != null">
+            <if test="cardId != null and cardId != ''">
                 u_card_id,
             </if>
             <if test="roleId != 0">
                 u_role_id,
             </if>
-            <if test="phone != null">
+            <if test="phone != null and phone != ''">
                 u_phone,
             </if>
-            <if test="password != null">
+            <if test="password != null and password != ''">
                 u_password,
             </if>
-            <if test="email != null">
+            <if test="email != null and email != ''">
                 u_email,
             </if>
-            <if test="address != null">
+            <if test="address != null and address != ''">
                 u_address,
             </if>
-            <if test="organization != null">
+            <if test="organization != null and organization != ''">
                 u_organization,
             </if>
-            <if test="workNumber != null">
+            <if test="workNumber != null and workNumber != ''">
                 u_work_number,
             </if>
-            <if test="department != null">
+            <if test="department != null and department != ''">
                 u_department,
             </if>
-            <if test="duty != null">
+            <if test="duty != null and duty != ''">
                 u_duty,
             </if>
             <if test="projectId != 0">
                 u_project_id,
             </if>
-            <if test="createTime != null">
+            <if test="createTime != null and createTime != ''">
                 u_create_time,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="userName != null">
+            <if test="userName != null and userName != ''">
                 #{userName},
             </if>
             <if test="gender != 0">
                 #{gender},
             </if>
-            <if test="cardId != null">
+            <if test="cardId != null and cardId != ''">
                 #{cardId},
             </if>
             <if test="roleId != 0">
                 #{roleId},
             </if>
-            <if test="phone != null">
+            <if test="phone != null and phone != ''">
                 #{phone},
             </if>
-            <if test="password != null">
+            <if test="password != null and password != ''">
                 #{password},
             </if>
-            <if test="email != null">
+            <if test="email != null and email != ''">
                 #{email},
             </if>
-            <if test="address != null">
+            <if test="address != null and address != ''">
                 #{address},
             </if>
-            <if test="organization != null">
+            <if test="organization != null and organization != ''">
                 #{organization},
             </if>
-            <if test="workNumber != null">
+            <if test="workNumber != null and workNumber != ''">
                 #{workNumber},
             </if>
-            <if test="department != null">
+            <if test="department != null and department != ''">
                 #{department},
             </if>
-            <if test="duty != null">
+            <if test="duty != null and duty != ''">
                 #{duty},
             </if>
             <if test="projectId != 0">
                 #{projectId},
             </if>
-            <if test="createTime != null">
+            <if test="createTime != null and createTime != ''">
                 #{createTime},
             </if>
         </trim>
@@ -134,46 +134,46 @@
     <update id="editUser" parameterType="com.vians.admin.model.UserDetailInfo">
         UPDATE vi_user
         <set>
-            <if test="userName != null">
+            <if test="userName != null and userName != ''">
                 u_name = #{userName},
             </if>
             <if test="gender != 0">
                 u_gender = #{gender},
             </if>
-            <if test="cardId != null">
+            <if test="cardId != null and cardId != ''">
                 u_card_id = #{cardId},
             </if>
             <if test="roleId != 0">
                 u_role_id = #{roleId},
             </if>
-            <if test="phone != null">
+            <if test="phone != null and phone != ''">
                 u_phone = #{phone},
             </if>
-            <if test="password != null">
+            <if test="password != null and password != ''">
                 u_password = #{password},
             </if>
-            <if test="email != null">
+            <if test="email != null and email != ''">
                 u_email = #{email},
             </if>
-            <if test="address != null">
+            <if test="address != null and address != ''">
                 u_address = #{address},
             </if>
-            <if test="organization != null">
+            <if test="organization != null and organization != ''">
                 u_organization = #{organization},
             </if>
-            <if test="workNumber != null">
+            <if test="workNumber != null and workNumber != ''">
                 u_work_number = #{workNumber},
             </if>
-            <if test="department != null">
+            <if test="department != null and department != ''">
                 u_department = #{department},
             </if>
-            <if test="duty != null">
+            <if test="duty != null and duty != ''">
                 u_duty = #{duty},
             </if>
             <if test="projectId != 0">
                 u_project_id = #{projectId},
             </if>
-            <if test="updateTime != null">
+            <if test="updateTime != null and updateTime != ''">
                 u_update_time = #{updateTime},
             </if>
         </set>
@@ -214,16 +214,16 @@
                  INNER JOIN vi_project p ON u.u_project_id = p.p_id
         WHERE
             1 = 1
-            <if test="name != null">
+            <if test="name != null and name != ''">
                 AND u.u_name like concat('%', #{name}, '%')
             </if>
             <if test="gender != 0">
                 AND u.u_gender = #{gender}
             </if>
-            <if test="cardId != null">
+            <if test="cardId != null and cardId != ''">
                 AND u.u_card_id like concat('%',#{cardId}, '%')
             </if>
-            <if test="phone != null">
+            <if test="phone != null and phone != ''">
                 AND u.u_phone like concat('%',#{phone}, '%')
             </if>
             <if test="roleId != 0">

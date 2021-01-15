@@ -1,6 +1,6 @@
 package com.vians.admin.response.bean;
 
-import com.vians.admin.model.Device;
+import com.vians.admin.model.DeviceBaseInfo;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +17,7 @@ public class GetDeviceResponse extends BResponse {
 
     @Getter
     @Setter
-    private List<Device> Dev;
+    private List<DeviceBaseInfo> Dev;
 
     @Getter
     @Setter

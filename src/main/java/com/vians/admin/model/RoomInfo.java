@@ -29,6 +29,13 @@ public class RoomInfo {
     private String roomName;
 
     /**
+     * 房间全称
+     */
+    @Getter
+    @Setter
+    private String roomFullName;
+
+    /**
      * 房间性质ID
      */
     @Getter

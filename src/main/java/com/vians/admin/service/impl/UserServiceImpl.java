@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
     public void editUser(UserDetailInfo userDetailInfo) {
         userDetailInfo.setUpdateTime(new Date());
         userMapper.editUser(userDetailInfo);
-        System.out.println("================userDetailInfo=" + userDetailInfo);
     }
 
     @Transactional(rollbackFor = Exception.class)

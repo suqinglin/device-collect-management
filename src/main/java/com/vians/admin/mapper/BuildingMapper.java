@@ -30,5 +30,5 @@ public interface BuildingMapper {
             @Param("buildingName") String buildingName,
             @Param("communityId") long communityId);
 
-    List<BuildingInfo> getBuildingsByCommunityId(long id);
+    List<BuildingInfo> getBuildingsByCommunityId(@Param("id") long id);
 }

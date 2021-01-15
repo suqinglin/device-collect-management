@@ -626,7 +626,6 @@ public class DeviceApiController {
      */
     @PostMapping("/GetDevice")
     public ResponseData getDevice(@Valid @RequestBody RxGetDevice getDevice) {
-        System.out.println("RmtUnlockReqParam=" + getDevice.toString());
         String appKey = getAppKey(redisService, propUtil);
         String userId = redisService.get(RedisKeyConstants.VIANS_USER_ID);
         if (appKey == null || userId == null) {

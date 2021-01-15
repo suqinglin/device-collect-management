@@ -32,7 +32,7 @@
                 INNER JOIN vi_building b ON unit.u_building_id = b.b_id
         WHERE
             1 = 1
-            <if test="unitName != null">
+            <if test="unitName != null and unitName != ''">
                 AND unit.u_name like CONCAT('%',#{unitName},'%')
             </if>
             <if test="buildingId != 0">
@@ -60,7 +60,11 @@
         select
         <include refid="Base_Column_List" />
         from vi_unit
-        where u_building_id = #{id}
+        where
+        1 = 1
+        <if test="id != 0">
+            and u_building_id = #{id}
+        </if>
     </select>
 
     <insert id="addUnit"
@@ -76,7 +80,7 @@
     <update id="editUnit" parameterType="com.vians.admin.model.UnitInfo">
         update vi_unit
         <set>
-            <if test="unitName != null">
+            <if test="unitName != null and unitName != ''">
                 u_name = #{unitName},
             </if>
             <if test="buildingId != 0">
@@ -85,7 +89,7 @@
             <if test="natureId != 0">
                 u_unit_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null">
+            <if test="updateTime != null and updateTime != ''">
                 u_update_time = #{updateTime},
             </if>
         </set>

@@ -30,4 +30,6 @@ public interface RoomMapper {
     RoomInfo getRoomByNameInFloor(@Param("roomName") String roomName, @Param("floorId") long floorId);
 
     RoomInfo getRoomById(long id);
+
+    List<RoomInfo> getRoomsByFloorId(@Param("id")long id);
 }
