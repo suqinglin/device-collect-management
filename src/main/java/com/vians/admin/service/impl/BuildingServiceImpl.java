@@ -36,9 +36,9 @@ public class BuildingServiceImpl implements BuildingService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Page<BuildingInfo> getBuildingList(String buildingName, long communityId, Pageable pageable) {
+    public Page<BuildingInfo> getBuildingList(String buildingName, long communityId, long projectId, Pageable pageable) {
         PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize());
-        List<BuildingInfo> buildingInfoList = buildingMapper.getBuildingList(buildingName, communityId);
+        List<BuildingInfo> buildingInfoList = buildingMapper.getBuildingList(buildingName, communityId, projectId);
         PageInfo<BuildingInfo> pageInfo = new PageInfo<>(buildingInfoList);
         return new Page<>(buildingInfoList, pageInfo.getTotal(), pageable);
     }

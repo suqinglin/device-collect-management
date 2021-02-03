@@ -30,6 +30,7 @@ public enum ResponseCode implements BaseEnum {
     ERROR_ACCOUNT_NOT_LOGIN("1004007", "账户没有登录"),
     ERROR_ACCOUNT_NOT_EXIST("1004008", "账户不存在"),
     ERROR_ACCOUNT_AUTH("1004009", "不合法的凭证类型"),
+    ERROR_ACCOUNT_OLD_PASSWORD_ERROR("1004010", "原密码错误"),
     // API错误
     ERROR_API_INVALID_GATEWAY("1001000", "无效的网关"),
     ERROR_API_INVALID_UUID("1001001", "无效的 UUID"),
@@ -43,15 +44,18 @@ public enum ResponseCode implements BaseEnum {
     ERROR_API_FILE_TRANSFER_FAIL("1001009", "文件传送失败"),
     ERROR_API_NO_OPERATE_PERMISSION("1001010", "无操作权限"),
     ERROR_API_COMMUNICATING("1001011", "正在通讯中"),
+    ERROR_API_ACK_TIMEOUT("1001012", "设备应答超时"),
     //设备相关
     ERROR_DEVICE_ADMIN("1006001", "设备不属于该管理员"),
     ERROR_DEVICE_NO_GW("1006002", "设备没有绑定网关盒子"),
     ERROR_DEVICE_NOT_EXIST("1006003", "设备不存在"),
     ERROR_DEVICE_MODEL_NOT_EXIST("1006004", "设备型号不存在"),
     ERROR_DEVICE_CRC_ERROR("1006005", "CRC检验错误"),
-    ERROR_DEVICE_PHYSIC_NOT_GET_TOKEN("1006006", "物理账号未获取到Token"),
-    ERROR_DEVICE_PHYSIC_NOT_LOGIN("1006007", "物理账号未登录"),
+    ERROR_DEVICE_ROOT_USER_NOT_GET_TOKEN("1006006", "root账号未获取到Token"),
+    ERROR_DEVICE_ROOT_USER_NOT_LOGIN("1006007", "root账号未登录"),
     ERROR_DEVICE_GET_DEVICE_FAILURE("1006008", "获取设备失败"),
+    ERROR_DEVICE_ROOT_USER_PASSWORD_ERROR("1006009", "密码错误"),
+    ERROR_DEVICE_ROOT_USER_PHONE_ERROR("1006010", "账号未注册"),
     // 项目错误
     ERROR_PROJECT_NAME_EXIST("1007001", "项目名称已存在"),
     // 小区错误
@@ -66,6 +70,7 @@ public enum ResponseCode implements BaseEnum {
     ERROR_ROOM_NAME_EXIST("1012001", "房间名称已存在"),
     // 人员错误
     ERROR_USER_PHONE_EXIST("1013001", "手机号码已存在"),
+    ERROR_USER_IS_ILLEGAL("1013002", "非法用户"),
     /***********************************************************************
      * SUCCESS
      ***********************************************************************/

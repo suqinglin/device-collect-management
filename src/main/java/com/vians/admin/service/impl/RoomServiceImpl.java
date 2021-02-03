@@ -37,9 +37,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Page<RoomInfo> getRoomList(String roomName, long floorId, Pageable pageable) {
+    public Page<RoomInfo> getRoomList(String roomName, long floorId, Long projectId, Pageable pageable) {
         PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize());
-        List<RoomInfo> roomInfoList = roomMapper.getRoomList(roomName, floorId);
+        List<RoomInfo> roomInfoList = roomMapper.getRoomList(roomName, floorId, projectId);
         PageInfo<RoomInfo> pageInfo = new PageInfo<>(roomInfoList);
         return new Page<>(roomInfoList, pageInfo.getTotal(), pageable);
     }
@@ -75,8 +75,27 @@ public class RoomServiceImpl implements RoomService {
         return roomMapper.getRoomById(id);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public List<RoomInfo> getRoomsByFloorId(long id) {
         return roomMapper.getRoomsByFloorId(id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateRoomState(long id, int state) {
+        roomMapper.updateRoomState(id, state);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<RoomInfo> getRoomListByUserId(long id) {
+        return roomMapper.getRoomListByUserId(id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int getRoomCount(long projectId, int state) {
+        return roomMapper.getRoomCount(projectId, state);
     }
 }

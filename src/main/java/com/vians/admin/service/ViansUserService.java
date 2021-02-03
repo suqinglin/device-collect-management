@@ -8,6 +8,8 @@ public interface ViansUserService {
 
     UserInfo getUserById(long id);
 
+    UserInfo loginByPhone(String phone);
+
 //    boolean validPassword(Long userId, String password);
 //
 //    void registerUser(String userPhone, String password, String nickName);

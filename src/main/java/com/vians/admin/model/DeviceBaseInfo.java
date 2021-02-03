@@ -1,7 +1,6 @@
 package com.vians.admin.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
@@ -12,6 +11,10 @@ import java.util.Date;
  * @Date 2021/1/15 15:26
  * @Version 1.0
  **/
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
 public class DeviceBaseInfo {
 
     @Getter
@@ -83,4 +86,8 @@ public class DeviceBaseInfo {
     @Getter
     @Setter
     private long bindUserId;
+
+    @Getter
+    @Setter
+    private long projectId;
 }

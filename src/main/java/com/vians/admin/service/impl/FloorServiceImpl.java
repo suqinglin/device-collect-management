@@ -36,9 +36,9 @@ public class FloorServiceImpl implements FloorService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Page<FloorInfo> getFloorList(String floorName, long unitId, Pageable pageable) {
+    public Page<FloorInfo> getFloorList(String floorName, long unitId, Long projectId, Pageable pageable) {
         PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize());
-        List<FloorInfo> floorInfoList = floorMapper.getFloorList(floorName, unitId);
+        List<FloorInfo> floorInfoList = floorMapper.getFloorList(floorName, unitId, projectId);
         PageInfo<FloorInfo> pageInfo = new PageInfo<>(floorInfoList);
         return new Page<>(floorInfoList, pageInfo.getTotal(), pageable);
     }

@@ -28,4 +28,29 @@ public class AppBean {
         }
         return userDetails.getId();
     }
+
+    /**
+     * 获取Root用户id
+     *
+     * @return
+     */
+    public Long getRootUserId() {
+        UserDetailsImpl userDetails = getCurrentUser();
+        if (userDetails == null) {
+            return null;
+        }
+        return userDetails.getRootId();
+    }
+
+    /**
+     * 获取用户所属的项目ID
+     * @return
+     */
+    public Long getProjectId() {
+        UserDetailsImpl userDetails = getCurrentUser();
+        if (userDetails == null) {
+            return null;
+        }
+        return userDetails.getProjectId();
+    }
 }

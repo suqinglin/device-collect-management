@@ -6,6 +6,7 @@ import com.vians.admin.model.RoomModelInfo;
 import com.vians.admin.request.RxGetNatures;
 import com.vians.admin.request.RxId;
 import com.vians.admin.request.RxRoom;
+import com.vians.admin.request.RxUpdateState;
 import com.vians.admin.request.query.RoomQuery;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
@@ -72,10 +73,20 @@ public class RoomController {
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
+    @PostMapping("/updateState")
+    public ResponseData updateState(@RequestBody RxUpdateState roomState) {
+        roomService.updateRoomState(roomState.getId(), roomState.getState());
+        return ResponseData.success();
+    }
+
     @PostMapping("/list")
     public ResponseData getRoomList(@RequestBody RoomQuery query) {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
         Pageable pageable = new Pageable(query.getPageIndex(), query.getPageSize());
-        Page<RoomInfo> roomInfoPage = roomService.getRoomList(query.getRoomName(), query.getFloorId(), pageable);
+        Page<RoomInfo> roomInfoPage = roomService.getRoomList(query.getRoomName(), query.getFloorId(), projectId, pageable);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", roomInfoPage.getList());
         responseData.addData("total", roomInfoPage.getTotal());
@@ -102,7 +113,15 @@ public class RoomController {
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
-    @PostMapping("/all")
+    @PostMapping("/userRooms")
+    public ResponseData getRoomsByUserId(@RequestBody RxId rxId) {
+        List<RoomInfo> rooms = roomService.getRoomListByUserId(rxId.getId());
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        responseData.addData("rooms", rooms);
+        return responseData;
+    }
+
+    @PostMapping("/floorRooms")
     public ResponseData getRoomsByFloorId(@RequestBody RxId rxId) {
         List<RoomInfo> rooms = roomService.getRoomsByFloorId(rxId.getId());
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);

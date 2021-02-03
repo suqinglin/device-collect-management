@@ -19,7 +19,7 @@ public class Battery {
 
     @Getter
     @Setter
-    private int Time;
+    private String Time;
 
     @Getter
     @Setter
@@ -28,5 +28,33 @@ public class Battery {
     @Getter
     @Setter
     private String Name;
+
+    @Getter
+    @Setter
+    private String projectName;
+
+    @Getter
+    @Setter
+    private String communityName;
+
+    @Getter
+    @Setter
+    private String buildingName;
+
+    @Getter
+    @Setter
+    private String unitName;
+
+    @Getter
+    @Setter
+    private String floorName;
+
+    @Getter
+    @Setter
+    private String roomName;
+
+    @Getter
+    @Setter
+    private String deviceModel;
 
 }

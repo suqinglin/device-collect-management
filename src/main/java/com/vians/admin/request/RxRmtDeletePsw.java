@@ -10,6 +10,10 @@ public class RxRmtDeletePsw {
 
     @Getter
     @Setter
+    private String userName;
+
+    @Getter
+    @Setter
     private String mac;
 
     @Getter

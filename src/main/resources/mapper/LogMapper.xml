@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.LogMapper">
+
+    <select id="getUnlockLogByMacAndName" resultType="com.vians.admin.model.UnlockLog">
+        SELECT
+            d.d_id,
+            r.r_name AS roomName,
+            f.f_name AS floorName,
+            vu.u_name AS unitName,
+            b.b_name AS buildingName,
+            c.c_name AS communityName,
+            p.p_name AS projectName,
+            d.d_name AS deviceName,
+            d.d_model AS deviceModel,
+            uu.cardId,
+            uu.roleName
+        FROM
+            vi_device d
+                LEFT JOIN vi_room r ON d.d_room_id = r.r_id
+                LEFT JOIN vi_floor f ON f.f_id = r.r_floor_id
+                LEFT JOIN vi_unit vu ON vu.u_id = f.f_unit_id
+                LEFT JOIN vi_building b ON b.b_id = vu.u_building_id
+                LEFT JOIN vi_community c ON c.c_id = b.b_community_id
+                LEFT JOIN vi_project p ON p.p_id = c.c_project_id
+                LEFT JOIN (
+                SELECT
+                    u.u_card_id AS cardId,
+                    vr.r_name AS roleName,
+                    ru.ru_room_id AS roomId
+                FROM
+                    vi_user u
+                        LEFT JOIN vi_room_user ru ON ru.ru_user_id = u.u_id
+                        LEFT JOIN vi_role vr ON vr.r_id = u.u_role_id
+                WHERE
+                    u.u_name = #{name}
+            ) uu ON uu.roomId = r.r_id
+        WHERE
+            d.d_mac = #{mac}
+    </select>
+
+    <insert id="addUnlockLog" parameterType="com.vians.admin.model.UnlockLog">
+        insert into vi_unlock_log(ul_name, ul_mac, ul_time, ul_action, ul_value, ul_project_id)
+        values (#{name}, #{MAC}, #{time}, #{action}, #{value}, #{projectId})
+    </insert>
+
+    <delete id="deleteUnlockLogsByProjectId">
+        delete from vi_unlock_log where ul_project_id = #{projectId}
+    </delete>
+
+    <select id="unlockStatistics" resultType="com.vians.admin.model.LogHourCount">
+        select HOUR(ul.ul_time) as hour, count(*) as count
+        from vi_unlock_log ul
+        where
+              ul.ul_action = #{type} and ul.ul_project_id = #{projectId}
+        group by HOUR(ul.ul_time)
+        order by HOUR(ul.ul_time)
+    </select>
+
+    <insert id="addAlarmLog" parameterType="com.vians.admin.model.UnlockLog">
+        insert into vi_alarm_log(al_mac, al_time, al_project_id, al_action)
+        values (#{MAC}, #{time}, #{projectId}, #{action})
+    </insert>
+
+    <delete id="deleteAlarmLogsByProjectId">
+        delete from vi_alarm_log where al_project_id = #{projectId}
+    </delete>
+
+    <select id="getAlarmStatistics" parameterType="string" resultType="com.vians.admin.model.LogHourCount">
+        select HOUR(al.al_time) as hour, count(*) as count from vi_alarm_log al where al.al_action = #{type} group by HOUR(al.al_time) order by HOUR(al.al_time)
+    </select>
+
+    <select id="getRealTimeOperateStatistics" parameterType="long" resultType="com.vians.admin.model.UnlockLog">
+        SELECT
+            d.d_id AS id,
+            d.d_name AS deviceName,
+            d.d_model AS deviceModel,
+            ul.ul_action AS action,
+            ul.ul_time AS time,
+            r.r_name AS roomName,
+            f.f_name AS floorName,
+            vu.u_name AS unitName,
+            b.b_name AS buildingName,
+            c.c_name AS communityName,
+            p.p_name AS projectName,
+            ul.ul_name AS name,
+            u.u_card_id AS cardId,
+            vr.r_name AS roleName
+        FROM
+            vi_unlock_log ul
+                LEFT JOIN vi_device d on ul.ul_mac = d.d_mac
+                LEFT JOIN vi_room r ON d.d_room_id = r.r_id
+                LEFT JOIN vi_floor f ON f.f_id = r.r_floor_id
+                LEFT JOIN vi_unit vu ON vu.u_id = f.f_unit_id
+                LEFT JOIN vi_building b ON b.b_id = vu.u_building_id
+                LEFT JOIN vi_community c ON c.c_id = b.b_community_id
+                LEFT JOIN vi_project p ON p.p_id = c.c_project_id
+                LEFT JOIN vi_user u ON u.u_name = ul.ul_name
+                LEFT JOIN vi_role vr on vr.r_id = u.u_role_id
+        WHERE
+            ul.ul_project_id = #{projectId}
+        ORDER BY ul.ul_time DESC;
+    </select>
+</mapper>

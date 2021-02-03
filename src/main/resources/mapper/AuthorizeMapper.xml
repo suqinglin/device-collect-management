@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.AuthorizeMapper">
+
+    <sql id="Base_Column_List">
+        ac_id AS id,
+        ac_content AS content,
+        ac_type AS type,
+        ac_user_id AS userId,
+        ac_position AS position,
+        ac_time_type AS timeType,
+        ac_start_time AS startTime,
+        ac_end_time AS endTime
+    </sql>
+
+    <select id="getAuthorizeList" parameterType="long" resultType="com.vians.admin.model.AuthorizeInfo">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM vi_authorize_content
+        WHERE ac_user_id = #{userId} AND ac_room_Id = #{roomId}
+    </select>
+
+    <insert id="addAuthorize" parameterType="com.vians.admin.request.RxAuthorize">
+        INSERT INTO vi_authorize_content
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="content != null and content != ''">
+                ac_content,
+            </if>
+            <if test="type != 0">
+                ac_type,
+            </if>
+            <if test="userId != 0">
+                ac_user_id,
+            </if>
+            <if test="position != 0">
+                ac_position,
+            </if>
+            <if test="timeType != 0">
+                ac_time_type,
+            </if>
+            <if test="startTime != null">
+                ac_start_time,
+            </if>
+            <if test="endTime != null">
+                ac_end_time,
+            </if>
+            <if test="tempPath != null and tempPath != ''">
+                ac_temp_path,
+            </if>
+            <if test="imgPath != null and imgPath != ''">
+                ac_img_path,
+            </if>
+            <if test="createUserId != 0">
+                ac_create_user_id,
+            </if>
+            <if test="createTime != null">
+                ac_create_time,
+            </if>
+            <if test="roomId != 0">
+                ac_room_id
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="content != null and content != ''">
+                #{content},
+            </if>
+            <if test="type != 0">
+                #{type},
+            </if>
+            <if test="userId != 0">
+                #{userId},
+            </if>
+            <if test="position != 0">
+                #{position},
+            </if>
+            <if test="timeType != 0">
+                #{timeType},
+            </if>
+            <if test="startTime != null">
+                #{startTime},
+            </if>
+            <if test="endTime != null">
+                #{endTime},
+            </if>
+            <if test="tempPath != null and tempPath != ''">
+                #{tempPath},
+            </if>
+            <if test="imgPath != null and imgPath != ''">
+                #{imgPath},
+            </if>
+            <if test="createUserId != 0">
+                #{createUserId},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="roomId != 0">
+                #{roomId}
+            </if>
+        </trim>
+    </insert>
+
+    <delete id="deleteAuthorize" parameterType="long">
+        delete from vi_authorize_content where ac_id = #{id}
+    </delete>
+
+    <delete id="deleteAuthorizeByRoom">
+        delete from vi_authorize_content where ac_room_id = #{roomId} and ac_type = #{type}
+    </delete>
+</mapper>

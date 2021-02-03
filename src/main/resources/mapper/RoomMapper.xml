@@ -33,9 +33,9 @@
             u.u_name AS createUserName
         FROM
             vi_room r
-                INNER JOIN vi_room_nature rn ON r.r_room_nature_id = rn.rn_id
-                INNER JOIN vi_room_model rm ON r.r_room_model_id = rm.rm_id
-                INNER JOIN vi_user u ON r.r_create_user_id = u.u_id
+                LEFT JOIN vi_room_nature rn ON r.r_room_nature_id = rn.rn_id
+                LEFT JOIN vi_room_model rm ON r.r_room_model_id = rm.rm_id
+                LEFT JOIN vi_user u ON r.r_create_user_id = u.u_id
                 LEFT JOIN vi_floor f ON r.r_floor_id = f.f_id
                 LEFT JOIN vi_unit unit ON f.f_unit_id = unit.u_id
                 LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
@@ -49,11 +49,46 @@
             <if test="floorId != 0">
                 AND r.r_floor_id = #{floorId}
             </if>
+            <if test="projectId != 0">
+                AND c.c_project_id = #{projectId}
+            </if>
+    </select>
+
+    <select id="getRoomListByUserId" parameterType="long" resultType="com.vians.admin.model.RoomInfo">
+        SELECT
+            r.r_id AS id,
+            r.r_name AS roomName,
+            f.f_name AS floorName,
+            unit.u_name AS unitName,
+            b.b_name AS buildingName,
+            c.c_name AS communityName,
+            p.p_name AS projectName
+        FROM
+            vi_room r
+            LEFT JOIN vi_floor f ON r.r_floor_id = f.f_id
+            LEFT JOIN vi_unit unit ON f.f_unit_id = unit.u_id
+            LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
+            LEFT JOIN vi_community c ON b.b_community_id = c.c_id
+            LEFT JOIN vi_project p ON c.c_project_id = p.p_id
+            INNER JOIN vi_room_user ru ON ru.ru_room_id = r.r_id
+        WHERE ru.ru_user_id = #{id}
     </select>
 
     <select id="getRoomsByFloorId" resultType="com.vians.admin.model.RoomInfo">
         select
         <include refid="Base_Column_List" />
+        from vi_room
+        where
+        1 = 1
+        <if test="id != 0">
+            and r_floor_id = #{id}
+        </if>
+    </select>
+
+    <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
+        select
+        r_id as id,
+        r_name as name
         from vi_room
         where
         1 = 1
@@ -96,6 +131,10 @@
         delete from vi_room where r_id = #{id}
     </delete>
 
+    <update id="updateRoomState">
+        update vi_room set r_state = #{state} where r_id = #{id}
+    </update>
+
     <update id="editRoom" parameterType="com.vians.admin.model.RoomInfo">
         update vi_room
         <set>
@@ -117,7 +156,7 @@
             <if test="state != null and state != ''">
                 r_state = #{state},
             </if>
-            <if test="updateTime != null and updateTime != ''">
+            <if test="updateTime != null">
                 r_update_time = #{updateTime},
             </if>
         </set>
@@ -125,4 +164,14 @@
             r_id = #{id}
         </where>
     </update>
+
+    <select id="getRoomCount" resultType="int">
+        select count(r.r_id)
+        from vi_room r
+         left join vi_floor f on r.r_floor_id = f.f_id
+         left join vi_unit unit on f.f_unit_id = unit.u_id
+         left join vi_building b on unit.u_building_id = b.b_id
+         left join vi_community c on b.b_community_id = c.c_id
+        where c.c_project_id = #{projectId} and r.r_state = #{state}
+    </select>
 </mapper>

@@ -10,6 +10,10 @@ public class RxRmtAddCard {
 
     @Getter
     @Setter
+    private String userName;
+
+    @Getter
+    @Setter
     private String mac;
 
     @Getter

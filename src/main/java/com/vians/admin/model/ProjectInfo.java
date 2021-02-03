@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @ClassName ProjectNature
@@ -55,4 +56,12 @@ public class ProjectInfo {
     @Getter
     @Setter
     private Date updateTime;
+
+    @Getter
+    @Setter
+    private String rootUser;
+
+    @Getter
+    @Setter
+    private List<CommunityInfo> communities;
 }

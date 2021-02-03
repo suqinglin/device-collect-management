@@ -72,8 +72,12 @@ public class UnitController {
 
     @PostMapping("/list")
     public ResponseData getUnitList(@RequestBody UnitQuery query) {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
         Pageable pageable = new Pageable(query.getPageIndex(), query.getPageSize());
-        Page<UnitInfo> unitInfoPage = unitService.getUnitList(query.getUnitName(), query.getBuildingId(), pageable);
+        Page<UnitInfo> unitInfoPage = unitService.getUnitList(query.getUnitName(), query.getBuildingId(), projectId, pageable);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", unitInfoPage.getList());
         responseData.addData("total", unitInfoPage.getTotal());

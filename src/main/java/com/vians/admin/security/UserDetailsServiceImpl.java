@@ -1,8 +1,5 @@
 package com.vians.admin.security;
 
-//import com.suql.devicecollect.model.UserInfo;
-//import com.suql.devicecollect.service.UserService;
-
 import com.vians.admin.model.UserInfo;
 import com.vians.admin.service.ViansUserService;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,11 +22,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
-        UserInfo userInfo = userService.getUserByPhone(s);
+        UserInfo userInfo = userService.loginByPhone(s);
         return new UserDetailsImpl(
                 userInfo.getId(),
                 userInfo.getPhone(),
                 userInfo.getPassword(),
+                userInfo.getRootId(),
+                userInfo.getProjectId(),
                 authorities,
                 true);
     }

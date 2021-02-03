@@ -25,11 +25,12 @@
         FROM
             ((
                 vi_unit unit
-                    INNER JOIN vi_unit_nature un ON unit.u_unit_nature_id = un.un_id
+                    LEFT JOIN vi_unit_nature un ON unit.u_unit_nature_id = un.un_id
                 )
-                INNER JOIN vi_user u ON unit.u_create_user_id = u.u_id
+                LEFT JOIN vi_user u ON unit.u_create_user_id = u.u_id
                 )
-                INNER JOIN vi_building b ON unit.u_building_id = b.b_id
+                LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
+                LEFT JOIN vi_community c ON b.b_community_id = c.c_id
         WHERE
             1 = 1
             <if test="unitName != null and unitName != ''">
@@ -37,6 +38,9 @@
             </if>
             <if test="buildingId != 0">
                 AND unit.u_building_id = #{buildingId}
+            </if>
+            <if test="projectId != 0">
+                AND c.c_project_id = #{projectId}
             </if>
     </select>
 
@@ -67,6 +71,18 @@
         </if>
     </select>
 
+    <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
+        select
+        u_id as id,
+        u_name as name
+        from vi_unit
+        where
+        1 = 1
+        <if test="id != 0">
+            and u_building_id = #{id}
+        </if>
+    </select>
+
     <insert id="addUnit"
             parameterType="com.vians.admin.model.UnitInfo">
         insert into vi_unit(u_name, u_unit_nature_id, u_building_id, u_create_user_id, u_create_time)
@@ -89,7 +105,7 @@
             <if test="natureId != 0">
                 u_unit_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null and updateTime != ''">
+            <if test="updateTime != null">
                 u_update_time = #{updateTime},
             </if>
         </set>

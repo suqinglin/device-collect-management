@@ -17,7 +17,7 @@ public interface BuildingService {
 
     void addBuilding(BuildingInfo buildingInfo);
 
-    Page<BuildingInfo> getBuildingList(String buildingName, long communityId, Pageable pageable);
+    Page<BuildingInfo> getBuildingList(String buildingName, long communityId, long projectId, Pageable pageable);
 
     void deleteBuilding(long id);
 

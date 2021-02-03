@@ -72,8 +72,12 @@ public class BuildingController {
 
     @PostMapping("/list")
     public ResponseData getBuildingList(@RequestBody BuildingQuery query) {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
         Pageable pageable = new Pageable(query.getPageIndex(), query.getPageSize());
-        Page<BuildingInfo> buildingInfoPage = buildingService.getBuildingList(query.getBuildingName(), query.getCommunityId(), pageable);
+        Page<BuildingInfo> buildingInfoPage = buildingService.getBuildingList(query.getBuildingName(), query.getCommunityId(), projectId, pageable);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", buildingInfoPage.getList());
         responseData.addData("total", buildingInfoPage.getTotal());

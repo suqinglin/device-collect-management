@@ -1,6 +1,9 @@
 package com.vians.admin.utils;
 
-import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 public class CommUtil {
@@ -61,17 +64,58 @@ public class CommUtil {
         return sb.toString();
     }
 
+//    /**
+//     * hex异或计算得到hex
+//     * @param hex1
+//     * @param hex2
+//     * @return
+//     */
+//    public static String hexXOR(String hex1, String hex2){
+//        BigInteger i1 = new BigInteger(hex1, 16);
+//        BigInteger i2 = new BigInteger(hex2, 16);
+//        BigInteger res = i1.xor(i2);
+//        return res.toString(16).toUpperCase();
+//    }
+
+    public static byte[] bytesXorBytes(byte[] bytes1, byte[] bytes2) {
+        for (int i = 0; i < bytes1.length; i++) {
+            bytes1[i] = (byte) ((int) bytes1[i] ^ (int) bytes2[i]);
+        }
+        return bytes1;
+    }
+
     /**
-     * hex异或计算得到hex
-     * @param hex1
-     * @param hex2
+     * 时间字符串转秒数
+     * @param time
      * @return
+     * @throws ParseException
      */
-    public static String hexXOR(String hex1, String hex2){
-        BigInteger i1 = new BigInteger(hex1, 16);
-        BigInteger i2 = new BigInteger(hex2, 16);
-        BigInteger res = i1.xor(i2);
-        return res.toString(16).toUpperCase();
+    public static long parseTime(String time) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//24小时制
+        long timeMs = simpleDateFormat.parse(time).getTime();
+        return timeMs/1000;
+    }
+
+    public static String parseTime(long time) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//24小时制
+        return simpleDateFormat.format(new Date(time * 1000));
+    }
+
+    public static String parseTime(long time, String format) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);//24小时制
+        return simpleDateFormat.format(new Date(time * 1000));
+    }
+    /**
+     * 获取当天的零点时间戳
+     *
+     * @return 当天的零点时间戳
+     */
+    public static long getTodayStartTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime().getTime();
     }
 
 

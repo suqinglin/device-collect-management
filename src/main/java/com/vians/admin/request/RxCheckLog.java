@@ -10,6 +10,14 @@ public class RxCheckLog {
 
     @Getter
     @Setter
+    private String userName;
+
+    @Getter
+    @Setter
+    private long roomId;
+
+    @Getter
+    @Setter
     private String mac;
 
     @Getter
@@ -26,10 +34,10 @@ public class RxCheckLog {
 
     @Getter
     @Setter
-    private String Page;
+    private String page;
 
     @Getter
     @Setter
-    private String PageSize;
+    private String pageSize;
 
 }

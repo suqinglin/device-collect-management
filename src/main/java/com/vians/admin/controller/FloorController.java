@@ -70,8 +70,12 @@ public class FloorController {
 
     @PostMapping("/list")
     public ResponseData getFloorList(@RequestBody FloorQuery query) {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
         Pageable pageable = new Pageable(query.getPageIndex(), query.getPageSize());
-        Page<FloorInfo> floorInfoPage = floorService.getFloorList(query.getFloorName(), query.getUnitId(), pageable);
+        Page<FloorInfo> floorInfoPage = floorService.getFloorList(query.getFloorName(), query.getUnitId(), projectId, pageable);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", floorInfoPage.getList());
         responseData.addData("total", floorInfoPage.getTotal());

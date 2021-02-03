@@ -1,11 +1,14 @@
 package com.vians.admin.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.vians.admin.common.RedisKeyConstants;
+import com.vians.admin.common.CommConstants;
+import com.vians.admin.excel.ExcelPOIHelper;
 import com.vians.admin.model.DeviceBaseInfo;
 import com.vians.admin.model.DeviceDetailInfo;
+import com.vians.admin.model.RootUserInfo;
 import com.vians.admin.request.RxBindDevice;
 import com.vians.admin.request.RxId;
+import com.vians.admin.request.RxPage;
 import com.vians.admin.request.query.DeviceQuery;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.ResponseCode;
@@ -13,19 +16,18 @@ import com.vians.admin.response.ResponseData;
 import com.vians.admin.response.bean.GetDeviceResponse;
 import com.vians.admin.service.DeviceService;
 import com.vians.admin.service.RedisService;
+import com.vians.admin.service.RootUserService;
 import com.vians.admin.utils.HttpUtil;
 import com.vians.admin.utils.KeyUtil;
-import com.vians.admin.utils.PropUtil;
 import com.vians.admin.web.AppBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @ClassName DeviceController
@@ -40,11 +42,10 @@ import java.util.Map;
 @RequestMapping("/vians/Device")
 public class DeviceController {
 
+    final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Resource
     public RedisService redisService;
-
-    @Autowired
-    public PropUtil propUtil;
 
     @Resource
     public DeviceService deviceService;
@@ -52,21 +53,28 @@ public class DeviceController {
     @Resource
     public AppBean appBean;
 
+    @Resource
+    public RootUserService rootUserService;
+
     @PostMapping("/synch")
     public ResponseData synchDevice() {
+        Long rootId = appBean.getRootUserId();
+        Long projectId = appBean.getProjectId();
+        if (projectId == null || rootId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
+        return doSyncDevices(rootId, projectId);
+    }
 
-        String token = redisService.get(RedisKeyConstants.VIANS_TOKEN);
-        String cnt = redisService.get(RedisKeyConstants.VIANS_CNT);
-        String userId = redisService.get(RedisKeyConstants.VIANS_USER_ID);
-        if (StringUtils.isEmpty(token)) {
-            return new ResponseData(ResponseCode.ERROR_DEVICE_PHYSIC_NOT_GET_TOKEN);
+    private ResponseData doSyncDevices(long rootId, long projectId) {
+        RootUserInfo rootUserInfo = rootUserService.getRootUserById(rootId);
+        if (rootUserInfo == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
         }
-        if (StringUtils.isEmpty(cnt) || StringUtils.isEmpty(userId)) {
-            return new ResponseData(ResponseCode.ERROR_DEVICE_PHYSIC_NOT_LOGIN);
-        }
+        String userId = String.valueOf(rootUserInfo.getUserId());
         // cnt加1
-        int nextCnt = Integer.parseInt(cnt, 16) + 1;
-        String appKey =  KeyUtil.getAppKey(token, propUtil.physicPsw, nextCnt);
+        long nextCnt = rootUserInfo.getCnt() + 1;
+        String appKey =  KeyUtil.getAppKey(rootUserInfo.getToken(), rootUserInfo.getPassword(), nextCnt);
         // 1. 组装请求参数
         Map<String, Object> requestParam = new HashMap<>();
         requestParam.put("UserID", userId); // 后台分配的用户号
@@ -76,22 +84,50 @@ public class DeviceController {
         requestParam.put("Page", "1");
         requestParam.put("PageSize", "1000");
         // 2. 发送请求
-        JSONObject respObj = HttpUtil.getInstance().doRequest(requestParam, propUtil.url + "/api/GetDevice");
+        JSONObject respObj = HttpUtil.getInstance().doRequest(requestParam, CommConstants.C_API_URL + "/api/GetDevice");
         if (respObj != null) {
             int result = (int) respObj.get("Result");
             if (result == 0) {
                 // 3. 解析出响应数据
                 GetDeviceResponse getDeviceResponse = respObj.toJavaObject(GetDeviceResponse.class);
-                redisService.set(RedisKeyConstants.VIANS_CNT, getDeviceResponse.getCNT());
+                rootUserInfo.setCnt(Long.parseLong(getDeviceResponse.getCNT(), 16));
+                rootUserService.updateRootUser(rootUserInfo);
                 List<DeviceBaseInfo> deviceBaseInfos = getDeviceResponse.getDev();
+                List<String> dbMacs = deviceService.getDeviceMacs(projectId);
+                List<String> syncMacs = new ArrayList<>();
                 // 4、保存到数据库
-                for (int i = 0; i < deviceBaseInfos.size(); i++) {
-                    DeviceBaseInfo deviceBaseInfo = deviceBaseInfos.get(i);
+                for (DeviceBaseInfo deviceBaseInfo : deviceBaseInfos) {
                     deviceBaseInfo.setUserId(userId);
                     deviceBaseInfo.setCreateTime(new Date());
+                    deviceBaseInfo.setProjectId(projectId);
                     deviceService.addDevice(deviceBaseInfo);
+                    if (!syncMacs.contains(deviceBaseInfo.getMAC())) {
+                        syncMacs.add(deviceBaseInfo.getMAC());
+                    }
                 }
+                // 删除掉项目下的同步中不包含的设备
+                dbMacs.forEach(dbMac -> {
+                    if (!syncMacs.contains(dbMac)) {
+                        deviceService.deleteDeviceByMac(dbMac);
+                    }
+                });
                 return new ResponseData(ResponseCode.SUCCESS);
+            } else if (result == 1002) {
+                // 无效用户：重新登录
+                return HttpUtil.getInstance().reLogin(rootUserInfo.getPhone(), rootUserInfo.getPassword(),
+                        rootUserService, new HttpUtil.ReLoginCallback() {
+                    @Override
+                    public ResponseData success() {
+                        // 登陆成功，重新同步设备
+                        return doSyncDevices(rootId, projectId);
+                    }
+
+                    @Override
+                    public ResponseData failure(int result) {
+                        // 登陆失败，返回异常
+                        return HttpUtil.getInstance().doResult(result);
+                    }
+                });
             } else {
                 return HttpUtil.getInstance().doResult(result);
             }
@@ -103,6 +139,11 @@ public class DeviceController {
     @PostMapping("/list")
     public ResponseData getDevicesByPage(@RequestBody DeviceQuery query) {
 
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
+        query.setProjectId(projectId);
         Page<DeviceDetailInfo> devicePage = deviceService.getDevicesByPage(query);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", devicePage.getList());
@@ -111,14 +152,43 @@ public class DeviceController {
     }
 
     /**
+     * 获取采集设备，即指纹读卡器设备
+     * @return
+     */
+    @PostMapping("/collectDevices")
+    public ResponseData getCollectDevices() {
+        Long rootId = appBean.getRootUserId();
+        if (rootId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        List<DeviceBaseInfo> collectDevices = deviceService.getCollectDevicesByUser(rootId);
+        responseData.addData("collectDevices", collectDevices);
+        return responseData;
+    }
+
+    @PostMapping("/deviceInRoom")
+    public ResponseData getDeviceByRoomId(@RequestBody RxId rxId) {
+        DeviceBaseInfo device = deviceService.getDeviceByRoomId(rxId.getId());
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        responseData.addData("device", device);
+        return responseData;
+    }
+
+    /**
      * 获取空闲设备
      * @return
      */
     @PostMapping("/freeDevices")
-    public ResponseData getFreeDevices() {
-        List<DeviceBaseInfo> devices = deviceService.getFreeDevices();
+    public ResponseData getFreeDevices(@RequestBody RxPage page) {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
+        Page<DeviceBaseInfo> devicePage = deviceService.getFreeDevicesByPage(page, projectId);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
-        responseData.addData("devices", devices);
+        responseData.addData("list", devicePage.getList());
+        responseData.addData("total", devicePage.getTotal());
         return responseData;
     }
 
@@ -162,7 +232,28 @@ public class DeviceController {
 
     @PostMapping("/delete")
     public ResponseData deleteDevice(@RequestBody RxId id) {
-        deviceService.deleteDevice(id.getId());
+        deviceService.deleteDeviceById(id.getId());
         return new ResponseData(ResponseCode.SUCCESS);
+    }
+
+    @PostMapping("/uploadDevicesExcel")
+    public ResponseData uploadDevicesExcel(@RequestParam(value = "file") MultipartFile file) {
+        logger.info("Filename {}", file.getOriginalFilename());
+        String fileName = file.getOriginalFilename();
+        Long userId = appBean.getCurrentUserId();
+        if (fileName == null || (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx"))) {
+            return ResponseData.error();
+        }
+        if (userId == null) {
+            return new ResponseData(ResponseCode.ERROR_ACCOUNT_NOT_LOGIN);
+        }
+        try {
+            List<DeviceBaseInfo> deviceList = new ExcelPOIHelper().readDevicesExcel(fileName, file.getInputStream());
+            logger.info("deviceList = {}", deviceList.toString());
+            deviceService.batchAddUsers(deviceList, userId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseData.success();
     }
 }

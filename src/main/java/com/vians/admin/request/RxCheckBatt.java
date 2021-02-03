@@ -10,6 +10,14 @@ public class RxCheckBatt {
 
     @Getter
     @Setter
+    private long roomId;
+
+    @Getter
+    @Setter
+    private String userName;
+
+    @Getter
+    @Setter
     private String mac;
 
     @Getter

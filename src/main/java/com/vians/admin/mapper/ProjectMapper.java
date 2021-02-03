@@ -1,5 +1,6 @@
 package com.vians.admin.mapper;
 
+import com.vians.admin.model.DataDir;
 import com.vians.admin.model.ProjectInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -16,6 +17,8 @@ public interface ProjectMapper {
 
     List<ProjectInfo> getAllProjects();
 
+    List<DataDir> getDataDir(Long projectId);
+
     ProjectInfo getProjectByName(@Param("projectName") String projectName);
 
     void deleteProject(long id);
@@ -23,4 +26,6 @@ public interface ProjectMapper {
     void editProject(ProjectInfo projectInfo);
 
     ProjectInfo getProjectById(long id);
+
+    void updateAdminProject(@Param("projectId") long projectId);
 }

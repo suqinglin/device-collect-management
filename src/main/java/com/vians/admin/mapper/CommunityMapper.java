@@ -1,6 +1,7 @@
 package com.vians.admin.mapper;
 
 import com.vians.admin.model.CommunityInfo;
+import com.vians.admin.model.DataDir;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -29,4 +30,6 @@ public interface CommunityMapper {
     CommunityInfo getCommunityById(long id);
 
     List<CommunityInfo> getCommunitiesByProjectId(@Param("id") long id);
+
+    List<DataDir> getDataDir(@Param("id") long id);
 }

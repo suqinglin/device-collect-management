@@ -24,9 +24,9 @@
             (SELECT COUNT(unit.u_id) FROM vi_unit unit WHERE unit.u_building_id = b.b_id GROUP BY b.b_id DESC LIMIT 1) AS unitCount
         FROM
             vi_building b
-            INNER JOIN vi_building_nature bn ON b.b_building_nature_id = bn.bn_id
-            INNER JOIN vi_user u ON b.b_create_user_id = u.u_id
-            INNER JOIN vi_community c ON b.b_community_id = c.c_id
+            LEFT JOIN vi_building_nature bn ON b.b_building_nature_id = bn.bn_id
+            LEFT JOIN vi_user u ON b.b_create_user_id = u.u_id
+            LEFT JOIN vi_community c ON b.b_community_id = c.c_id
         <where>
             1 = 1
             <if test="buildingName != null and buildingName != ''">
@@ -34,6 +34,9 @@
             </if>
             <if test="communityId != 0">
                 AND b.b_community_id = #{communityId}
+            </if>
+            <if test="projectId != 0">
+                AND c.c_project_id = #{projectId}
             </if>
         </where>
     </select>
@@ -65,6 +68,18 @@
         </if>
     </select>
 
+    <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
+        select
+        b_id as id,
+        b_name as name
+        from vi_building
+        where
+        1 = 1
+        <if test="id != 0">
+            and b_community_id = #{id}
+        </if>
+    </select>
+
     <insert id="addBuilding"
             parameterType="com.vians.admin.model.BuildingInfo">
         insert into vi_building(b_name, b_building_nature_id, b_community_id, b_create_user_id, b_create_time)
@@ -87,7 +102,7 @@
             <if test="natureId != 0">
                 b_building_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null and updateTime != ''">
+            <if test="updateTime != null">
                 b_update_time = #{updateTime},
             </if>
         </set>

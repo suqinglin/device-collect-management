@@ -27,17 +27,10 @@ public class PayloadEnDeUtil {
         // 需要加密的原始字节数组
         byte[] originBuf = ByteBuffer.allocate(resBuf.length + 2).put(resBuf).putShort((short) crc).array();
         byte[] key = getKey(uuid, originBuf.length);
-        byte[] oxrBuf = bytesOxrBytes(key, originBuf);
+        byte[] oxrBuf = CommUtil.bytesXorBytes(key, originBuf);
         Base64.Encoder encoder = Base64.getEncoder();
         byte[] encodeBuf = encoder.encode(oxrBuf);
         return new String(encodeBuf);
-    }
-
-    private static byte[] bytesOxrBytes(byte[] bytes1, byte[] bytes2) {
-        for (int i = 0; i < bytes1.length; i++) {
-            bytes1[i] = (byte) ((int) bytes1[i] ^ (int) bytes2[i]);
-        }
-        return bytes1;
     }
 
     /**
@@ -50,7 +43,7 @@ public class PayloadEnDeUtil {
         Base64.Decoder decoder = Base64.getDecoder();
         byte[] repArr = decoder.decode(respStr.getBytes());
         byte[] key = getKey(uuid, repArr.length);
-        return CommUtil.bytes2HexString(bytesOxrBytes(key, repArr));
+        return CommUtil.bytes2HexString(CommUtil.bytesXorBytes(key, repArr));
     }
 
     /**

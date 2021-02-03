@@ -132,4 +132,20 @@ public class RoomInfo {
     @Getter
     @Setter
     private int userCount;
+
+    @Getter
+    @Setter
+    private String unitName;
+
+    @Getter
+    @Setter
+    private String buildingName;
+
+    @Getter
+    @Setter
+    private String communityName;
+
+    @Getter
+    @Setter
+    private String projectName;
 }

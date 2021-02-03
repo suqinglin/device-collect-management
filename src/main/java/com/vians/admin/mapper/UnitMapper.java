@@ -1,5 +1,6 @@
 package com.vians.admin.mapper;
 
+import com.vians.admin.model.DataDir;
 import com.vians.admin.model.UnitInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -18,7 +19,10 @@ public interface UnitMapper {
 
     void addUnit(UnitInfo buildingInfo);
 
-    List<UnitInfo> getUnitList(@Param("unitName") String unitName, @Param("buildingId") long buildingId);
+    List<UnitInfo> getUnitList(
+            @Param("unitName") String unitName,
+            @Param("buildingId") long buildingId,
+            @Param("projectId") Long projectId);
 
     void deleteUnit(long id);
 
@@ -29,4 +33,6 @@ public interface UnitMapper {
     UnitInfo getUnitById(long id);
 
     List<UnitInfo> getUnitsByBuildingId(@Param("id")long id);
+
+    List<DataDir> getDataDir(@Param("id")long id);
 }

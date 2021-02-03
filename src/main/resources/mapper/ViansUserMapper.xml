@@ -6,6 +6,8 @@
         u_id AS id,
         u_phone AS phone,
         u_password AS password,
+        u_root_id AS rootId,
+        u_project_id AS projectId,
         u_name AS name
     </sql>
 
@@ -81,8 +83,11 @@
             <if test="projectId != 0">
                 u_project_id,
             </if>
-            <if test="createTime != null and createTime != ''">
+            <if test="createTime != null">
                 u_create_time,
+            </if>
+            <if test="rootId != 0">
+                u_root_id,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -125,8 +130,11 @@
             <if test="projectId != 0">
                 #{projectId},
             </if>
-            <if test="createTime != null and createTime != ''">
+            <if test="createTime != null">
                 #{createTime},
+            </if>
+            <if test="rootId != 0">
+                #{rootId},
             </if>
         </trim>
     </insert>
@@ -173,7 +181,7 @@
             <if test="projectId != 0">
                 u_project_id = #{projectId},
             </if>
-            <if test="updateTime != null and updateTime != ''">
+            <if test="updateTime != null">
                 u_update_time = #{updateTime},
             </if>
         </set>
@@ -186,11 +194,34 @@
         delete from vi_user where u_id = #{id}
     </delete>
 
+    <delete id="deleteUserByPhone" parameterType="String">
+        delete from vi_user where u_phone = #{phone}
+    </delete>
+
     <select id="getRoles" resultType="com.vians.admin.model.RoleInfo">
+        SELECT
+            r.r_id AS id,
+            r.r_name AS roleName,
+            r.r_create_time AS createTime
+        FROM vi_role r
+        WHERE r_id != 1 AND r.r_id !=4
+    </select>
+
+    <select id="getAllRoles" resultType="com.vians.admin.model.RoleInfo">
+        SELECT
+            r.r_id AS id,
+            r.r_name AS roleName,
+            r.r_create_time AS createTime
+        FROM vi_role r
+    </select>
+
+    <select id="getRoleByName" parameterType="String" resultType="com.vians.admin.model.RoleInfo">
         SELECT
             r.r_id AS id,
             r.r_name AS roleName
         FROM vi_role r
+        WHERE r.r_name = #{roleName}
+        LIMIT 1
     </select>
 
     <select id="getUserList" resultType="com.vians.admin.model.UserDetailInfo">
@@ -210,10 +241,10 @@
             u.u_duty AS duty,
             u.u_create_time AS createTime
         FROM vi_user u
-                 INNER JOIN vi_role r ON u.u_role_id = r.r_id
-                 INNER JOIN vi_project p ON u.u_project_id = p.p_id
+                 LEFT JOIN vi_role r ON u.u_role_id = r.r_id
+                 LEFT JOIN vi_project p ON u.u_project_id = p.p_id
         WHERE
-            1 = 1
+            u.u_role_id != 1
             <if test="name != null and name != ''">
                 AND u.u_name like concat('%', #{name}, '%')
             </if>
@@ -234,4 +265,207 @@
             </if>
     </select>
 
+    <select id="getUnbindUserList" resultType="com.vians.admin.model.UserDetailInfo">
+        SELECT
+        u.u_id AS id,
+        u.u_name AS userName,
+        u.u_gender AS gender,
+        u.u_card_id AS cardId,
+        u.u_phone AS phone,
+        r.r_name AS roleName,
+        p.p_name AS projectName
+        FROM vi_user u
+        INNER JOIN vi_role r ON u.u_role_id = r.r_id
+        INNER JOIN vi_project p ON u.u_project_id = p.p_id
+        LEFT JOIN vi_room_user ru ON ru.ru_user_id = u.u_id
+        WHERE
+        1 = 1
+        <if test="name != null and name != ''">
+            AND u.u_name like concat('%', #{name}, '%')
+        </if>
+        <if test="gender != 0">
+            AND u.u_gender = #{gender}
+        </if>
+        <if test="cardId != null and cardId != ''">
+            AND u.u_card_id like concat('%',#{cardId}, '%')
+        </if>
+        <if test="phone != null and phone != ''">
+            AND u.u_phone like concat('%',#{phone}, '%')
+        </if>
+        <if test="roleId != 0">
+            AND u.u_role_id = #{roleId}
+        </if>
+        <if test="projectId != 0">
+            AND u.u_project_id = #{projectId}
+        </if>
+        AND (ru.ru_room_id is null or ru.ru_room_id != #{roomId})
+        AND (
+                select count(ru_id)
+                from vi_room_user
+                where ru_user_id = u.u_id and ru_room_id = #{roomId}
+            ) = 0
+    </select>
+
+    <select id="getBindUserList" resultType="com.vians.admin.model.UserDetailInfo">
+        SELECT
+            u.u_id AS id,
+            ru.ru_id AS bindId,
+            u.u_name AS userName,
+            u.u_gender AS gender,
+            u.u_card_id AS cardId,
+            (
+                SELECT COUNT( ac.ac_id )
+                FROM vi_authorize_content ac
+                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 1
+                GROUP BY ac.ac_type DESC LIMIT 1
+            ) AS passwordCount,
+            (
+                SELECT COUNT( ac.ac_id )
+                FROM vi_authorize_content ac
+                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 2
+                GROUP BY ac.ac_type DESC LIMIT 1
+            ) AS cardCount,
+            (
+                SELECT COUNT( ac.ac_id )
+                FROM vi_authorize_content ac
+                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 3
+                GROUP BY ac.ac_type DESC LIMIT 1
+            ) AS fpCount,
+            (
+                SELECT COUNT( ac.ac_id )
+                FROM vi_authorize_content ac
+                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 4
+                GROUP BY ac.ac_type DESC LIMIT 1
+            ) AS faceCount,
+            (
+                SELECT COUNT( ac.ac_id )
+                FROM vi_authorize_content ac
+                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 5
+                GROUP BY ac.ac_type DESC LIMIT 1
+            ) AS bluetoothCount,
+            ru.ru_create_time AS bindTime,
+            u1.u_name AS bindUserName
+        FROM
+            vi_user u
+                LEFT JOIN vi_role r ON u.u_role_id = r.r_id
+                LEFT JOIN vi_project p ON u.u_project_id = p.p_id
+                LEFT JOIN vi_room_user ru ON ru.ru_user_id = u.u_id
+                LEFT JOIN vi_user u1 ON ru.ru_create_user_id = u1.u_id
+        WHERE
+            ru.ru_room_id = #{roomId}
+    </select>
+
+    <insert id="bindUser">
+        INSERT INTO vi_room_user(ru_room_id, ru_user_id, ru_create_user_id, ru_create_time)
+        VALUES (#{roomId}, #{userId}, #{createUserId}, #{createTime})
+    </insert>
+
+    <delete id="unbindUser">
+        delete from vi_room_user where ru_id = #{id}
+    </delete>
+
+
+    <resultMap id="BaseTreeResultMap" type="com.vians.admin.model.Permission">
+        <result column="p_id" property="id"/>
+        <result column="P_parent_id" property="parentId"/>
+        <result column="P_name" property="label"/>
+        <collection column="p_id" property="children" javaType="java.util.ArrayList"
+                    ofType="com.vians.admin.model.Permission" select="getNextPermissionTree"/>
+    </resultMap>
+
+    <resultMap id="NextTreeResultMap" type="com.vians.admin.model.Permission">
+        <result column="p_id" property="id"/>
+        <result column="P_parent_id" property="parentId"/>
+        <result column="P_name" property="label"/>
+        <collection column="p_id" property="children" javaType="java.util.ArrayList"
+                    ofType="com.vians.admin.model.Permission" select="getNextPermissionTree"/>
+    </resultMap>
+
+    <select id="getNextPermissionTree" resultMap="NextTreeResultMap">
+        SELECT
+            *
+        FROM vi_permission
+        WHERE p_parent_id = #{p_id}
+    </select>
+
+    <select id="getPermissionTree" resultMap="BaseTreeResultMap">
+        SELECT
+            *
+        FROM vi_permission
+        WHERE p_parent_id = 0 and p_name != 'admin'
+    </select>
+
+    <delete id="deleteRolePermissionsByRole" parameterType="long">
+        delete from vi_role_permission where rp_role_id = #{roleId}
+    </delete>
+
+    <insert id="addRolePermissions">
+        INSERT INTO vi_role_permission(rp_role_id, rp_permission_id, rp_create_time)
+        VALUES (#{roleId}, #{permissionId}, #{createTime})
+    </insert>
+
+    <select id="getPermissionIdsByRole" parameterType="long" resultType="java.lang.Integer">
+        select rp_permission_id from vi_role_permission where rp_role_id = #{roleId}
+    </select>
+
+    <select id="getPermissionLabelsByUser" resultType="String" parameterType="long">
+        select p.p_label
+        from vi_role_permission rp
+        left join vi_permission p on rp.rp_permission_id = p.p_id
+        left join vi_role r on rp.rp_role_id = r.r_id
+        left join vi_user u on r.r_id = u.u_role_id
+        where u.u_id = #{userId}
+    </select>
+
+    <select id="getPermissionsByUser" resultType="com.vians.admin.model.Permission" parameterType="long">
+        select
+               p.p_id as id,
+               p.p_label as label,
+               p.p_parent_id as parentId,
+               pp.p_label as pLabel
+        from vi_role_permission rp
+        left join vi_permission p on rp.rp_permission_id = p.p_id
+        left join vi_role r on rp.rp_role_id = r.r_id
+        left join vi_user u on r.r_id = u.u_role_id
+        left join vi_permission pp on p.p_parent_id = pp.p_id
+        where u.u_id = #{userId}
+    </select>
+
+    <update id="modifyPsw">
+        update vi_user set u_password = #{psw} where u_id = #{userId}
+    </update>
+
+    <select id="getTenementCount" resultType="int" parameterType="long">
+        select count(u.u_id)
+        from vi_user u
+        where u.u_project_id = #{projectId} and u.u_role_id = 3
+    </select>
+
+    <select id="getVisitorCount" resultType="int" parameterType="long">
+        select count(u.u_id)
+        from vi_user u
+        where u.u_project_id = #{projectId} and u.u_role_id = 11
+    </select>
+
+    <select id="getServeCount" resultType="int" parameterType="long">
+        select count(u.u_id)
+        from vi_user u
+        where u.u_project_id = #{projectId}
+          and (u.u_role_id = 2 or u.u_role_id = 7 or u.u_role_id = 8 or u.u_role_id = 9 or u.u_role_id = 10)
+    </select>
+
+    <select id="getManagerCount" resultType="int" parameterType="long">
+        select count(u.u_id)
+        from vi_user u
+        where u.u_project_id = #{projectId}
+          and (u.u_role_id = 1 or u.u_role_id = 4 or u.u_role_id = 5 or u.u_role_id = 6)
+    </select>
+
+    <delete id="deleteProjectManager">
+        delete from vi_user where u_project_id = #{projectId} and u_role_id = 4
+    </delete>
+
+    <update id="updateUsersRootId">
+        update vi_user set u_root_id = #{userId} where u_project_id = #{projectId}
+    </update>
 </mapper>

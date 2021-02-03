@@ -20,27 +20,38 @@
             p.p_project_nature_id AS natureId,
             u.u_name AS createUserName,
             p.p_create_time AS createTime,
+            vu.u_phone AS rootUser,
             (SELECT COUNT(c.c_id) FROM vi_community c where c.c_project_id = p.p_id GROUP BY p.p_id DESC LIMIT 1) AS communityCount
         FROM
             (
                 vi_project p
-                    INNER JOIN vi_project_nature pn ON p.p_project_nature_id = pn.pn_id
+                LEFT JOIN vi_project_nature pn ON p.p_project_nature_id = pn.pn_id
                 )
-                INNER JOIN vi_user u ON p.p_create_user_id = u.u_id
+                LEFT JOIN vi_user u ON p.p_create_user_id = u.u_id
+                LEFT JOIN
+                (
+                    select * from vi_user where u_role_id = 4 OR u_role_id is null
+                ) vu ON vu.u_project_id = p.p_id
             <where>
                 1 = 1
                 <if test="projectName != null and projectName != ''">
                     AND p.p_name like CONCAT('%',#{projectName},'%')
                 </if>
             </where>
-        GROUP BY
-            p.p_id
     </select>
 
     <select id="getAllProjects" resultType="com.vians.admin.model.ProjectInfo">
         select
         <include refid="Base_Column_List" />
         from vi_project
+    </select>
+
+    <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
+        select
+            p_id as id,
+            p_name as name
+        from vi_project
+        where p_id = #{projectId}
     </select>
 
     <select id="getProjectByName" resultType="com.vians.admin.model.ProjectInfo">
@@ -81,7 +92,7 @@
             <if test="natureId != null and natureId != ''">
                 p_project_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null and updateTime != ''">
+            <if test="updateTime != null">
                 p_update_time = #{updateTime},
             </if>
         </set>
@@ -89,4 +100,20 @@
             p_id = #{id}
         </where>
     </update>
+
+    <update id="updateAdminProject">
+        UPDATE vi_user
+        SET
+            u_project_id = #{projectId},
+            u_root_id =
+                (select a.u_root_id from
+                    (
+                        select u.u_root_id
+                        from vi_user u
+                        where u.u_project_id = #{projectId} and u.u_role_id = 4
+                    ) a)
+        where u_phone = 'admin'
+    </update>
+
+
 </mapper>

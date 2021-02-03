@@ -3,7 +3,6 @@ package com.suql.devicecollect;
 import com.vians.admin.mapper.NatureMapper;
 import com.vians.admin.mapper.ProjectMapper;
 import com.vians.admin.mapper.ViansUserMapper;
-import com.vians.admin.model.UserInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
@@ -33,6 +32,20 @@ public class DbTest {
 
     @Test
     public void natureTest() {
+//        List<Permission> permissions = userMapper.getNodeTree();
+//        permissions.forEach(permission -> {
+//            logger.info("=========== permission0 {}", permission.toString());
+//            if (permission.getChildren().size() > 0) {
+//                permission.getChildren().forEach(permission1 -> {
+//                    logger.info("=========== permission1 {}", permission1.toString());
+//                    if (permission1.getChildren().size() > 0) {
+//                        permission1.getChildren().forEach(permission2 -> {
+//                            logger.info("=========== permission2 {}", permission2.toString());
+//                        });
+//                    }
+//                });
+//            }
+//        });
 //        List<NatureInfo> ProjectNatures = natureMapper.getProjectNatures();
 //        logger.info("==================ProjectNatures size = {}", ProjectNatures.get(0).getNatureName());
 //        List<NatureInfo> CommunityNatures = natureMapper.getCommunityNatures(1);
@@ -67,8 +80,8 @@ public class DbTest {
 
     @Test
     public void test3() {
-        UserInfo userInfo = userMapper.getUserByPhone("18580250664");
-        logger.info("userInfo {}", userInfo.toString());
+//        UserInfo userInfo = userMapper.getUserByPhone("18580250664");
+//        logger.info("userInfo {}", userInfo.toString());
     }
 
 

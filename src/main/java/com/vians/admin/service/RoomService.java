@@ -18,7 +18,7 @@ public interface RoomService {
 
     void addRoom(RoomInfo floorInfo);
 
-    Page<RoomInfo> getRoomList(String roomName, long floorId, Pageable pageable);
+    Page<RoomInfo> getRoomList(String roomName, long floorId, Long projectId, Pageable pageable);
 
     void deleteRoom(long id);
 
@@ -31,4 +31,11 @@ public interface RoomService {
     RoomInfo getRoomById(long id);
 
     List<RoomInfo> getRoomsByFloorId(long id);
+
+    void updateRoomState(long id, int state);
+
+    List<RoomInfo> getRoomListByUserId(long id);
+
+    int getRoomCount(long projectId, int state);
+
 }

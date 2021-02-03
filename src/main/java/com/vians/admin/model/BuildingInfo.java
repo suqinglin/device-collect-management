@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @ClassName BuildingInfo
@@ -57,4 +58,8 @@ public class BuildingInfo {
     @Getter
     @Setter
     private Date updateTime;
+
+    @Getter
+    @Setter
+    private List<UnitInfo> units;
 }

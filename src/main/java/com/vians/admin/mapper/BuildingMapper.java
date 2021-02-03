@@ -1,6 +1,7 @@
 package com.vians.admin.mapper;
 
 import com.vians.admin.model.BuildingInfo;
+import com.vians.admin.model.DataDir;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,7 +19,10 @@ public interface BuildingMapper {
 
     void addBuilding(BuildingInfo buildingInfo);
 
-    List<BuildingInfo> getBuildingList(@Param("buildingName") String buildingName, @Param("communityId") long communityId);
+    List<BuildingInfo> getBuildingList(
+            @Param("buildingName") String buildingName,
+            @Param("communityId") long communityId,
+            @Param("projectId") long projectId);
 
     void deleteBuilding(long id);
 
@@ -31,4 +35,6 @@ public interface BuildingMapper {
             @Param("communityId") long communityId);
 
     List<BuildingInfo> getBuildingsByCommunityId(@Param("id") long id);
+
+    List<DataDir> getDataDir(@Param("id") long id);
 }

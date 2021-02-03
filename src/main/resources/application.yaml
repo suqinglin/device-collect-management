@@ -12,7 +12,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     #    url: jdbc:mysql://192.168.1.137/xy_unmannedhotel120?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
 #    url: jdbc:mysql://120.92.33.104/xy_unmanedhotel_1.4?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
-    url: jdbc:mysql://8.129.15.73/ViansTest_suqinglin?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+#    url: jdbc:mysql://8.129.15.73/ViansTest_suqinglin?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    url: jdbc:mysql://8.129.15.73/Vians?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
     username: root
     #    password: xyzh2018
     password: 81BACAD41DDF1
@@ -43,8 +44,3 @@ pagehelper:
 logging:
   level:
     com.vians.admin.mapper: debug
-system:
-  url: http://admin.szvians.cn:8087
-  physicUser: 18580250664
-  physicPsw: 123456
-

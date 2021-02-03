@@ -17,7 +17,7 @@ public interface FloorService {
 
     void addFloor(FloorInfo floorInfo);
 
-    Page<FloorInfo> getFloorList(String floorName, long unitId, Pageable pageable);
+    Page<FloorInfo> getFloorList(String floorName, long unitId, Long projectId, Pageable pageable);
 
     void deleteFloor(long id);
 

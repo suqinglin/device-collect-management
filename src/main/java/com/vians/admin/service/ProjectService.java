@@ -1,5 +1,6 @@
 package com.vians.admin.service;
 
+import com.vians.admin.model.DataDir;
 import com.vians.admin.model.ProjectInfo;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
@@ -17,9 +18,13 @@ public interface ProjectService {
 
     void addProject(ProjectInfo projectInfo);
 
-    Page<ProjectInfo> getProjectList(String projectName, Pageable pageable);
+    Page<ProjectInfo> getProjectListByPage(String projectName, Pageable pageable);
 
-    List<ProjectInfo> getAllProjects();
+    List<ProjectInfo> getProjectList();
+
+    List<ProjectInfo> getProjectAll(int level);
+
+    List<DataDir> getDataDirs(int level, Long projectId);
 
     void deleteProject(long id);
 
@@ -28,4 +33,6 @@ public interface ProjectService {
     ProjectInfo getProjectByName(String projectName);
 
     ProjectInfo getProjectById(long id);
+
+    void updateAdminProject(long projectId);
 }

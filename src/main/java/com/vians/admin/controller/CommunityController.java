@@ -13,6 +13,8 @@ import com.vians.admin.response.ResponseData;
 import com.vians.admin.service.CommunityService;
 import com.vians.admin.service.NatureService;
 import com.vians.admin.web.AppBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +33,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/vians/community")
 public class CommunityController {
+
+    final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     AppBean appBean;
@@ -72,8 +76,12 @@ public class CommunityController {
 
     @PostMapping("/list")
     public ResponseData getCommunityList(@RequestBody CommunityQuery query) {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
         Pageable pageable = new Pageable(query.getPageIndex(), query.getPageSize());
-        Page<CommunityInfo> communityInfoPage = communityService.getCommunityList(query.getCommunityName(), query.getProjectId(), pageable);
+        Page<CommunityInfo> communityInfoPage = communityService.getCommunityList(query.getCommunityName(), projectId, pageable);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", communityInfoPage.getList());
         responseData.addData("total", communityInfoPage.getTotal());

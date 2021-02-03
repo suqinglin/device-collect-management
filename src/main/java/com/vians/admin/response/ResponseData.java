@@ -55,6 +55,12 @@ public class ResponseData implements Serializable {
         this.message = message;
     }
 
+    public ResponseData setResponseCode(ResponseCode code) {
+        this.code = code.getKey();
+        this.message = code.getRemark();
+        return this;
+    }
+
     /**
      * 返回成功
      *

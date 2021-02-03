@@ -22,6 +22,10 @@ public class UserDetailInfo {
 
     @Getter
     @Setter
+    private long bindId;
+
+    @Getter
+    @Setter
     private String userName;
 
     @Getter
@@ -87,4 +91,37 @@ public class UserDetailInfo {
     @Getter
     @Setter
     private String address;
+
+    @Getter
+    @Setter
+    private Date bindTime;
+
+    @Getter
+    @Setter
+    private String bindUserName;
+
+    @Getter
+    @Setter
+    private int passwordCount;
+
+    @Getter
+    @Setter
+    private int fpCount;
+
+    @Getter
+    @Setter
+    private int cardCount;
+
+    @Getter
+    @Setter
+    private int faceCount;
+
+    @Getter
+    @Setter
+    private int bluetoothCount;
+
+    @Getter
+    @Setter
+    private long rootId;
+
 }

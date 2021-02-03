@@ -49,6 +49,8 @@ public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
                         userInfo.getId(),
                         userInfo.getPhone(),
                         userInfo.getPassword(),
+                        userInfo.getRootId(),
+                        userInfo.getProjectId(),
                         authorities,
                         true);
                 UsernamePasswordAuthenticationToken authentication =

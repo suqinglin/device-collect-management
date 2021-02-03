@@ -17,6 +17,14 @@
         d_token AS token
     </sql>
 
+    <select id="getCollectDevicesByUser" parameterType="long" resultType="com.vians.admin.model.DeviceBaseInfo">
+        select db.db_name as Name,
+               db.db_Mac as MAC
+        from xy_areadeviceinfo ac
+        left join xy_devicebaseinfo db on ac.ad_deviceid = db.db_ID
+        where ac.ad_ManagerUser = #{userId} and db.db_message = 'VI_AUT01A'
+    </select>
+
     <select id="getDeviceByMac" resultType="com.vians.admin.model.DeviceInfo">
         select
         <include refid="Base_Column_List" />
@@ -27,9 +35,29 @@
         LIMIT 1
     </select>
 
+    <select id="getDeviceByRoomId" resultType="com.vians.admin.model.DeviceBaseInfo">
+        select
+        d.d_id AS id,
+        d.d_mac AS MAC,
+        d.d_gw_mac AS GwMac,
+        d.d_model AS Device,
+        d.d_name AS NAME,
+        d.d_feature AS Feature,
+        d.d_active AS Active,
+        d.d_index AS idx,
+        d.d_create_user_id AS userId,
+        d.d_create_time AS createTime,
+        d.d_ele AS ele
+        from vi_device d
+        <where>
+            d_room_id = #{roomId}
+        </where>
+        LIMIT 1
+    </select>
+
     <insert id="addDevice" parameterType="com.vians.admin.model.DeviceBaseInfo">
-        insert into vi_device(d_mac, d_gw_mac, d_model, d_name, d_feature, d_active, d_index, d_create_user_id, d_create_time)
-        values (#{MAC}, #{GwMac}, #{Device}, #{Name}, #{Feature}, #{Active}, #{Index}, #{userId}, #{createTime})
+        insert into vi_device(d_mac, d_gw_mac, d_model, d_name, d_feature, d_active, d_index, d_create_user_id, d_create_time, d_project_id)
+        values (#{MAC}, #{GwMac}, #{Device}, #{Name}, #{Feature}, #{Active}, #{Index}, #{userId}, #{createTime}, #{projectId})
         on duplicate key
             update d_gw_mac = values(d_gw_mac),
                    d_model = values(d_model),
@@ -37,7 +65,8 @@
                    d_feature = values(d_feature),
                    d_active = values(d_active),
                    d_index = values(d_index),
-                   d_create_user_id = values(d_create_user_id)
+                   d_create_user_id = values(d_create_user_id),
+                   d_project_id = values(d_project_id)
     </insert>
 
     <select id="getDeviceList"
@@ -70,7 +99,7 @@
                 LEFT JOIN vi_unit unit ON f.f_unit_id = unit.u_id
                 LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
                 LEFT JOIN vi_community c ON b.b_community_id = c.c_id
-                LEFT JOIN vi_project p ON c.c_project_id = p.p_id
+                LEFT JOIN vi_project p ON d.d_project_id = p.p_id
         WHERE
             1 = 1
             <if test="projectId != 0">
@@ -125,6 +154,7 @@
         FROM
             vi_device d
                 LEFT JOIN vi_user u ON d.d_create_user_id = u.u_id
+        WHERE d.d_room_id is null and d.d_project_id = #{projectId}
     </select>
 
     <select id="getBindedDevice" resultType="com.vians.admin.model.DeviceBaseInfo">
@@ -140,7 +170,8 @@
             d.d_create_user_id AS userId,
             d.d_create_time AS createTime,
             d.d_ele AS ele,
-            u.u_name AS bindUserName
+            u.u_name AS bindUserName,
+            d.d_bind_time AS bindTime
         FROM
             vi_device d
                 LEFT JOIN vi_user u ON d.d_bind_user_id = u.u_id
@@ -168,7 +199,51 @@
             d_id = #{id}
     </update>
 
-    <delete id="deleteDevice" parameterType="long">
+    <delete id="deleteDeviceById" parameterType="long">
         delete from vi_device where d_id = #{id}
     </delete>
+
+    <delete id="deleteDeviceByMac" parameterType="String">
+        delete from vi_device where d_mac = #{mac}
+    </delete>
+
+    <select id="getLockFromRoom" resultType="com.vians.admin.model.DeviceBaseInfo">
+        select
+            d.d_id AS id,
+            d.d_mac AS MAC,
+            d.d_gw_mac AS GwMac,
+            d.d_model AS Device,
+            d.d_name AS NAME,
+            d.d_feature AS Feature,
+            d.d_active AS Active,
+            d.d_index AS idx,
+            d.d_create_user_id AS userId,
+            d.d_create_time AS createTime,
+            d.d_ele AS ele
+        from vi_device d
+        where d_room_id = #{roomId} and d_feature = 'LOCK'
+        limit 1
+    </select>
+
+    <select id="getDeviceMacsByProject" parameterType="long" resultType="String">
+        select d.d_mac from vi_device d
+        where d.d_project_id = #{projectId}
+    </select>
+
+    <select id="getDevCount" resultType="int">
+        select count(d.d_id) from vi_device d where d.d_project_id = #{projectId} and d.d_active = #{state}
+    </select>
+
+    <select id="getGwCount" resultType="int">
+        SELECT
+            COUNT( * )
+        FROM
+            xy_areadeviceinfo a
+                LEFT JOIN xy_devicebaseinfo B ON a.ad_deviceid = B.db_ID
+                LEFT JOIN xy_deviceproperty e ON a.ad_deviceid = e.dp_DeviceID
+        WHERE
+            e.dp_Online = #{state}
+          AND a.ad_ManagerUser = #{rootId}
+          AND B.db_Type = 96
+    </select>
 </mapper>

@@ -25,11 +25,13 @@
         FROM
             ((
                 vi_floor f
-                    INNER JOIN vi_floor_nature fn ON f.f_floor_nature_id = fn.fn_id
+                    LEFT JOIN vi_floor_nature fn ON f.f_floor_nature_id = fn.fn_id
                 )
-                INNER JOIN vi_user u ON f.f_create_user_id = u.u_id
+                LEFT JOIN vi_user u ON f.f_create_user_id = u.u_id
                 )
-                INNER JOIN vi_unit unit ON f.f_unit_id = unit.u_id
+                LEFT JOIN vi_unit unit ON f.f_unit_id = unit.u_id
+                LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
+                LEFT JOIN vi_community c ON b.b_community_id = c.c_id
         WHERE
             1 = 1
             <if test="floorName != null and floorName != ''">
@@ -37,6 +39,9 @@
             </if>
             <if test="unitId != 0">
                 AND f.f_unit_id = #{unitId}
+            </if>
+            <if test="projectId != 0">
+                AND c.c_project_id = #{projectId}
             </if>
     </select>
 
@@ -67,6 +72,18 @@
         </if>
     </select>
 
+    <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
+        select
+        f_id as id,
+        f_name as name
+        from vi_floor
+        where
+        1 = 1
+        <if test="id != 0">
+            and f_unit_id = #{id}
+        </if>
+    </select>
+
     <insert id="addFloor"
             parameterType="com.vians.admin.model.FloorInfo">
         insert into vi_floor(f_name, f_floor_nature_id, f_unit_id, f_create_user_id, f_create_time)
@@ -89,7 +106,7 @@
             <if test="natureId != 0">
                 f_floor_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null and updateTime != ''">
+            <if test="updateTime != null">
                 f_update_time = #{updateTime},
             </if>
         </set>

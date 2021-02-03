@@ -17,7 +17,7 @@ public interface UnitService {
 
     void addUnit(UnitInfo unitInfo);
 
-    Page<UnitInfo> getUnitList(String unitName, long buildingId, Pageable pageable);
+    Page<UnitInfo> getUnitList(String unitName, long buildingId, Long projectId, Pageable pageable);
 
     void deleteUnit(long id);
 

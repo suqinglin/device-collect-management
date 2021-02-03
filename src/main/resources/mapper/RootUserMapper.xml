@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.vians.admin.mapper.RootUserMapper">
+
+    <insert id="updateRootUser" parameterType="com.vians.admin.model.RootUserInfo">
+        INSERT INTO vi_root_user
+        VALUES
+        (#{userId}, #{phone}, #{password}, #{token}, #{cnt}, #{updateTime})
+        ON DUPLICATE KEY UPDATE
+         ru_phone = VALUES( ru_phone ),
+         ru_password = VALUES ( ru_password ),
+         ru_token = VALUES ( ru_token ),
+         ru_cnt = VALUES ( ru_cnt ),
+         ru_update_time = VALUES ( ru_update_time )
+    </insert>
+
+    <select id="getRootUserById" resultType="com.vians.admin.model.RootUserInfo" parameterType="long">
+        select
+               ru.ru_id AS userId,
+               ru.ru_phone AS phone,
+               ru.ru_password AS password,
+               ru.ru_token AS token,
+               ru.ru_cnt AS cnt,
+               ru.ru_update_time AS updateTime
+        from vi_root_user ru
+        where ru.ru_id = #{userId}
+    </select>
+</mapper>

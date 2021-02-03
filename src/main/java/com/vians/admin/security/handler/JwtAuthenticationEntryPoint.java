@@ -32,7 +32,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-
+        logger.info("=============JwtAuthenticationEntryPoint commence");
         ResponseCode responseCode = ResponseCode.ERROR_USERNAME_PWD_INCORRECT;
         if (authException instanceof InsufficientAuthenticationException) {
             responseCode = ResponseCode.ERROR_ACCOUNT_AUTH;

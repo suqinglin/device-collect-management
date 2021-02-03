@@ -12,6 +12,10 @@ public class RxRmtUnlock {
 
     @Getter
     @Setter
+    private String userName;
+
+    @Getter
+    @Setter
     private String mac;
 
     /**

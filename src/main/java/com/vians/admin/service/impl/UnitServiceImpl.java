@@ -36,9 +36,9 @@ public class UnitServiceImpl implements UnitService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Page<UnitInfo> getUnitList(String unitName, long buildingId, Pageable pageable) {
+    public Page<UnitInfo> getUnitList(String unitName, long buildingId, Long projectId, Pageable pageable) {
         PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize());
-        List<UnitInfo> unitInfoList = unitMapper.getUnitList(unitName, buildingId);
+        List<UnitInfo> unitInfoList = unitMapper.getUnitList(unitName, buildingId, projectId);
         PageInfo<UnitInfo> pageInfo = new PageInfo<>(unitInfoList);
         return new Page<>(unitInfoList, pageInfo.getTotal(), pageable);
     }

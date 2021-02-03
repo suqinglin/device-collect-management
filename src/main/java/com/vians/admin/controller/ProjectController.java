@@ -1,9 +1,11 @@
 package com.vians.admin.controller;
 
+import com.vians.admin.model.DataDir;
 import com.vians.admin.model.NatureInfo;
 import com.vians.admin.model.ProjectInfo;
 import com.vians.admin.request.RxId;
 import com.vians.admin.request.RxProject;
+import com.vians.admin.request.RxDataDir;
 import com.vians.admin.request.query.ProjectQuery;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
@@ -67,21 +69,33 @@ public class ProjectController {
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
-    @PostMapping("/list")
-    public ResponseData getProjectList(@RequestBody ProjectQuery projectQuery) {
+    @PostMapping("/listByPage")
+    public ResponseData getProjectListByPage(@RequestBody ProjectQuery projectQuery) {
         Pageable pageable = new Pageable(projectQuery.getPageIndex(), projectQuery.getPageSize());
-        Page<ProjectInfo> projectInfoPage = projectService.getProjectList(projectQuery.getProjectName(), pageable);
+        Page<ProjectInfo> projectInfoPage = projectService.getProjectListByPage(projectQuery.getProjectName(), pageable);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", projectInfoPage.getList());
         responseData.addData("total", projectInfoPage.getTotal());
         return responseData;
     }
 
-    @PostMapping("/all")
-    public ResponseData getAllProjects() {
-        List<ProjectInfo> projects = projectService.getAllProjects();
+    @PostMapping("/list")
+    public ResponseData getProjectList() {
+        List<ProjectInfo> projects = projectService.getProjectList();
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("projects", projects);
+        return responseData;
+    }
+
+    @PostMapping("/dataDir")
+    public ResponseData getDataDir(@RequestBody RxDataDir rxDataDir) {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
+        List<DataDir> dataDir = projectService.getDataDirs(rxDataDir.getLevel(), projectId);
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        responseData.addData("dataDir", dataDir);
         return responseData;
     }
 
@@ -108,5 +122,11 @@ public class ProjectController {
         projectService.deleteProject(delete.getId());
         // TODO: 还应该删除底下的小区楼栋单元楼层房间，以及房间下的绑定关系
         return new ResponseData(ResponseCode.SUCCESS);
+    }
+
+    @PostMapping("/updateAdminProject")
+    public ResponseData updateAdminProject(@RequestBody RxId rxId) {
+        projectService.updateAdminProject(rxId.getId());
+        return ResponseData.success();
     }
 }

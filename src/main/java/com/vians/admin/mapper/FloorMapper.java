@@ -1,5 +1,6 @@
 package com.vians.admin.mapper;
 
+import com.vians.admin.model.DataDir;
 import com.vians.admin.model.FloorInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -19,7 +20,7 @@ public interface FloorMapper {
 
     void addFloor(FloorInfo floorInfo);
 
-    List<FloorInfo> getFloorList(@Param("floorName") String floorName, @Param("unitId") long unitId);
+    List<FloorInfo> getFloorList(@Param("floorName") String floorName, @Param("unitId") long unitId, @Param("projectId") Long projectId);
 
     void deleteFloor(long id);
 
@@ -30,4 +31,6 @@ public interface FloorMapper {
     FloorInfo getFloorById(long id);
 
     List<FloorInfo> getFloorsByUnitId(@Param("id")long id);
+
+    List<DataDir> getDataDir(@Param("id")long id);
 }

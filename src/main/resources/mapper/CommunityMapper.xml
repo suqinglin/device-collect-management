@@ -25,11 +25,11 @@
         FROM
             ((
                 vi_community c
-                    INNER JOIN vi_community_nature cn ON c.c_community_nature_id = cn.cn_id
+                    LEFT JOIN vi_community_nature cn ON c.c_community_nature_id = cn.cn_id
                 )
-                INNER JOIN vi_user u ON c.c_create_user_id = u.u_id
+                LEFT JOIN vi_user u ON c.c_create_user_id = u.u_id
                 )
-                INNER JOIN vi_project p ON c.c_project_id = p.p_id
+                LEFT JOIN vi_project p ON c.c_project_id = p.p_id
         WHERE
             1 = 1
             <if test="communityName != null and communityName != ''">
@@ -67,6 +67,18 @@
         </if>
     </select>
 
+    <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
+        select
+            c_id as id,
+            c_name as name
+        from vi_community
+        where
+        1 = 1
+        <if test="id != 0">
+            and c_project_id = #{id}
+        </if>
+    </select>
+
     <insert id="addCommunity"
             parameterType="com.vians.admin.model.CommunityInfo">
         insert into vi_community(c_name, c_community_nature_id, c_create_user_id, c_create_time, c_project_id)
@@ -89,7 +101,7 @@
             <if test="natureId != 0">
                 c_community_nature_id = #{natureId},
             </if>
-            <if test="updateTime != null and updateTime != ''">
+            <if test="updateTime != null">
                 c_update_time = #{updateTime},
             </if>
         </set>

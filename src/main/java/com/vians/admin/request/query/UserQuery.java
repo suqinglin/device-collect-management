@@ -15,6 +15,10 @@ public class UserQuery extends RxPage {
 
     @Getter
     @Setter
+    private long roomId;
+
+    @Getter
+    @Setter
     private String name;
 
     @Getter
@@ -31,7 +35,9 @@ public class UserQuery extends RxPage {
 
     @Getter
     @Setter
-    private int roleId;
+    private long roleId;
 
-    private int projectId;
+    @Getter
+    @Setter
+    private long projectId;
 }

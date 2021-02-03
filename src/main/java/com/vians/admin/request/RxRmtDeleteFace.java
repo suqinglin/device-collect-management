@@ -10,6 +10,10 @@ public class RxRmtDeleteFace {
 
     @Getter
     @Setter
+    private String userName;
+
+    @Getter
+    @Setter
     private String mac;
 
     @Getter
