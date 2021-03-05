@@ -28,4 +28,6 @@ public interface UnitService {
     UnitInfo getUnitById(long id);
 
     List<UnitInfo> getUnitsByBuildingId(long id);
+
+    int getUnitCountByBuildingId(long id);
 }

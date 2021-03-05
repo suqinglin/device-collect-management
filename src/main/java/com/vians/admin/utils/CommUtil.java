@@ -118,5 +118,16 @@ public class CommUtil {
         return calendar.getTime().getTime();
     }
 
-
+    public static String getNumChars(String data) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < data.length(); i++) {
+            char iChar = data.charAt(i);
+            if (iChar >= 48 && iChar <= 57) {
+                builder.append(iChar);
+            } else {
+                break;
+            }
+        }
+        return new String(builder);
+    }
 }

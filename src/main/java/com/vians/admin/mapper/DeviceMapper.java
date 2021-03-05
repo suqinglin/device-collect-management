@@ -56,4 +56,6 @@ public interface DeviceMapper {
     int getDevCount(@Param("projectId") long projectId, @Param("state") int state);
 
     int getGwCount(@Param("rootId") long rootId, @Param("state") int state);
+
+    void unbindDevicesByRoomId(@Param("roomId") long roomId);
 }

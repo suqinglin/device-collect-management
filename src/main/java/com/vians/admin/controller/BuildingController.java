@@ -2,6 +2,7 @@ package com.vians.admin.controller;
 
 import com.vians.admin.model.BuildingInfo;
 import com.vians.admin.model.NatureInfo;
+import com.vians.admin.model.UnitInfo;
 import com.vians.admin.request.RxBuilding;
 import com.vians.admin.request.RxGetNatures;
 import com.vians.admin.request.RxId;
@@ -12,6 +13,7 @@ import com.vians.admin.response.ResponseCode;
 import com.vians.admin.response.ResponseData;
 import com.vians.admin.service.BuildingService;
 import com.vians.admin.service.NatureService;
+import com.vians.admin.service.UnitService;
 import com.vians.admin.web.AppBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -41,6 +43,9 @@ public class BuildingController {
     @Resource
     BuildingService buildingService;
 
+    @Resource
+    UnitService unitService;
+
     @PostMapping("/natures")
     public ResponseData getNatures(@RequestBody RxGetNatures getNatures) {
 
@@ -67,6 +72,15 @@ public class BuildingController {
         buildingInfo.setNatureId(building.getNatureId());
         buildingInfo.setCommunityId(building.getCommunityId());
         buildingService.addBuilding(buildingInfo);
+        // 批量创建单元：i+1单元
+        for (int i = 0; i < building.getUnitCount(); i++) {
+            UnitInfo unitInfo = new UnitInfo();
+            unitInfo.setBuildingId(buildingInfo.getId());
+            unitInfo.setNatureId(1);
+            unitInfo.setUnitName((i + 1) + "单元");
+            unitInfo.setCreateUserId(userId);
+            unitService.addUnit(unitInfo);
+        }
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
@@ -94,6 +108,10 @@ public class BuildingController {
 
     @PostMapping("/edit")
     public ResponseData editBuilding(@RequestBody RxBuilding building) {
+        Long userId = appBean.getCurrentUserId();
+        if (userId == null) {
+            return new ResponseData(ResponseCode.ERROR_UN_AUTHORIZE_LOGIN);
+        }
         if (!StringUtils.isEmpty(building.getBuildingName())) {
             BuildingInfo bi = buildingService.getBuildingByNameInCommunity(building.getBuildingName(), building.getCommunityId());
             if (bi != null && bi.getId() != building.getId()) {
@@ -105,6 +123,18 @@ public class BuildingController {
         buildingInfo.setBuildingName(building.getBuildingName());
         buildingInfo.setNatureId(building.getNatureId());
         buildingInfo.setCommunityId(building.getCommunityId());
+        // 如果输入的单元数大于0且数据库中的单元数为0，则允许批量添加单元
+        if (building.getUnitCount() > 0 && unitService.getUnitCountByBuildingId(building.getId()) == 0) {
+            // 批量创建单元：i+1单元
+            for (int i = 0; i < building.getUnitCount(); i++) {
+                UnitInfo unitInfo = new UnitInfo();
+                unitInfo.setBuildingId(buildingInfo.getId());
+                unitInfo.setNatureId(1);
+                unitInfo.setUnitName((i + 1) + "单元");
+                unitInfo.setCreateUserId(userId);
+                unitService.addUnit(unitInfo);
+            }
+        }
         buildingService.editBuilding(buildingInfo);
         return new ResponseData(ResponseCode.SUCCESS);
     }

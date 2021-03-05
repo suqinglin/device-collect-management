@@ -2,7 +2,12 @@ package com.vians.admin.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.vians.admin.mapper.DeviceMapper;
+import com.vians.admin.mapper.FloorMapper;
+import com.vians.admin.mapper.RoomMapper;
 import com.vians.admin.mapper.UnitMapper;
+import com.vians.admin.model.FloorInfo;
+import com.vians.admin.model.RoomInfo;
 import com.vians.admin.model.UnitInfo;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
@@ -27,6 +32,15 @@ public class UnitServiceImpl implements UnitService {
     @Resource
     private UnitMapper unitMapper;
 
+    @Resource
+    private FloorMapper floorMapper;
+
+    @Resource
+    private RoomMapper roomMapper;
+
+    @Resource
+    private DeviceMapper deviceMapper;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addUnit(UnitInfo unitInfo) {
@@ -46,6 +60,20 @@ public class UnitServiceImpl implements UnitService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteUnit(long id) {
+        List<FloorInfo> floors = floorMapper.getFloorsByUnitId(id);
+        floors.forEach(floorInfo -> {
+            List<RoomInfo> rooms = roomMapper.getRoomsByFloorId(floorInfo.getId());
+            rooms.forEach(roomInfo -> {
+                // 删除房间人员关联
+                roomMapper.deleteRoomUserByRoomId(roomInfo.getId());
+                // 删除房间设备关联
+                deviceMapper.unbindDevicesByRoomId(roomInfo.getId());
+            });
+            // 删除楼层下所有房间
+            roomMapper.deleteRoomsByFloorId(floorInfo.getId());
+        });
+        // 删除单元下所有楼层
+        floorMapper.deleteFloorsByUnitId(id);
         unitMapper.deleteUnit(id);
     }
 
@@ -72,5 +100,11 @@ public class UnitServiceImpl implements UnitService {
     @Override
     public UnitInfo getUnitByNameInBuilding(String unitName, long buildingId) {
         return unitMapper.getUnitByNameInBuilding(unitName, buildingId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int getUnitCountByBuildingId(long id) {
+        return unitMapper.getUnitCountByBuildingId(id);
     }
 }

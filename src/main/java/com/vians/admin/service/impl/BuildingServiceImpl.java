@@ -2,8 +2,11 @@ package com.vians.admin.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.vians.admin.mapper.BuildingMapper;
+import com.vians.admin.mapper.*;
 import com.vians.admin.model.BuildingInfo;
+import com.vians.admin.model.FloorInfo;
+import com.vians.admin.model.RoomInfo;
+import com.vians.admin.model.UnitInfo;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
 import com.vians.admin.service.BuildingService;
@@ -27,6 +30,18 @@ public class BuildingServiceImpl implements BuildingService {
     @Resource
     private BuildingMapper buildingMapper;
 
+    @Resource
+    private UnitMapper unitMapper;
+
+    @Resource
+    private FloorMapper floorMapper;
+
+    @Resource
+    private RoomMapper roomMapper;
+
+    @Resource
+    private DeviceMapper deviceMapper;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addBuilding(BuildingInfo buildingInfo) {
@@ -46,6 +61,25 @@ public class BuildingServiceImpl implements BuildingService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteBuilding(long id) {
+        List<UnitInfo> units = unitMapper.getUnitsByBuildingId(id);
+        units.forEach(unitInfo -> {
+            List<FloorInfo> floors = floorMapper.getFloorsByUnitId(unitInfo.getId());
+            floors.forEach(floorInfo -> {
+                List<RoomInfo> rooms = roomMapper.getRoomsByFloorId(floorInfo.getId());
+                rooms.forEach(roomInfo -> {
+                    // 删除房间人员关联
+                    roomMapper.deleteRoomUserByRoomId(roomInfo.getId());
+                    // 删除房间设备关联
+                    deviceMapper.unbindDevicesByRoomId(roomInfo.getId());
+                });
+                // 删除楼层下所有房间
+                roomMapper.deleteRoomsByFloorId(floorInfo.getId());
+            });
+            // 删除单元下所有楼层
+            floorMapper.deleteFloorsByUnitId(unitInfo.getId());
+        });
+        // 删除楼栋下所有单元
+        unitMapper.deleteUnitsByBuildingId(id);
         buildingMapper.deleteBuilding(id);
     }
 
@@ -72,5 +106,11 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     public List<BuildingInfo> getBuildingsByCommunityId(long id) {
         return buildingMapper.getBuildingsByCommunityId(id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int getBuildingCountByCommunityId(long id) {
+        return buildingMapper.getBuildingCountByCommunityId(id);
     }
 }

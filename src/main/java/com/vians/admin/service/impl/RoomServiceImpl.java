@@ -2,6 +2,7 @@ package com.vians.admin.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.vians.admin.mapper.DeviceMapper;
 import com.vians.admin.mapper.RoomMapper;
 import com.vians.admin.model.RoomInfo;
 import com.vians.admin.model.RoomModelInfo;
@@ -28,6 +29,9 @@ public class RoomServiceImpl implements RoomService {
     @Resource
     private RoomMapper roomMapper;
 
+    @Resource
+    private DeviceMapper deviceMapper;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addRoom(RoomInfo roomInfo) {
@@ -47,6 +51,10 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteRoom(long id) {
+        // 删除房间人员关联
+        roomMapper.deleteRoomUserByRoomId(id);
+        // 删除房间设备关联
+        deviceMapper.unbindDevicesByRoomId(id);
         roomMapper.deleteRoom(id);
     }
 
@@ -97,5 +105,11 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public int getRoomCount(long projectId, int state) {
         return roomMapper.getRoomCount(projectId, state);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int getRoomCountByFloorId(long id) {
+        return roomMapper.getRoomCountByFloorId(id);
     }
 }

@@ -80,6 +80,9 @@
     </select>
 
     <insert id="addCommunity"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="c_id"
             parameterType="com.vians.admin.model.CommunityInfo">
         insert into vi_community(c_name, c_community_nature_id, c_create_user_id, c_create_time, c_project_id)
         values (#{communityName}, #{natureId}, #{createUserId}, #{createTime}, #{projectId})
@@ -87,6 +90,10 @@
 
     <delete id="deleteCommunity" parameterType="long">
         delete from vi_community where c_id = #{id}
+    </delete>
+
+    <delete id="deleteCommunitiesByProjectId" parameterType="long">
+        delete from vi_community where c_project_id = #{projectId}
     </delete>
 
     <update id="editCommunity" parameterType="com.vians.admin.model.CommunityInfo">

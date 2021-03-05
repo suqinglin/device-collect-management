@@ -38,4 +38,5 @@ public interface RoomService {
 
     int getRoomCount(long projectId, int state);
 
+    int getRoomCountByFloorId(long id);
 }

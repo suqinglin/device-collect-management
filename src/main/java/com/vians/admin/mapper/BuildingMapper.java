@@ -36,5 +36,9 @@ public interface BuildingMapper {
 
     List<BuildingInfo> getBuildingsByCommunityId(@Param("id") long id);
 
+    int getBuildingCountByCommunityId(@Param("id") long id);
+
     List<DataDir> getDataDir(@Param("id") long id);
+
+    void deleteBuildingsByCommunityId(@Param("communityId") long communityId);
 }

@@ -166,7 +166,9 @@ public class ViansUserController {
     public ResponseData info() {
         Long userId = appBean.getCurrentUserId();
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
-//        responseData.addData("userInfo", userService.getUserInfo(userId));
+        if (userId == null) {
+            return new ResponseData(ResponseCode.ERROR_UN_AUTHORIZE_LOGIN);
+        }
         UserInfo userInfo = userService.getUserInfo(userId);
         responseData.addData("projectId", appBean.getProjectId());
         responseData.addData("name", userInfo.getPhone());
@@ -223,7 +225,10 @@ public class ViansUserController {
 
     @PostMapping("/add")
     public ResponseData addUser(@RequestBody RxUser user) {
-
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
         if (viansUserService.getUserByPhone(user.getPhone()) != null) {
             return new ResponseData(ResponseCode.ERROR_USER_PHONE_EXIST);
         }
@@ -238,7 +243,7 @@ public class ViansUserController {
         userInfo.setDepartment(user.getDepartment());
         userInfo.setWorkNumber(user.getWorkNumber());
         userInfo.setDuty(user.getDuty());
-        userInfo.setProjectId(user.getProjectId());
+        userInfo.setProjectId(projectId);
         userService.addUser(userInfo);
         return new ResponseData(ResponseCode.SUCCESS);
     }

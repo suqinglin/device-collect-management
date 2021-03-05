@@ -30,7 +30,11 @@ public interface FloorMapper {
 
     FloorInfo getFloorById(long id);
 
-    List<FloorInfo> getFloorsByUnitId(@Param("id")long id);
+    List<FloorInfo> getFloorsByUnitId(@Param("id") long id);
 
-    List<DataDir> getDataDir(@Param("id")long id);
+    List<DataDir> getDataDir(@Param("id") long id);
+
+    void deleteFloorsByUnitId(@Param("unitId") long unitId);
+
+    int getFloorCountByUnitId(@Param("id") long id);
 }

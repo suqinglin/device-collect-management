@@ -56,8 +56,9 @@
     </select>
 
     <insert id="addDevice" parameterType="com.vians.admin.model.DeviceBaseInfo">
-        insert into vi_device(d_mac, d_gw_mac, d_model, d_name, d_feature, d_active, d_index, d_create_user_id, d_create_time, d_project_id)
-        values (#{MAC}, #{GwMac}, #{Device}, #{Name}, #{Feature}, #{Active}, #{Index}, #{userId}, #{createTime}, #{projectId})
+
+        insert into vi_device(d_mac, d_gw_mac, d_model, d_name, d_feature, d_active, d_index, d_create_user_id, d_create_time, d_project_id, d_room_id, d_bind_time, d_bind_user_id, d_update_time)
+        values (#{MAC}, #{GwMac}, #{Device}, #{Name}, #{Feature}, #{Active}, #{Index}, #{userId}, #{createTime}, #{projectId}, #{roomId}, #{bindTime}, #{userId}, #{bindTime})
         on duplicate key
             update d_gw_mac = values(d_gw_mac),
                    d_model = values(d_model),
@@ -66,7 +67,11 @@
                    d_active = values(d_active),
                    d_index = values(d_index),
                    d_create_user_id = values(d_create_user_id),
-                   d_project_id = values(d_project_id)
+                   d_project_id = values(d_project_id),
+                   d_room_id = values(d_room_id),
+                   d_bind_time = values(d_bind_time),
+                   d_bind_user_id = values(d_bind_user_id),
+                   d_update_time = values(d_update_time)
     </insert>
 
     <select id="getDeviceList"
@@ -197,6 +202,15 @@
             d_room_id = null
         where
             d_id = #{id}
+    </update>
+
+    <update id="unbindDevicesByRoomId" parameterType="long">
+        update
+            vi_device
+        set
+            d_room_id = null
+        where
+            d_room_id = #{roomId}
     </update>
 
     <delete id="deleteDeviceById" parameterType="long">

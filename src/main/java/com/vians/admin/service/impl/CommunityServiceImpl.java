@@ -2,8 +2,8 @@ package com.vians.admin.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.vians.admin.mapper.CommunityMapper;
-import com.vians.admin.model.CommunityInfo;
+import com.vians.admin.mapper.*;
+import com.vians.admin.model.*;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
 import com.vians.admin.service.CommunityService;
@@ -25,7 +25,22 @@ import java.util.List;
 public class CommunityServiceImpl implements CommunityService {
 
     @Resource
+    private BuildingMapper buildingMapper;
+
+    @Resource
     private CommunityMapper communityMapper;
+
+    @Resource
+    private UnitMapper unitMapper;
+
+    @Resource
+    private FloorMapper floorMapper;
+
+    @Resource
+    private RoomMapper roomMapper;
+
+    @Resource
+    private DeviceMapper deviceMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -46,6 +61,31 @@ public class CommunityServiceImpl implements CommunityService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteCommunity(long id) {
+        List<BuildingInfo> buildings = buildingMapper.getBuildingsByCommunityId(id);
+        buildings.forEach(buildingInfo -> {
+            List<UnitInfo> units = unitMapper.getUnitsByBuildingId(buildingInfo.getId());
+            units.forEach(unitInfo -> {
+                List<FloorInfo> floors = floorMapper.getFloorsByUnitId(unitInfo.getId());
+                floors.forEach(floorInfo -> {
+                    List<RoomInfo> rooms = roomMapper.getRoomsByFloorId(floorInfo.getId());
+                    rooms.forEach(roomInfo -> {
+                        // 删除房间人员关联
+                        roomMapper.deleteRoomUserByRoomId(roomInfo.getId());
+                        // 删除房间设备关联
+                        deviceMapper.unbindDevicesByRoomId(roomInfo.getId());
+                    });
+                    // 删除楼层下所有房间
+                    roomMapper.deleteRoomsByFloorId(floorInfo.getId());
+                });
+                // 删除单元下所有楼层
+                floorMapper.deleteFloorsByUnitId(unitInfo.getId());
+            });
+            // 删除楼栋下所有单元
+            unitMapper.deleteUnitsByBuildingId(buildingInfo.getId());
+        });
+        // 删除小区下所有楼栋
+        buildingMapper.deleteBuildingsByCommunityId(id);
+        // 最后删除小区
         communityMapper.deleteCommunity(id);
     }
 

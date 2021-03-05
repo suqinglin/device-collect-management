@@ -27,4 +27,8 @@ public class RxFloor {
     @Getter
     @Setter
     private long unitId;
+
+    @Getter
+    @Setter
+    private int roomCount;
 }

@@ -71,6 +71,13 @@
         </if>
     </select>
 
+    <select id="getUnitCountByBuildingId" resultType="int">
+        select
+            count(u_id)
+        from vi_unit
+        where u_building_id = #{id}
+    </select>
+
     <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
         select
         u_id as id,
@@ -84,6 +91,9 @@
     </select>
 
     <insert id="addUnit"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="u_id"
             parameterType="com.vians.admin.model.UnitInfo">
         insert into vi_unit(u_name, u_unit_nature_id, u_building_id, u_create_user_id, u_create_time)
         values (#{unitName}, #{natureId}, #{buildingId}, #{createUserId}, #{createTime})
@@ -91,6 +101,10 @@
 
     <delete id="deleteUnit" parameterType="long">
         delete from vi_unit where u_id = #{id}
+    </delete>
+
+    <delete id="deleteUnitsByBuildingId" parameterType="long">
+        delete from vi_unit where u_building_id = #{buildingId}
     </delete>
 
     <update id="editUnit" parameterType="com.vians.admin.model.UnitInfo">

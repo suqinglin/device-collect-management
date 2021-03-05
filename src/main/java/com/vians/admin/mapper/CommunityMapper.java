@@ -32,4 +32,6 @@ public interface CommunityMapper {
     List<CommunityInfo> getCommunitiesByProjectId(@Param("id") long id);
 
     List<DataDir> getDataDir(@Param("id") long id);
+
+    void deleteCommunitiesByProjectId(@Param("projectId") long projectId);
 }

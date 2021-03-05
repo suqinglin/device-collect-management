@@ -2,8 +2,11 @@ package com.vians.admin.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.vians.admin.mapper.DeviceMapper;
 import com.vians.admin.mapper.FloorMapper;
+import com.vians.admin.mapper.RoomMapper;
 import com.vians.admin.model.FloorInfo;
+import com.vians.admin.model.RoomInfo;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
 import com.vians.admin.service.FloorService;
@@ -27,6 +30,12 @@ public class FloorServiceImpl implements FloorService {
     @Resource
     private FloorMapper floorMapper;
 
+    @Resource
+    private RoomMapper roomMapper;
+
+    @Resource
+    private DeviceMapper deviceMapper;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addFloor(FloorInfo floorInfo) {
@@ -46,6 +55,15 @@ public class FloorServiceImpl implements FloorService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteFloor(long id) {
+        List<RoomInfo> rooms = roomMapper.getRoomsByFloorId(id);
+        rooms.forEach(roomInfo -> {
+            // 删除房间人员关联
+            roomMapper.deleteRoomUserByRoomId(roomInfo.getId());
+            // 删除房间设备关联
+            deviceMapper.unbindDevicesByRoomId(roomInfo.getId());
+        });
+        // 删除楼层下所有房间
+        roomMapper.deleteRoomsByFloorId(id);
         floorMapper.deleteFloor(id);
     }
 
@@ -72,5 +90,11 @@ public class FloorServiceImpl implements FloorService {
     @Override
     public FloorInfo getFloorById(long id) {
         return floorMapper.getFloorById(id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int getFloorCountByUnitId(long id) {
+        return floorMapper.getFloorCountByUnitId(id);
     }
 }

@@ -90,4 +90,28 @@ public class DeviceBaseInfo {
     @Getter
     @Setter
     private long projectId;
+
+    @Getter
+    @Setter
+    private String community;
+
+    @Getter
+    @Setter
+    private String building;
+
+    @Getter
+    @Setter
+    private String unit;
+
+    @Getter
+    @Setter
+    private String floor;
+
+    @Getter
+    @Setter
+    private String room;
+
+    @Getter
+    @Setter
+    private long roomId;
 }

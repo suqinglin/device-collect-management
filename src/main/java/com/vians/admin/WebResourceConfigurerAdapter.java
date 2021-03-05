@@ -16,6 +16,7 @@ public class WebResourceConfigurerAdapter extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/app/**").addResourceLocations("file:D://resources/app/");
         registry.addResourceHandler("/doc/**").addResourceLocations("file:D://resources/doc/");
         registry.addResourceHandler("/AppNote/**").addResourceLocations("file:D://resources/AppNote/");
         registry.addResourceHandler("/EDA/**").addResourceLocations("file:D://resources/EDA/");

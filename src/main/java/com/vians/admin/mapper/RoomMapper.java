@@ -43,4 +43,14 @@ public interface RoomMapper {
     List<RoomInfo> getRoomListByUserId(@Param("id") long id);
 
     int getRoomCount(@Param("projectId") long projectId, @Param("state") int state);
+
+    /**
+     * 根据房间ID，删除房间与人员的关联关系
+     * @param roomId
+     */
+    void deleteRoomUserByRoomId(@Param("roomId") long roomId);
+
+    void deleteRoomsByFloorId(@Param("floorId") long floorId);
+
+    int getRoomCountByFloorId(@Param("id") long id);
 }

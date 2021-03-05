@@ -2,6 +2,7 @@ package com.vians.admin.controller;
 
 import com.vians.admin.model.FloorInfo;
 import com.vians.admin.model.NatureInfo;
+import com.vians.admin.model.RoomInfo;
 import com.vians.admin.request.RxFloor;
 import com.vians.admin.request.RxGetNatures;
 import com.vians.admin.request.RxId;
@@ -12,6 +13,8 @@ import com.vians.admin.response.ResponseCode;
 import com.vians.admin.response.ResponseData;
 import com.vians.admin.service.FloorService;
 import com.vians.admin.service.NatureService;
+import com.vians.admin.service.RoomService;
+import com.vians.admin.utils.CommUtil;
 import com.vians.admin.web.AppBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -41,6 +44,9 @@ public class FloorController {
     @Resource
     FloorService floorService;
 
+    @Resource
+    RoomService roomService;
+
     @PostMapping("/natures")
     public ResponseData getNatures(@RequestBody RxGetNatures getNatures) {
 
@@ -65,6 +71,18 @@ public class FloorController {
         floorInfo.setNatureId(floor.getNatureId());
         floorInfo.setUnitId(floor.getUnitId());
         floorService.addFloor(floorInfo);
+        // 批量创建房间：i+1楼
+        for (int i = 0; i < floor.getRoomCount(); i++) {
+            RoomInfo roomInfo = new RoomInfo();
+            roomInfo.setFloorId(floorInfo.getId());
+            roomInfo.setNatureId(1);
+            roomInfo.setArea(0);
+            roomInfo.setRoomModelId(1);
+            // 如4楼，i=2：403号房间，如5楼，i=21：522号房间
+            roomInfo.setRoomName(CommUtil.getNumChars(floor.getFloorName()) + (i < 10 ? "0" : "") + (i + 1) + "号房间");
+            roomInfo.setCreateUserId(userId);
+            roomService.addRoom(roomInfo);
+        }
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
@@ -92,6 +110,10 @@ public class FloorController {
 
     @PostMapping("/edit")
     public ResponseData editFloor(@RequestBody RxFloor floor) {
+        Long userId = appBean.getCurrentUserId();
+        if (userId == null) {
+            return new ResponseData(ResponseCode.ERROR_UN_AUTHORIZE_LOGIN);
+        }
         if (!StringUtils.isEmpty(floor.getFloorName())) {
             FloorInfo fi = floorService.getFloorByNameInUnit(floor.getFloorName(), floor.getUnitId());
             if (fi != null && fi.getId() != floor.getId()) {
@@ -103,6 +125,21 @@ public class FloorController {
         floorInfo.setFloorName(floor.getFloorName());
         floorInfo.setNatureId(floor.getNatureId());
         floorInfo.setUnitId(floor.getUnitId());
+        // 如果输入的房间数大于0且数据库中的房间数为0，则允许批量添加房间
+        if (floor.getRoomCount() > 0 && roomService.getRoomCountByFloorId(floor.getId()) == 0) {
+            // 批量创建房间：i+1楼
+            for (int i = 0; i < floor.getRoomCount(); i++) {
+                RoomInfo roomInfo = new RoomInfo();
+                roomInfo.setFloorId(floorInfo.getId());
+                roomInfo.setNatureId(1);
+                roomInfo.setArea(0);
+                roomInfo.setRoomModelId(1);
+                // 如4楼，i=2：403号房间，如5楼，i=21：522号房间
+                roomInfo.setRoomName(CommUtil.getNumChars(floor.getFloorName()) + (i < 10 ? "0" : "") + (i + 1) + "号房间");
+                roomInfo.setCreateUserId(userId);
+                roomService.addRoom(roomInfo);
+            }
+        }
         floorService.editFloor(floorInfo);
         return new ResponseData(ResponseCode.SUCCESS);
     }

@@ -85,6 +85,12 @@
         </if>
     </select>
 
+    <select id="getRoomCountByFloorId" resultType="int">
+        select count(r_id)
+        from vi_room
+        where r_floor_id = #{id}
+    </select>
+
     <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
         select
         r_id as id,
@@ -122,6 +128,9 @@
     </select>
 
     <insert id="addRoom"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="r_id"
             parameterType="com.vians.admin.model.RoomInfo">
         insert into vi_room(r_name, r_room_nature_id, r_room_model_id, r_floor_id, r_area, r_state, r_create_user_id, r_create_time)
         values (#{roomName}, #{natureId}, #{roomModelId}, #{floorId}, #{area}, #{state}, #{createUserId}, #{createTime})
@@ -129,6 +138,14 @@
 
     <delete id="deleteRoom" parameterType="long">
         delete from vi_room where r_id = #{id}
+    </delete>
+
+    <delete id="deleteRoomsByFloorId" parameterType="long">
+        delete from vi_room where r_floor_id = #{floorId}
+    </delete>
+
+    <delete id="deleteRoomUserByRoomId" parameterType="long">
+        delete from vi_room_user where ru_room_id = #{roomId}
     </delete>
 
     <update id="updateRoomState">

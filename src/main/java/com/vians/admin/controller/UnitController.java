@@ -1,5 +1,6 @@
 package com.vians.admin.controller;
 
+import com.vians.admin.model.FloorInfo;
 import com.vians.admin.model.NatureInfo;
 import com.vians.admin.model.UnitInfo;
 import com.vians.admin.request.RxGetNatures;
@@ -10,6 +11,7 @@ import com.vians.admin.response.Page;
 import com.vians.admin.response.Pageable;
 import com.vians.admin.response.ResponseCode;
 import com.vians.admin.response.ResponseData;
+import com.vians.admin.service.FloorService;
 import com.vians.admin.service.NatureService;
 import com.vians.admin.service.UnitService;
 import com.vians.admin.web.AppBean;
@@ -41,6 +43,9 @@ public class UnitController {
     @Resource
     UnitService unitService;
 
+    @Resource
+    FloorService floorService;
+
     @PostMapping("/natures")
     public ResponseData getNatures(@RequestBody RxGetNatures getNatures) {
 
@@ -67,6 +72,15 @@ public class UnitController {
         unitInfo.setNatureId(unit.getNatureId());
         unitInfo.setBuildingId(unit.getBuildingId());
         unitService.addUnit(unitInfo);
+        // 批量创建楼层：i+1楼
+        for (int i = 0; i < unit.getFloorCount(); i++) {
+            FloorInfo floorInfo = new FloorInfo();
+            floorInfo.setUnitId(unitInfo.getId());
+            floorInfo.setNatureId(1);
+            floorInfo.setFloorName((i + 1) + "楼");
+            floorInfo.setCreateUserId(userId);
+            floorService.addFloor(floorInfo);
+        }
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
@@ -94,6 +108,10 @@ public class UnitController {
 
     @PostMapping("/edit")
     public ResponseData editUnit(@RequestBody RxUnit unit) {
+        Long userId = appBean.getCurrentUserId();
+        if (userId == null) {
+            return new ResponseData(ResponseCode.ERROR_UN_AUTHORIZE_LOGIN);
+        }
         if (!StringUtils.isEmpty(unit.getUnitName())) {
             UnitInfo ui = unitService.getUnitByNameInBuilding(unit.getUnitName(), unit.getBuildingId());
             if (ui != null && ui.getId() != unit.getId()) {
@@ -105,6 +123,18 @@ public class UnitController {
         unitInfo.setUnitName(unit.getUnitName());
         unitInfo.setNatureId(unit.getNatureId());
         unitInfo.setBuildingId(unit.getBuildingId());
+        // 如果输入的楼层数大于0且数据库中的楼层数为0，则允许批量添加楼层
+        if (unit.getFloorCount() > 0 && floorService.getFloorCountByUnitId(unit.getId()) == 0) {
+            // 批量创建楼层：i+1楼
+            for (int i = 0; i < unit.getFloorCount(); i++) {
+                FloorInfo floorInfo = new FloorInfo();
+                floorInfo.setUnitId(unitInfo.getId());
+                floorInfo.setNatureId(1);
+                floorInfo.setFloorName((i + 1) + "楼");
+                floorInfo.setCreateUserId(userId);
+                floorService.addFloor(floorInfo);
+            }
+        }
         unitService.editUnit(unitInfo);
         return new ResponseData(ResponseCode.SUCCESS);
     }

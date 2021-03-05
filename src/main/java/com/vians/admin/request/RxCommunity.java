@@ -26,4 +26,8 @@ public class RxCommunity {
     @Getter
     @Setter
     private long projectId;
+
+    @Getter
+    @Setter
+    private int buildingCount;
 }

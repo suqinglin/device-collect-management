@@ -27,4 +27,8 @@ public class RxBuilding {
     @Getter
     @Setter
     private long communityId;
+
+    @Getter
+    @Setter
+    private int unitCount;
 }

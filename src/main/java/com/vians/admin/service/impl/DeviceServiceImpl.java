@@ -2,10 +2,8 @@ package com.vians.admin.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.vians.admin.mapper.DeviceMapper;
-import com.vians.admin.model.DeviceBaseInfo;
-import com.vians.admin.model.DeviceDetailInfo;
-import com.vians.admin.model.DeviceInfo;
+import com.vians.admin.mapper.*;
+import com.vians.admin.model.*;
 import com.vians.admin.request.RxPage;
 import com.vians.admin.request.query.DeviceQuery;
 import com.vians.admin.response.Page;
@@ -25,6 +23,21 @@ import java.util.List;
 public class DeviceServiceImpl implements DeviceService {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Resource
+    private CommunityMapper communityMapper;
+
+    @Resource
+    private BuildingMapper buildingMapper;
+
+    @Resource
+    private UnitMapper unitMapper;
+
+    @Resource
+    private FloorMapper floorMapper;
+
+    @Resource
+    private RoomMapper roomMapper;
 
     @Resource
     private DeviceMapper deviceMapper;
@@ -132,14 +145,80 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void batchAddUsers(List<DeviceBaseInfo> deviceList, Long userId) {
+    public void batchAddDevices(List<DeviceBaseInfo> deviceList, Long userId, Long projectId) {
         deviceList.forEach(device -> {
             if (device.getMAC() == null) {
                 logger.info("deviceService mac is null, {}", device.toString());
                 return;
             }
+            device.setActive("V".equals(device.getActive()) ? "1" : "0");
             device.setCreateTime(new Date());
             device.setUserId(String.valueOf(userId));
+            device.setProjectId(projectId);
+            // 创建小区
+            CommunityInfo communityInfo = communityMapper.getCommunityByNameInProject(device.getCommunity(), projectId);
+            if (communityInfo == null) {
+                communityInfo = new CommunityInfo();
+                communityInfo.setProjectId(projectId);
+                communityInfo.setCommunityName(device.getCommunity());
+                communityInfo.setNatureId(1);
+                communityInfo.setCreateUserId(userId);
+                communityInfo.setCreateTime(new Date());
+                communityMapper.addCommunity(communityInfo);
+            }
+            logger.info("community id: {}", communityInfo.getId());
+            String buildingName = device.getBuilding() + "号楼";
+            BuildingInfo buildingInfo = buildingMapper.getBuildingByNameInCommunity(buildingName, communityInfo.getId());
+            if (buildingInfo == null) {
+                buildingInfo = new BuildingInfo();
+                buildingInfo.setCommunityId(communityInfo.getId());
+                buildingInfo.setNatureId(1);
+                buildingInfo.setBuildingName(buildingName);
+                buildingInfo.setCreateUserId(userId);
+                buildingInfo.setCreateTime(new Date());
+                buildingMapper.addBuilding(buildingInfo);
+            }
+            logger.info("building id: {}", buildingInfo.getId());
+            String unitName = device.getUnit() + "单元";
+            UnitInfo unitInfo = unitMapper.getUnitByNameInBuilding(unitName, buildingInfo.getId());
+            if (unitInfo == null) {
+                unitInfo = new UnitInfo();
+                unitInfo.setBuildingId(buildingInfo.getId());
+                unitInfo.setNatureId(1);
+                unitInfo.setUnitName(unitName);
+                unitInfo.setCreateUserId(userId);
+                unitInfo.setCreateTime(new Date());
+                unitMapper.addUnit(unitInfo);
+            }
+            logger.info("unit id: {}", unitInfo.getId());
+            String floorName = device.getFloor() + "楼";
+            FloorInfo floorInfo = floorMapper.getFloorByNameInUnit(floorName, unitInfo.getId());
+            if (floorInfo == null) {
+                floorInfo = new FloorInfo();
+                floorInfo.setUnitId(unitInfo.getId());
+                floorInfo.setNatureId(1);
+                floorInfo.setFloorName(floorName);
+                floorInfo.setCreateUserId(userId);
+                floorInfo.setCreateTime(new Date());
+                floorMapper.addFloor(floorInfo);
+            }
+            logger.info("floor id: {}", floorInfo.getId());
+            String roomName = device.getRoom() + "号房间";
+            RoomInfo roomInfo = roomMapper.getRoomByNameInFloor(roomName, floorInfo.getId());
+            if (roomInfo == null) {
+                roomInfo = new RoomInfo();
+                roomInfo.setFloorId(floorInfo.getId());
+                roomInfo.setNatureId(1);
+                roomInfo.setArea(0);
+                roomInfo.setRoomModelId(1);
+                roomInfo.setRoomName(device.getFloor() + (Integer.parseInt(device.getRoom()) < 10 ? "0" : "") + roomName);
+                roomInfo.setCreateUserId(userId);
+                roomInfo.setCreateTime(new Date());
+                roomMapper.addRoom(roomInfo);
+            }
+            logger.info("room id: {}", roomInfo.getId());
+            device.setRoomId(roomInfo.getId());
+            device.setBindTime(new Date());
             deviceMapper.addDevice(device);
         });
     }

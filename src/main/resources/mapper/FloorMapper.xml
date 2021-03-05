@@ -72,6 +72,12 @@
         </if>
     </select>
 
+    <select id="getFloorCountByUnitId" resultType="int">
+        select count(f_id)
+        from vi_floor
+        where f_unit_id = #{id}
+    </select>
+
     <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
         select
         f_id as id,
@@ -85,6 +91,9 @@
     </select>
 
     <insert id="addFloor"
+            useGeneratedKeys="true"
+            keyColumn="f_id"
+            keyProperty="id"
             parameterType="com.vians.admin.model.FloorInfo">
         insert into vi_floor(f_name, f_floor_nature_id, f_unit_id, f_create_user_id, f_create_time)
         values (#{floorName}, #{natureId}, #{unitId}, #{createUserId}, #{createTime})
@@ -92,6 +101,10 @@
 
     <delete id="deleteFloor" parameterType="long">
         delete from vi_floor where f_id = #{id}
+    </delete>
+
+    <delete id="deleteFloorsByUnitId" parameterType="long">
+        delete from vi_floor where f_unit_id = #{unitId}
     </delete>
 
     <update id="editFloor" parameterType="com.vians.admin.model.FloorInfo">

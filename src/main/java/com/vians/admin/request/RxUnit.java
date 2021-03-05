@@ -27,4 +27,8 @@ public class RxUnit {
     @Getter
     @Setter
     private long buildingId;
+
+    @Getter
+    @Setter
+    private int floorCount;
 }

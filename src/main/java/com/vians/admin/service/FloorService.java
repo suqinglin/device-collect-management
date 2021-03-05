@@ -28,4 +28,6 @@ public interface FloorService {
     FloorInfo getFloorByNameInUnit(String floorName, long unitId);
 
     List<FloorInfo> getFloorsByUnitId(long id);
+
+    int getFloorCountByUnitId(long id);
 }

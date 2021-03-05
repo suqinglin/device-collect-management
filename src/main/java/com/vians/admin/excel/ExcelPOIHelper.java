@@ -72,13 +72,18 @@ public class ExcelPOIHelper {
                 for (int i = sheet.getFirstRowNum() + 1; i <= sheet.getLastRowNum(); i++) {
                     Row row = sheet.getRow(i);
                     DeviceBaseInfo.DeviceBaseInfoBuilder builder = DeviceBaseInfo.builder();
-                    builder.MAC(readCellContent(row.getCell(0)));
-                    builder.GwMac(readCellContent(row.getCell(1)));
-                    builder.Device(readCellContent(row.getCell(2)));
-                    builder.Name(readCellContent(row.getCell(3)));
-                    builder.Feature(readCellContent(row.getCell(4)));
+                    builder.Device(readCellContent(row.getCell(0)));
+                    builder.Feature(readCellContent(row.getCell(1)));
+                    builder.Name(readCellContent(row.getCell(2)));
+                    builder.MAC(readCellContent(row.getCell(3)));
+                    builder.GwMac(readCellContent(row.getCell(4)));
                     builder.Active(readCellContent(row.getCell(5)));
                     builder.Index(readCellContent(row.getCell(6)));
+                    builder.community(readCellContent(row.getCell(7)));
+                    builder.building(readCellContent(row.getCell(8)));
+                    builder.unit(readCellContent(row.getCell(9)));
+                    builder.floor(readCellContent(row.getCell(10)));
+                    builder.room(readCellContent(row.getCell(11)));
                     data.add(builder.build());
                 }
             }

@@ -28,4 +28,5 @@ public interface CommunityService {
     CommunityInfo getCommunityById(long id);
 
     List<CommunityInfo> getCommunitiesByProjectId(long id);
+
 }

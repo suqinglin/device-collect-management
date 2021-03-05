@@ -35,4 +35,8 @@ public interface UnitMapper {
     List<UnitInfo> getUnitsByBuildingId(@Param("id")long id);
 
     List<DataDir> getDataDir(@Param("id")long id);
+
+    void deleteUnitsByBuildingId(@Param("buildingId") long buildingId);
+
+    int getUnitCountByBuildingId(@Param("id")long id);
 }

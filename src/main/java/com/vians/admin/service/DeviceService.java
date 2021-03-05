@@ -38,7 +38,7 @@ public interface DeviceService {
 
     List<DeviceBaseInfo> getCollectDevicesByUser(long userId);
 
-    void batchAddUsers(List<DeviceBaseInfo> deviceList, Long userId);
+    void batchAddDevices(List<DeviceBaseInfo> deviceList, Long userId, Long projectId);
 
     List<String> getDeviceMacs(long projectId);
 

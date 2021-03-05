@@ -42,6 +42,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Resource
     private ProjectMapper projectMapper;
 
+    @Resource
+    private DeviceMapper deviceMapper;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addProject(ProjectInfo projectInfo) {
@@ -61,6 +64,37 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteProject(long id) {
+        List<CommunityInfo> communities = communityMapper.getCommunitiesByProjectId(id);
+        communities.forEach(communityInfo -> {
+        List<BuildingInfo> buildings = buildingMapper.getBuildingsByCommunityId(communityInfo.getId());
+            buildings.forEach(buildingInfo -> {
+                List<UnitInfo> units = unitMapper.getUnitsByBuildingId(buildingInfo.getId());
+                units.forEach(unitInfo -> {
+                    List<FloorInfo> floors = floorMapper.getFloorsByUnitId(unitInfo.getId());
+                    floors.forEach(floorInfo -> {
+                        List<RoomInfo> rooms = roomMapper.getRoomsByFloorId(floorInfo.getId());
+                        rooms.forEach(roomInfo -> {
+                            // 删除房间人员关联
+                            roomMapper.deleteRoomUserByRoomId(roomInfo.getId());
+                            // 删除房间设备关联
+                            deviceMapper.unbindDevicesByRoomId(roomInfo.getId());
+                        });
+                        // 删除楼层下所有房间
+                        roomMapper.deleteRoomsByFloorId(floorInfo.getId());
+                    });
+                    // 删除单元下所有楼层
+                    floorMapper.deleteFloorsByUnitId(unitInfo.getId());
+                });
+                // 删除楼栋下所有单元
+                unitMapper.deleteUnitsByBuildingId(buildingInfo.getId());
+            });
+            // 删除小区下所有楼栋
+            buildingMapper.deleteBuildingsByCommunityId(communityInfo.getId());
+        });
+        // 删除项目下的所有小区
+        communityMapper.deleteCommunitiesByProjectId(id);
+        // TODO: 还需要删除项目下的设备、人员
+        // 最后删除项目
         projectMapper.deleteProject(id);
     }
 

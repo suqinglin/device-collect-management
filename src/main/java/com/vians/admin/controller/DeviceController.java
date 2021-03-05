@@ -94,23 +94,29 @@ public class DeviceController {
                 rootUserService.updateRootUser(rootUserInfo);
                 List<DeviceBaseInfo> deviceBaseInfos = getDeviceResponse.getDev();
                 List<String> dbMacs = deviceService.getDeviceMacs(projectId);
-                List<String> syncMacs = new ArrayList<>();
-                // 4、保存到数据库
-                for (DeviceBaseInfo deviceBaseInfo : deviceBaseInfos) {
-                    deviceBaseInfo.setUserId(userId);
-                    deviceBaseInfo.setCreateTime(new Date());
-                    deviceBaseInfo.setProjectId(projectId);
-                    deviceService.addDevice(deviceBaseInfo);
-                    if (!syncMacs.contains(deviceBaseInfo.getMAC())) {
-                        syncMacs.add(deviceBaseInfo.getMAC());
+                if (deviceBaseInfos == null) {
+                    // 如果同步到设备为空，则删除掉数据库中本项目下的所有设备
+                    dbMacs.forEach(dbMac -> deviceService.deleteDeviceByMac(dbMac));
+                } else {
+                    // 本次同步的设备mac列表
+                    List<String> syncMacs = new ArrayList<>();
+                    // 4、保存到数据库
+                    for (DeviceBaseInfo deviceBaseInfo : deviceBaseInfos) {
+                        deviceBaseInfo.setUserId(userId);
+                        deviceBaseInfo.setCreateTime(new Date());
+                        deviceBaseInfo.setProjectId(projectId);
+                        deviceService.addDevice(deviceBaseInfo);
+                        if (!syncMacs.contains(deviceBaseInfo.getMAC())) {
+                            syncMacs.add(deviceBaseInfo.getMAC());
+                        }
                     }
+                    // 删除掉项目下的同步中不包含的设备
+                    dbMacs.forEach(dbMac -> {
+                        if (!syncMacs.contains(dbMac)) {
+                            deviceService.deleteDeviceByMac(dbMac);
+                        }
+                    });
                 }
-                // 删除掉项目下的同步中不包含的设备
-                dbMacs.forEach(dbMac -> {
-                    if (!syncMacs.contains(dbMac)) {
-                        deviceService.deleteDeviceByMac(dbMac);
-                    }
-                });
                 return new ResponseData(ResponseCode.SUCCESS);
             } else if (result == 1002) {
                 // 无效用户：重新登录
@@ -241,6 +247,7 @@ public class DeviceController {
         logger.info("Filename {}", file.getOriginalFilename());
         String fileName = file.getOriginalFilename();
         Long userId = appBean.getCurrentUserId();
+        Long projectId = appBean.getProjectId();
         if (fileName == null || (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx"))) {
             return ResponseData.error();
         }
@@ -250,7 +257,7 @@ public class DeviceController {
         try {
             List<DeviceBaseInfo> deviceList = new ExcelPOIHelper().readDevicesExcel(fileName, file.getInputStream());
             logger.info("deviceList = {}", deviceList.toString());
-            deviceService.batchAddUsers(deviceList, userId);
+            deviceService.batchAddDevices(deviceList, userId, projectId);
         } catch (IOException e) {
             e.printStackTrace();
         }

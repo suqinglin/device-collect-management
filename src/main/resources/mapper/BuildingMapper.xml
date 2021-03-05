@@ -68,6 +68,13 @@
         </if>
     </select>
 
+    <select id="getBuildingCountByCommunityId" resultType="Integer">
+        select
+            count(b_id)
+        from vi_building
+        where b_community_id = #{id}
+    </select>
+
     <select id="getDataDir" resultType="com.vians.admin.model.DataDir">
         select
         b_id as id,
@@ -81,6 +88,9 @@
     </select>
 
     <insert id="addBuilding"
+            useGeneratedKeys="true"
+            keyColumn="b_id"
+            keyProperty="id"
             parameterType="com.vians.admin.model.BuildingInfo">
         insert into vi_building(b_name, b_building_nature_id, b_community_id, b_create_user_id, b_create_time)
         values (#{buildingName}, #{natureId}, #{communityId}, #{createUserId}, #{createTime})
@@ -88,6 +98,10 @@
 
     <delete id="deleteBuilding" parameterType="long">
         delete from vi_building where b_id = #{id}
+    </delete>
+
+    <delete id="deleteBuildingsByCommunityId" parameterType="long">
+        delete from vi_building where b_community_id = #{communityId}
     </delete>
 
     <update id="editBuilding" parameterType="com.vians.admin.model.BuildingInfo">

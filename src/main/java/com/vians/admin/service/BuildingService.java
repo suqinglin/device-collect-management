@@ -28,4 +28,6 @@ public interface BuildingService {
     BuildingInfo getBuildingById(long id);
 
     List<BuildingInfo> getBuildingsByCommunityId(long id);
+
+    int getBuildingCountByCommunityId(long id);
 }
