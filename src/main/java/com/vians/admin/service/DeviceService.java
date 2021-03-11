@@ -45,4 +45,8 @@ public interface DeviceService {
     int getDevCount(long projectId, int state);
 
     int getGwCount(long rootId, int state);
+
+    void addBrowserDevice(String browserUUID, String mac, long userId);
+
+    String getDeviceMacByBrowser(String browserUUID);
 }

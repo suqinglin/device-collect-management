@@ -58,4 +58,8 @@ public interface DeviceMapper {
     int getGwCount(@Param("rootId") long rootId, @Param("state") int state);
 
     void unbindDevicesByRoomId(@Param("roomId") long roomId);
+
+    void addBrowserDevice(@Param("browserUUID") String browserUUID, @Param("mac") String mac, @Param("userId") long userId);
+
+    String getDeviceMacByBrowser(@Param("browserUUID") String browserUUID);
 }

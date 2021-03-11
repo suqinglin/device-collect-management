@@ -238,4 +238,14 @@ public class DeviceServiceImpl implements DeviceService {
     public int getGwCount(long rootId, int state) {
         return deviceMapper.getGwCount(rootId, state);
     }
+
+    @Override
+    public void addBrowserDevice(String browserUUID, String mac, long userId) {
+        deviceMapper.addBrowserDevice(browserUUID, mac, userId);
+    }
+
+    @Override
+    public String getDeviceMacByBrowser(String browserUUID) {
+        return deviceMapper.getDeviceMacByBrowser(browserUUID);
+    }
 }

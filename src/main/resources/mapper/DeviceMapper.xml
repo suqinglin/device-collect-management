@@ -74,6 +74,22 @@
                    d_update_time = values(d_update_time)
     </insert>
 
+    <insert id="addBrowserDevice">
+        insert into vi_browser_device(bd_browser_uuid, bd_device_mac, bd_user_id)
+        values (#{browserUUID}, #{mac}, #{userId})
+        on duplicate key
+            update bd_device_mac = values(bd_device_mac),
+                   bd_user_id = values(bd_user_id)
+    </insert>
+
+    <select id="getDeviceMacByBrowser" parameterType="string"
+            resultType="string">
+        select bd.bd_device_mac
+        from vi_browser_device bd
+        where bd.bd_browser_uuid = #{browserUUID}
+        limit 1
+    </select>
+
     <select id="getDeviceList"
             parameterType="com.vians.admin.request.query.DeviceQuery"
             resultType="com.vians.admin.model.DeviceDetailInfo">

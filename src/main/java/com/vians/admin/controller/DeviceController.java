@@ -9,6 +9,7 @@ import com.vians.admin.model.RootUserInfo;
 import com.vians.admin.request.RxBindDevice;
 import com.vians.admin.request.RxId;
 import com.vians.admin.request.RxPage;
+import com.vians.admin.request.RxSelectCollectDevice;
 import com.vians.admin.request.query.DeviceQuery;
 import com.vians.admin.response.Page;
 import com.vians.admin.response.ResponseCode;
@@ -171,6 +172,21 @@ public class DeviceController {
         List<DeviceBaseInfo> collectDevices = deviceService.getCollectDevicesByUser(rootId);
         responseData.addData("collectDevices", collectDevices);
         return responseData;
+    }
+
+    /**
+     * 选择指纹读卡器设备
+     * @return
+     */
+    @PostMapping("/selectCollectDevice")
+    public ResponseData selectCollectDevice(@RequestBody RxSelectCollectDevice selectCollectDevice) {
+
+        Long userId = appBean.getCurrentUserId();
+        if (userId == null) {
+            return new ResponseData(ResponseCode.ERROR_UN_AUTHORIZE_LOGIN);
+        }
+        deviceService.addBrowserDevice(selectCollectDevice.getBrowserUUID(), selectCollectDevice.getMac(), userId);
+        return ResponseData.success();
     }
 
     @PostMapping("/deviceInRoom")

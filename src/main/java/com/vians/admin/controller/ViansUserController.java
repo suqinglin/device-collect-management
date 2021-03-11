@@ -65,6 +65,9 @@ public class ViansUserController {
     @Resource
     private RoomService roomService;
 
+    @Resource
+    private DeviceService deviceService;
+
     @PostMapping("/login")
     public ResponseData login(@Valid @RequestBody RxLogin login) {
         String userPhone = login.getUserPhone();
@@ -163,7 +166,7 @@ public class ViansUserController {
     }
 
     @PostMapping("/info")
-    public ResponseData info() {
+    public ResponseData info(@RequestBody RxGetInfo getInfo) {
         Long userId = appBean.getCurrentUserId();
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         if (userId == null) {
@@ -175,6 +178,8 @@ public class ViansUserController {
         responseData.addData("roles", userInfo.getPermissions());
         responseData.addData("avatar", "/static/images/m0.jpg");
         responseData.addData("introduction", userInfo.getUserName());
+        String collectDevMac = deviceService.getDeviceMacByBrowser(getInfo.getBrowserUUID()); // 指纹读卡器设备
+        responseData.addData("collectDevMac", StringUtils.isEmpty(collectDevMac)? "" : collectDevMac);
         return responseData;
     }
 
