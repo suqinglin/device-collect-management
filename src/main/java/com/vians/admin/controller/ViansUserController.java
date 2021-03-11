@@ -180,6 +180,7 @@ public class ViansUserController {
         responseData.addData("introduction", userInfo.getUserName());
         String collectDevMac = deviceService.getDeviceMacByBrowser(getInfo.getBrowserUUID()); // 指纹读卡器设备
         responseData.addData("collectDevMac", StringUtils.isEmpty(collectDevMac)? "" : collectDevMac);
+        responseData.addData("projectLogo", userInfo.getProjectLogo());
         return responseData;
     }
 

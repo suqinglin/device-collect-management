@@ -40,6 +40,10 @@ public class UserInfo {
     @Setter
     private long projectId;
 
+    @Getter
+    @Setter
+    private String projectLogo;
+
     public UserInfo() {
     }
 

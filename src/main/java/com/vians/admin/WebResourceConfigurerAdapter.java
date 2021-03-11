@@ -28,6 +28,7 @@ public class WebResourceConfigurerAdapter extends WebMvcConfigurerAdapter {
         registry.addResourceHandler("/Tools/**").addResourceLocations("file:D://resources/Tools/");
         registry.addResourceHandler("/彩页/**").addResourceLocations("file:D://resources/彩页/");
         registry.addResourceHandler("/内部资料/**").addResourceLocations("file:D://resources/内部资料/");
+        registry.addResourceHandler("/images/**").addResourceLocations("file:D://resources/images/");
         super.addResourceHandlers(registry);
     }
 }
