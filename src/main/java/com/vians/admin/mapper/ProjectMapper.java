@@ -28,4 +28,6 @@ public interface ProjectMapper {
     ProjectInfo getProjectById(long id);
 
     void updateAdminProject(@Param("projectId") long projectId);
+
+    void updateRootId(@Param("projectId") long projectId, @Param("rootId") long rootId);
 }

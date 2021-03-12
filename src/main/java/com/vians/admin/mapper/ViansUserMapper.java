@@ -80,5 +80,10 @@ public interface ViansUserMapper {
 
     void deleteProjectManager(@Param("projectId") long projectId);
 
+    /**
+     * 为项目下的所有用户设置rootUser
+     * @param projectId 要设置的项目
+     * @param userId rootUser的用户ID
+     */
     void updateUsersRootId(@Param("projectId") long projectId, @Param("userId") long userId);
 }

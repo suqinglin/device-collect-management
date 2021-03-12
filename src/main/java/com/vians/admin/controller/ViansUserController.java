@@ -68,6 +68,9 @@ public class ViansUserController {
     @Resource
     private DeviceService deviceService;
 
+    @Resource
+    private ProjectService projectService;
+
     @PostMapping("/login")
     public ResponseData login(@Valid @RequestBody RxLogin login) {
         String userPhone = login.getUserPhone();
@@ -135,6 +138,7 @@ public class ViansUserController {
                         userService.deleteUserByPhone(rxSaveRootUser.getRootUserPhone());
                         userService.deleteProjectManager(rxSaveRootUser.getProjectId());
                         userService.updateUsersRootId(rxSaveRootUser.getProjectId(), userId);
+                        projectService.updateRootId(rxSaveRootUser.getProjectId(), userId);
                         UserDetailInfo userDetailInfo = new UserDetailInfo();
                         userDetailInfo.setPhone(rxSaveRootUser.getRootUserPhone());
                         userDetailInfo.setRoleId(4); // 角色ID为4：项目管理员
@@ -186,11 +190,14 @@ public class ViansUserController {
 
     @PostMapping("/list")
     public ResponseData getUserList(@RequestBody UserQuery userQuery) {
-        Long projectId = appBean.getProjectId();
-        if (projectId == null) {
-            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        // 普通用户人员管理，只查询自己项目下的人员，项目管理员人员管理，查询前端指定的项目下的人员
+        if (userQuery.getType() == UserQuery.USER_TYPE_GENERAL_USER) {
+            Long projectId = appBean.getProjectId();
+            if (projectId == null) {
+                return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+            }
+            userQuery.setProjectId(projectId);
         }
-        userQuery.setProjectId(projectId);
         Page<UserDetailInfo> roomInfoPage = userService.getUserList(userQuery);
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         responseData.addData("list", roomInfoPage.getList());
@@ -231,14 +238,20 @@ public class ViansUserController {
 
     @PostMapping("/add")
     public ResponseData addUser(@RequestBody RxUser user) {
-        Long projectId = appBean.getProjectId();
-        if (projectId == null) {
-            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
-        }
         if (viansUserService.getUserByPhone(user.getPhone()) != null) {
             return new ResponseData(ResponseCode.ERROR_USER_PHONE_EXIST);
         }
         UserDetailInfo userInfo = new UserDetailInfo();
+        // 添加普通用户，只能添加到当前项目下，添加项目管理员，添加到前端指定的项目下
+        if (user.getRoleId() != 4) {
+            Long projectId = appBean.getProjectId();
+            if (projectId == null) {
+                return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+            }
+            userInfo.setProjectId(projectId);
+        } else {
+            userInfo.setProjectId(user.getProjectId());
+        }
         userInfo.setUserName(user.getUserName());
         userInfo.setPassword(user.getPassword());
         userInfo.setGender(user.getGender());
@@ -249,7 +262,7 @@ public class ViansUserController {
         userInfo.setDepartment(user.getDepartment());
         userInfo.setWorkNumber(user.getWorkNumber());
         userInfo.setDuty(user.getDuty());
-        userInfo.setProjectId(projectId);
+//        userInfo.setRootId(userId);
         userService.addUser(userInfo);
         return new ResponseData(ResponseCode.SUCCESS);
     }

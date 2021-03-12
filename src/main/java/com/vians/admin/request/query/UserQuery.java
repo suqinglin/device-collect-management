@@ -13,6 +13,15 @@ import lombok.Setter;
  **/
 public class UserQuery extends RxPage {
 
+    /**
+     * 一般用户
+     */
+    public static final int USER_TYPE_GENERAL_USER = 0;
+    /**
+     * 项目管理员
+     */
+    public static final int USER_TYPE_PROJECT_MANAGER = 1;
+
     @Getter
     @Setter
     private long roomId;
@@ -40,4 +49,8 @@ public class UserQuery extends RxPage {
     @Getter
     @Setter
     private long projectId;
+
+    @Getter
+    @Setter
+    private int type;
 }

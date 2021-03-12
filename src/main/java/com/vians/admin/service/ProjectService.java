@@ -34,5 +34,11 @@ public interface ProjectService {
 
     ProjectInfo getProjectById(long id);
 
+    /**
+     * 修改Admin用户可以查看的项目
+     * @param projectId
+     */
     void updateAdminProject(long projectId);
+
+    void updateRootId(long projectId, long rootId);
 }

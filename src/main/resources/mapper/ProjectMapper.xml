@@ -115,5 +115,10 @@
         where u_phone = 'admin'
     </update>
 
+    <update id="updateRootId">
+        UPDATE vi_project
+        SET p_root_id = #{rootId}
+        where p_id = #{projectId}
+    </update>
 
 </mapper>

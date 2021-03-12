@@ -218,8 +218,15 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.getProjectById(id);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateAdminProject(long projectId) {
         projectMapper.updateAdminProject(projectId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateRootId(long projectId, long rootId) {
+        projectMapper.updateRootId(projectId, rootId);
     }
 }

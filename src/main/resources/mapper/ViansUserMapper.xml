@@ -6,15 +6,16 @@
         u_id AS id,
         u_phone AS phone,
         u_password AS password,
-        u_root_id AS rootId,
         u_project_id AS projectId,
         u_name AS name
     </sql>
 
     <select id="getUserByPhone" resultType="com.vians.admin.model.UserInfo">
         select
-        <include refid="Base_Column_List" />
-        from vi_user
+        <include refid="Base_Column_List" />,
+        p.p_root_id AS rootId
+        from vi_user u
+        left join vi_project p on p.p_id = u.u_project_id
         <where>
             u_phone = #{phone}
         </where>
@@ -23,8 +24,10 @@
 
     <select id="getUserByName" resultType="com.vians.admin.model.UserInfo">
         select
-        <include refid="Base_Column_List" />
-        from vi_user
+        <include refid="Base_Column_List" />,
+        p.p_root_id AS rootId
+        from vi_user u
+        left join vi_project p on p.p_id = u.u_project_id
         <where>
             u_name = #{name}
         </where>
@@ -34,7 +37,8 @@
     <select id="getUserById" resultType="com.vians.admin.model.UserInfo">
         select
             <include refid="Base_Column_List" />,
-            p.p_logo AS projectLogo
+            p.p_logo AS projectLogo,
+            p.p_root_id AS rootId
         from vi_user u
         left join vi_project p on p.p_id = u.u_project_id
         <where>
@@ -247,6 +251,16 @@
                  LEFT JOIN vi_project p ON u.u_project_id = p.p_id
         WHERE
             u.u_role_id != 1
+            <choose>
+                <when test="roleId != 0">
+                    AND u.u_role_id = #{roleId}
+                </when>
+                <otherwise>
+                    <if test="type == 0">
+                        AND u.u_role_id != 4
+                    </if>
+                </otherwise>
+            </choose>
             <if test="name != null and name != ''">
                 AND u.u_name like concat('%', #{name}, '%')
             </if>
@@ -258,9 +272,6 @@
             </if>
             <if test="phone != null and phone != ''">
                 AND u.u_phone like concat('%',#{phone}, '%')
-            </if>
-            <if test="roleId != 0">
-                AND u.u_role_id = #{roleId}
             </if>
             <if test="projectId != 0">
                 AND u.u_project_id = #{projectId}

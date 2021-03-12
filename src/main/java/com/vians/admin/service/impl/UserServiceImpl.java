@@ -232,6 +232,10 @@ public class UserServiceImpl implements UserService {
         return userMapper.getManagerCount(projectId);
     }
 
+    /**
+     * 删除项目中的项目管理员账号，确保每个项目中管理员唯一
+     * @param projectId
+     */
     @Override
     public void deleteProjectManager(long projectId) {
         userMapper.deleteProjectManager(projectId);
