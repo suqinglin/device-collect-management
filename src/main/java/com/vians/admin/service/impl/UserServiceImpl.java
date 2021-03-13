@@ -246,4 +246,11 @@ public class UserServiceImpl implements UserService {
         userMapper.updateUsersRootId(projectId, userId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void addPermission(Permission permission) {
+        permission.setCreateTime(new Date());
+        userMapper.addPermission(permission);
+    }
+
 }

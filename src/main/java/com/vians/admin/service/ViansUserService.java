@@ -1,5 +1,6 @@
 package com.vians.admin.service;
 
+import com.vians.admin.model.Permission;
 import com.vians.admin.model.UserInfo;
 
 public interface ViansUserService {
@@ -9,6 +10,7 @@ public interface ViansUserService {
     UserInfo getUserById(long id);
 
     UserInfo loginByPhone(String phone);
+
 
 //    boolean validPassword(Long userId, String password);
 //

@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.vians.admin.common.CommConstants;
 import com.vians.admin.excel.ExcelPOIHelper;
 import com.vians.admin.excel.ExcelUser;
-import com.vians.admin.model.RoleInfo;
-import com.vians.admin.model.RootUserInfo;
-import com.vians.admin.model.UserDetailInfo;
-import com.vians.admin.model.UserInfo;
+import com.vians.admin.model.*;
 import com.vians.admin.request.*;
 import com.vians.admin.request.query.UserQuery;
 import com.vians.admin.response.Page;
@@ -170,7 +167,7 @@ public class ViansUserController {
     }
 
     @PostMapping("/info")
-    public ResponseData info(@RequestBody RxGetInfo getInfo) {
+    public ResponseData getUserInfo(@RequestBody RxGetInfo getInfo) {
         Long userId = appBean.getCurrentUserId();
         ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
         if (userId == null) {
@@ -178,13 +175,18 @@ public class ViansUserController {
         }
         UserInfo userInfo = userService.getUserInfo(userId);
         responseData.addData("projectId", appBean.getProjectId());
-        responseData.addData("name", userInfo.getPhone());
+        responseData.addData("name", userInfo.getUserName());
         responseData.addData("roles", userInfo.getPermissions());
         responseData.addData("avatar", "/static/images/m0.jpg");
         responseData.addData("introduction", userInfo.getUserName());
         String collectDevMac = deviceService.getDeviceMacByBrowser(getInfo.getBrowserUUID()); // 指纹读卡器设备
         responseData.addData("collectDevMac", StringUtils.isEmpty(collectDevMac)? "" : collectDevMac);
         responseData.addData("projectLogo", userInfo.getProjectLogo());
+        responseData.addData("phone", userInfo.getPhone());
+        responseData.addData("gender", userInfo.getGender());
+        responseData.addData("projectName", userInfo.getProjectName());
+        responseData.addData("roleName", userInfo.getRoleName());
+        responseData.addData("createTime", userInfo.getCreateTime());
         return responseData;
     }
 
@@ -386,6 +388,20 @@ public class ViansUserController {
             return new ResponseData(ResponseCode.ERROR_ACCOUNT_OLD_PASSWORD_ERROR);
         }
         userService.modifyPsw(userId, modifyPsw.getNewPassword());
+        return ResponseData.success();
+    }
+
+    /**
+     * 创建权限
+     * @return
+     */
+    @PostMapping("/createPermission")
+    public ResponseData createPermission(@RequestBody RxCreatePermission createPermission) {
+        Permission permission = new Permission();
+        permission.setLabel(createPermission.getLabel());
+        permission.setName(createPermission.getName());
+        permission.setParentId((int) createPermission.getParentId());
+        userService.addPermission(permission);
         return ResponseData.success();
     }
 }

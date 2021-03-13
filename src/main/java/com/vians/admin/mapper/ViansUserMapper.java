@@ -58,6 +58,8 @@ public interface ViansUserMapper {
 
     ArrayList<Permission> getPermissionTree();
 
+    void addPermission(Permission permission);
+
     void deleteRolePermissionsByRole(@Param("roleId") long roleId);
 
     void addRolePermissions(@Param("roleId") long roleId, @Param("permissionId") long permissionId, @Param("createTime") Date createTime);

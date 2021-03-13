@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +31,10 @@ public class UserInfo {
 
     @Getter
     @Setter
+    private int gender;
+
+    @Getter
+    @Setter
     private List<String> permissions;
 
     @Getter
@@ -38,11 +43,23 @@ public class UserInfo {
 
     @Getter
     @Setter
+    private String roleName;
+
+    @Getter
+    @Setter
     private long projectId;
 
     @Getter
     @Setter
+    private String projectName;
+
+    @Getter
+    @Setter
     private String projectLogo;
+
+    @Getter
+    @Setter
+    private Date createTime;
 
     public UserInfo() {
     }

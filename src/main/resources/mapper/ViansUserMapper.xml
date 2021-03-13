@@ -7,7 +7,7 @@
         u_phone AS phone,
         u_password AS password,
         u_project_id AS projectId,
-        u_name AS name
+        u_name AS userName
     </sql>
 
     <select id="getUserByPhone" resultType="com.vians.admin.model.UserInfo">
@@ -37,10 +37,15 @@
     <select id="getUserById" resultType="com.vians.admin.model.UserInfo">
         select
             <include refid="Base_Column_List" />,
+            u.u_gender AS gender,
             p.p_logo AS projectLogo,
-            p.p_root_id AS rootId
+            p.p_root_id AS rootId,
+            p.p_name AS projectName,
+            r.r_name AS roleName,
+            u.u_create_time AS createTime
         from vi_user u
         left join vi_project p on p.p_id = u.u_project_id
+        left join vi_role r on r.r_id = u.u_role_id
         <where>
             u.u_id = #{id}
         </where>
@@ -407,6 +412,11 @@
         FROM vi_permission
         WHERE p_parent_id = 0 and p_name != 'admin'
     </select>
+
+    <insert id="addPermission">
+        insert into vi_permission(p_name, p_label, p_parent_id, p_create_time)
+        values (#{name}, #{label}, #{parentId}, #{createTime})
+    </insert>
 
     <delete id="deleteRolePermissionsByRole" parameterType="long">
         delete from vi_role_permission where rp_role_id = #{roleId}

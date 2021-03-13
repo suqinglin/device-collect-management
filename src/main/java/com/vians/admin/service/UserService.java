@@ -1,6 +1,7 @@
 package com.vians.admin.service;
 
 import com.vians.admin.excel.ExcelUser;
+import com.vians.admin.model.Permission;
 import com.vians.admin.model.RoleInfo;
 import com.vians.admin.model.UserDetailInfo;
 import com.vians.admin.model.UserInfo;
@@ -61,4 +62,6 @@ public interface UserService {
     void deleteProjectManager(long projectId);
 
     void updateUsersRootId(long projectId, long userId);
+
+    void addPermission(Permission permission);
 }

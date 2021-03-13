@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * @ClassName Permission
@@ -35,6 +36,14 @@ public class Permission {
     @Getter
     @Setter
     private boolean checked;
+
+    @Getter
+    @Setter
+    private String name;
+
+    @Getter
+    @Setter
+    private Date createTime;
 
     @Getter
     @Setter
