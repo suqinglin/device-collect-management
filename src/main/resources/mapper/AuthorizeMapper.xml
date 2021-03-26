@@ -14,50 +14,55 @@
     </sql>
 
     <select id="getAuthorizeList" parameterType="long" resultType="com.vians.admin.model.AuthorizeInfo">
-        SELECT
-        <include refid="Base_Column_List" />
-        FROM vi_authorize_content
-        WHERE ac_user_id = #{userId} AND ac_room_Id = #{roomId}
+        select ar.ar_id as id,
+               a.a_value as content,
+               a.a_type as type,
+               a.a_user_id as userId,
+               ar.ar_position as position,
+               a.a_time_type as timeType,
+               a.a_start_time as startTime,
+               a.a_end_time as endTime
+        from vi_authorize_room ar
+            left join vi_authorize a on a.a_id = ar.ar_authorize_id
+        where ar.ar_room_id = #{roomId} and a.a_user_id = #{userId}
     </select>
 
-    <insert id="addAuthorize" parameterType="com.vians.admin.request.RxAuthorize">
-        INSERT INTO vi_authorize_content
+    <insert id="addAuthorize"
+            useGeneratedKeys="true"
+            keyColumn="a_id"
+            keyProperty="id"
+            parameterType="com.vians.admin.request.RxAuthorize">
+        INSERT INTO vi_authorize
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="content != null and content != ''">
-                ac_content,
+                a_value,
             </if>
             <if test="type != 0">
-                ac_type,
+                a_type,
             </if>
             <if test="userId != 0">
-                ac_user_id,
-            </if>
-            <if test="position != 0">
-                ac_position,
+                a_user_id,
             </if>
             <if test="timeType != 0">
-                ac_time_type,
+                a_time_type,
             </if>
             <if test="startTime != null">
-                ac_start_time,
+                a_start_time,
             </if>
             <if test="endTime != null">
-                ac_end_time,
+                a_end_time,
             </if>
-            <if test="tempPath != null and tempPath != ''">
-                ac_temp_path,
+            <if test="tempContentId != 0">
+                a_temp_content_id,
             </if>
-            <if test="imgPath != null and imgPath != ''">
-                ac_img_path,
+            <if test="imgContentId != 0">
+                a_img_content_id,
             </if>
             <if test="createUserId != 0">
-                ac_create_user_id,
+                a_create_user_id,
             </if>
             <if test="createTime != null">
-                ac_create_time,
-            </if>
-            <if test="roomId != 0">
-                ac_room_id
+                a_create_time
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -70,9 +75,6 @@
             <if test="userId != 0">
                 #{userId},
             </if>
-            <if test="position != 0">
-                #{position},
-            </if>
             <if test="timeType != 0">
                 #{timeType},
             </if>
@@ -82,29 +84,130 @@
             <if test="endTime != null">
                 #{endTime},
             </if>
-            <if test="tempPath != null and tempPath != ''">
-                #{tempPath},
+            <if test="tempContentId != 0">
+                #{tempContentId},
             </if>
-            <if test="imgPath != null and imgPath != ''">
-                #{imgPath},
+            <if test="imgContentId != 0">
+                #{imgContentId},
             </if>
             <if test="createUserId != 0">
                 #{createUserId},
             </if>
             <if test="createTime != null">
-                #{createTime},
-            </if>
-            <if test="roomId != 0">
-                #{roomId}
+                #{createTime}
             </if>
         </trim>
     </insert>
 
     <delete id="deleteAuthorize" parameterType="long">
-        delete from vi_authorize_content where ac_id = #{id}
+        delete from vi_authorize_room where ar_id = #{id}
     </delete>
 
     <delete id="deleteAuthorizeByRoom">
-        delete from vi_authorize_content where ac_room_id = #{roomId} and ac_type = #{type}
+        DELETE vi_authorize_room
+        FROM
+            vi_authorize_room
+                LEFT JOIN vi_authorize ON vi_authorize_room.ar_authorize_id = vi_authorize.a_id
+        WHERE
+            vi_authorize_room.ar_room_id = #{roomId}
+          AND vi_authorize.a_type = #{type}
     </delete>
+
+    <delete id="deleteAuthorizeTempContent">
+        DELETE vi_authorize_content
+        FROM vi_authorize_content
+                LEFT JOIN vi_authorize on vi_authorize_content.ac_id = vi_authorize.a_temp_content_id
+        WHERE vi_authorize.a_id = #{authorizeId}
+    </delete>
+
+    <delete id="deleteAuthorizeTempContentByRoom">
+    </delete>
+
+    <delete id="deleteAuthorizeByUser" parameterType="long">
+        DELETE vi_authorize,
+            vi_authorize_content
+        FROM
+            vi_authorize
+                LEFT JOIN vi_authorize_content ON vi_authorize.a_temp_content_id = vi_authorize_content.ac_id
+        WHERE
+            a_user_id = #{userId}
+    </delete>
+
+    <select id="findEmptyPosition" resultType="int">
+        SELECT IF(NOT EXISTS
+            (
+                SELECT ar.*
+                FROM vi_authorize_room ar
+                         LEFT JOIN vi_authorize a ON a.a_id = ar.ar_authorize_id
+                WHERE ar.ar_room_id = #{roomId}
+                  AND a.a_type = #{type}
+                  AND ar.ar_position = 1
+            ), 1, (
+                      SELECT MIN(arA.ar_position) + 1 AS missing
+                      FROM (
+                               SELECT ar.*
+                               FROM vi_authorize_room ar
+                                        LEFT JOIN vi_authorize a ON a.a_id = ar.ar_authorize_id
+                               WHERE ar.ar_room_id = #{roomId}
+                                 AND a.a_type = #{type}
+                           ) arA
+                      WHERE NOT EXISTS(
+                              SELECT arB.*
+                              FROM vi_authorize_room arB
+                                       LEFT JOIN vi_authorize a ON a.a_id = arB.ar_authorize_id
+                              WHERE arB.ar_room_id = #{roomId}
+                                AND a.a_type = #{type}
+                                AND arA.ar_position + 1 = arB.ar_position
+                          ))) AS missing;
+    </select>
+
+    <insert id="addAuthorizeRoom">
+        INSERT INTO vi_authorize_room
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="roomId != 0">
+                ar_room_id,
+            </if>
+            <if test="authorizeId != 0">
+                ar_authorize_id,
+            </if>
+            <if test="position != 0">
+                ar_position
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="roomId != 0">
+                #{roomId},
+            </if>
+            <if test="authorizeId != 0">
+                #{authorizeId},
+            </if>
+            <if test="position != 0">
+                #{position}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="addAuthorizeContent"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="ac_id"
+            parameterType="com.vians.admin.model.AuthorizeContentInfo">
+        INSERT INTO vi_authorize_content
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="content != null and content != ''">
+                ac_content,
+            </if>
+            <if test="type != 0">
+                ac_type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="content != null and content != ''">
+                #{content},
+            </if>
+            <if test="type != 0">
+                #{type},
+            </if>
+        </trim>
+    </insert>
 </mapper>

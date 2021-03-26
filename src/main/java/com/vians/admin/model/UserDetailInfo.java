@@ -46,6 +46,10 @@ public class UserDetailInfo {
 
     @Getter
     @Setter
+    private String mobile;
+
+    @Getter
+    @Setter
     private long roleId;
 
     @Getter

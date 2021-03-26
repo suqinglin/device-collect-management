@@ -30,7 +30,8 @@
             ( SELECT COUNT( d.d_id ) FROM vi_device d WHERE d.d_room_id = r.r_id ORDER BY r.r_id DESC LIMIT 1 ) AS deviceCount,
             ( SELECT COUNT( ru.ru_id ) FROM vi_room_user ru WHERE ru.ru_room_id = r.r_id ORDER BY r.r_id DESC LIMIT 1 ) AS userCount,
             r.r_create_time AS createTime,
-            u.u_name AS createUserName
+            u.u_name AS createUserName,
+            d.d_name AS defaultDevice
         FROM
             vi_room r
                 LEFT JOIN vi_room_nature rn ON r.r_room_nature_id = rn.rn_id
@@ -41,6 +42,7 @@
                 LEFT JOIN vi_building b ON unit.u_building_id = b.b_id
                 LEFT JOIN vi_community c ON b.b_community_id = c.c_id
                 LEFT JOIN vi_project p ON c.c_project_id = p.p_id
+                LEFT JOIN (SELECT * FROM vi_device WHERE d_is_default = 1) d ON d.d_room_id = r.r_id
         WHERE
             1 = 1
             <if test="roomName != null and roomName != ''">
@@ -62,7 +64,62 @@
             unit.u_name AS unitName,
             b.b_name AS buildingName,
             c.c_name AS communityName,
-            p.p_name AS projectName
+            p.p_name AS projectName,
+            (SELECT
+                 count( ar.ar_id )
+             FROM
+                 vi_authorize_room ar
+                     LEFT JOIN vi_authorize a ON a.a_id = ar.ar_authorize_id
+             WHERE
+                 ar.ar_room_id = r.r_id
+               AND a.a_user_id = #{id}
+               AND a.a_type = 1
+             GROUP BY
+                 ar.ar_room_id) AS passwordCount,
+            (SELECT
+                 count( ar.ar_id )
+             FROM
+                 vi_authorize_room ar
+                     LEFT JOIN vi_authorize a ON a.a_id = ar.ar_authorize_id
+             WHERE
+                 ar.ar_room_id = r.r_id
+               AND a.a_user_id = #{id}
+               AND a.a_type = 3
+             GROUP BY
+                 ar.ar_room_id) AS fpCount,
+            (SELECT
+                 count( ar.ar_id )
+             FROM
+                 vi_authorize_room ar
+                     LEFT JOIN vi_authorize a ON a.a_id = ar.ar_authorize_id
+             WHERE
+                 ar.ar_room_id = r.r_id
+               AND a.a_user_id = #{id}
+               AND a.a_type = 2
+             GROUP BY
+                 ar.ar_room_id) AS cardCount,
+            (SELECT
+                 count( ar.ar_id )
+             FROM
+                 vi_authorize_room ar
+                     LEFT JOIN vi_authorize a ON a.a_id = ar.ar_authorize_id
+             WHERE
+                 ar.ar_room_id = r.r_id
+               AND a.a_user_id = #{id}
+               AND a.a_type = 4
+             GROUP BY
+                 ar.ar_room_id) AS faceCount,
+            (SELECT
+                 count( ar.ar_id )
+             FROM
+                 vi_authorize_room ar
+                     LEFT JOIN vi_authorize a ON a.a_id = ar.ar_authorize_id
+             WHERE
+                 ar.ar_room_id = r.r_id
+               AND a.a_user_id = #{id}
+               AND a.a_type = 5
+             GROUP BY
+                 ar.ar_room_id) AS bluetoothCount
         FROM
             vi_room r
             LEFT JOIN vi_floor f ON r.r_floor_id = f.f_id

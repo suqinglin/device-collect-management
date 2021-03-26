@@ -3,6 +3,8 @@ package com.vians.admin.request;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * @ClassName RxAddFp
  * @Description TODO
@@ -22,7 +24,7 @@ public class RxAddFp {
 
     @Getter
     @Setter
-    private long roomId;
+    private List<Long> roomIds;
 
     @Getter
     @Setter
@@ -51,4 +53,8 @@ public class RxAddFp {
     @Getter
     @Setter
     private String endTime;
+
+    @Getter
+    @Setter
+    private long authorizeId;
 }

@@ -69,4 +69,12 @@ public class RxAuthorize {
     @Getter
     @Setter
     private int index;
+
+    @Getter
+    @Setter
+    private long tempContentId;
+
+    @Getter
+    @Setter
+    private long imgContentId;
 }

@@ -114,4 +114,8 @@ public class DeviceBaseInfo {
     @Getter
     @Setter
     private long roomId;
+
+    @Getter
+    @Setter
+    private int isDefault;
 }

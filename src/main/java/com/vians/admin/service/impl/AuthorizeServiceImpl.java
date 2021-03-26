@@ -1,6 +1,7 @@
 package com.vians.admin.service.impl;
 
 import com.vians.admin.mapper.AuthorizeMapper;
+import com.vians.admin.model.AuthorizeContentInfo;
 import com.vians.admin.model.AuthorizeInfo;
 import com.vians.admin.request.RxAuthorize;
 import com.vians.admin.service.AuthorizeService;
@@ -32,9 +33,16 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void addAuthorize(RxAuthorize rxAuthorize) {
+    public long addAuthorize(RxAuthorize rxAuthorize) {
         rxAuthorize.setCreateTime(new Date());
         authorizeMapper.addAuthorize(rxAuthorize);
+        return rxAuthorize.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void addAuthorizeRoom(long authorizeId, long roomId, int position) {
+        authorizeMapper.addAuthorizeRoom(authorizeId, roomId, position);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -43,9 +51,38 @@ public class AuthorizeServiceImpl implements AuthorizeService {
         authorizeMapper.deleteAuthorize(id);
     }
 
+    @Override
+    public void deleteAuthorizeTempContent(long authorizeId) {
+        authorizeMapper.deleteAuthorizeTempContent(authorizeId);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteAuthorizeByRoom(long roomId, int type) {
         authorizeMapper.deleteAuthorizeByRoom(roomId, type);
+    }
+
+    @Override
+    public void deleteAuthorizeTempContentByRoom(long roomId, int type) {
+        authorizeMapper.deleteAuthorizeTempContentByRoom(roomId, type);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public int findEmptyPosition(long roomId, int type) {
+        return authorizeMapper.findEmptyPosition(roomId, type);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public long addAuthorizeContent(AuthorizeContentInfo authorizeContentInfo) {
+        authorizeMapper.addAuthorizeContent(authorizeContentInfo);
+        return authorizeContentInfo.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteAuthorizeByUser(long userId) {
+        authorizeMapper.deleteAuthorizeByUser(userId);
     }
 }

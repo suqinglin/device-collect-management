@@ -100,6 +100,9 @@
             <if test="rootId != 0">
                 u_root_id,
             </if>
+            <if test="mobile != null and mobile != ''">
+                u_mobile,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userName != null and userName != ''">
@@ -146,6 +149,9 @@
             </if>
             <if test="rootId != 0">
                 #{rootId},
+            </if>
+            <if test="mobile != null and mobile != ''">
+                #{mobile},
             </if>
         </trim>
     </insert>
@@ -194,6 +200,9 @@
             </if>
             <if test="updateTime != null">
                 u_update_time = #{updateTime},
+            </if>
+            <if test="mobile != null and mobile != ''">
+                u_mobile = #{mobile},
             </if>
         </set>
         <where>
@@ -250,7 +259,8 @@
             u.u_department AS department,
             u.u_work_number AS workNumber,
             u.u_duty AS duty,
-            u.u_create_time AS createTime
+            u.u_create_time AS createTime,
+            u.u_mobile as mobile
         FROM vi_user u
                  LEFT JOIN vi_role r ON u.u_role_id = r.r_id
                  LEFT JOIN vi_project p ON u.u_project_id = p.p_id
@@ -284,7 +294,7 @@
     </select>
 
     <select id="getUnbindUserList" resultType="com.vians.admin.model.UserDetailInfo">
-        SELECT
+        SELECT DISTINCT
         u.u_id AS id,
         u.u_name AS userName,
         u.u_gender AS gender,
@@ -332,34 +342,34 @@
             u.u_gender AS gender,
             u.u_card_id AS cardId,
             (
-                SELECT COUNT( ac.ac_id )
-                FROM vi_authorize_content ac
-                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 1
-                GROUP BY ac.ac_type DESC LIMIT 1
+                SELECT COUNT( ac.a_id )
+                FROM vi_authorize ac
+                WHERE ac.a_user_id = u.u_id AND ac.a_type = 1
+                GROUP BY ac.a_type DESC LIMIT 1
             ) AS passwordCount,
             (
-                SELECT COUNT( ac.ac_id )
-                FROM vi_authorize_content ac
-                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 2
-                GROUP BY ac.ac_type DESC LIMIT 1
+                SELECT COUNT( ac.a_id )
+                FROM vi_authorize ac
+                WHERE ac.a_user_id = u.u_id AND ac.a_type = 2
+                GROUP BY ac.a_type DESC LIMIT 1
             ) AS cardCount,
             (
-                SELECT COUNT( ac.ac_id )
-                FROM vi_authorize_content ac
-                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 3
-                GROUP BY ac.ac_type DESC LIMIT 1
+                SELECT COUNT( ac.a_id )
+                FROM vi_authorize ac
+                WHERE ac.a_user_id = u.u_id AND ac.a_type = 3
+                GROUP BY ac.a_type DESC LIMIT 1
             ) AS fpCount,
             (
-                SELECT COUNT( ac.ac_id )
-                FROM vi_authorize_content ac
-                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 4
-                GROUP BY ac.ac_type DESC LIMIT 1
+                SELECT COUNT( ac.a_id )
+                FROM vi_authorize ac
+                WHERE ac.a_user_id = u.u_id AND ac.a_type = 4
+                GROUP BY ac.a_type DESC LIMIT 1
             ) AS faceCount,
             (
-                SELECT COUNT( ac.ac_id )
-                FROM vi_authorize_content ac
-                WHERE ac.ac_user_id = u.u_id AND ac.ac_type = 5
-                GROUP BY ac.ac_type DESC LIMIT 1
+                SELECT COUNT( ac.a_id )
+                FROM vi_authorize ac
+                WHERE ac.a_user_id = u.u_id AND ac.a_type = 5
+                GROUP BY ac.a_type DESC LIMIT 1
             ) AS bluetoothCount,
             ru.ru_create_time AS bindTime,
             u1.u_name AS bindUserName

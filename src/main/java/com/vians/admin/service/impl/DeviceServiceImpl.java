@@ -248,4 +248,10 @@ public class DeviceServiceImpl implements DeviceService {
     public String getDeviceMacByBrowser(String browserUUID) {
         return deviceMapper.getDeviceMacByBrowser(browserUUID);
     }
+
+    @Override
+    public void modifyRoomsDefaultDevice(long deviceId, long roomId) {
+        deviceMapper.setDeviceDefaultNoByRoom(roomId);
+        deviceMapper.setDeviceDefaultYesById(deviceId);
+    }
 }

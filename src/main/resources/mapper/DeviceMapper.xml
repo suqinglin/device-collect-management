@@ -57,21 +57,137 @@
 
     <insert id="addDevice" parameterType="com.vians.admin.model.DeviceBaseInfo">
 
-        insert into vi_device(d_mac, d_gw_mac, d_model, d_name, d_feature, d_active, d_index, d_create_user_id, d_create_time, d_project_id, d_room_id, d_bind_time, d_bind_user_id, d_update_time)
-        values (#{MAC}, #{GwMac}, #{Device}, #{Name}, #{Feature}, #{Active}, #{Index}, #{userId}, #{createTime}, #{projectId}, #{roomId}, #{bindTime}, #{userId}, #{bindTime})
-        on duplicate key
-            update d_gw_mac = values(d_gw_mac),
-                   d_model = values(d_model),
-                   d_name = values(d_name),
-                   d_feature = values(d_feature),
-                   d_active = values(d_active),
-                   d_index = values(d_index),
-                   d_create_user_id = values(d_create_user_id),
-                   d_project_id = values(d_project_id),
-                   d_room_id = values(d_room_id),
-                   d_bind_time = values(d_bind_time),
-                   d_bind_user_id = values(d_bind_user_id),
-                   d_update_time = values(d_update_time)
+        insert into vi_device
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MAC != null and MAC != ''">
+                d_mac,
+            </if>
+            <if test="GwMac != null and GwMac != ''">
+                d_gw_mac,
+            </if>
+            <if test="Device != null and Device != ''">
+                d_model,
+            </if>
+            <if test="Name != null and Name != ''">
+                d_name,
+            </if>
+            <if test="Feature != null and Feature != ''">
+                d_feature,
+            </if>
+            <if test="Active != null and Active != ''">
+                d_active,
+            </if>
+            <if test="Index != null and Index != ''">
+                d_index,
+            </if>
+            <if test="userId != null and userId != ''">
+                d_create_user_id,
+            </if>
+            <if test="createTime != null">
+                d_create_time,
+            </if>
+            <if test="projectId != 0">
+                d_project_id,
+            </if>
+            <if test="roomId != 0">
+                d_room_id,
+            </if>
+            <if test="bindTime != null">
+                d_bind_time,
+            </if>
+            <if test="userId != null and userId != ''">
+                d_bind_user_id,
+            </if>
+            <if test="bindTime != null">
+                d_update_time
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="MAC != null and MAC != ''">
+                #{MAC},
+            </if>
+            <if test="GwMac != null and GwMac != ''">
+                #{GwMac},
+            </if>
+            <if test="Device != null and Device != ''">
+                #{Device},
+            </if>
+            <if test="Name != null and Name != ''">
+                #{Name},
+            </if>
+            <if test="Feature != null and Feature != ''">
+                #{Feature},
+            </if>
+            <if test="Active != null and Active != ''">
+                #{Active},
+            </if>
+            <if test="Index != null and Index != ''">
+                #{Index},
+            </if>
+            <if test="userId != null and userId != ''">
+                #{userId},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="projectId != 0">
+                #{projectId},
+            </if>
+            <if test="roomId != 0">
+                #{roomId},
+            </if>
+            <if test="bindTime != null">
+                #{bindTime},
+            </if>
+            <if test="userId != null and userId != ''">
+                #{userId},
+            </if>
+            <if test="bindTime != null">
+                #{bindTime}
+            </if>
+        </trim>
+        on duplicate key update
+        <trim suffixOverrides=",">
+            <if test="GwMac != null and GwMac != ''">
+                d_gw_mac = values(d_gw_mac),
+            </if>
+            <if test="Device != null and Device != ''">
+                d_model = values(d_model),
+            </if>
+            <if test="Name != null and Name != ''">
+                d_name = values(d_name),
+            </if>
+            <if test="Feature != null and Feature != ''">
+                d_feature = values(d_feature),
+            </if>
+            <if test="Active != null and Active != ''">
+                d_active = values(d_active),
+            </if>
+            <if test="Index != null and Index != ''">
+                d_index = values(d_index),
+            </if>
+            <if test="userId != null and userId != ''">
+                d_create_user_id = values(d_create_user_id),
+            </if>
+            <if test="createTime != null">
+                d_create_time = values(d_create_time),
+            </if>
+            <if test="projectId != 0">
+                d_project_id = values(d_project_id),
+            </if>
+            <if test="roomId != 0">
+                d_room_id = values(d_room_id),
+            </if>
+            <if test="bindTime != null and roomId != 0">
+                d_bind_time = values(d_bind_time),
+            </if>
+            <if test="userId != null and userId != '' and roomId != 0">
+                d_bind_user_id = values(d_bind_user_id),
+            </if>
+            <if test="bindTime != null and roomId != 0">
+                d_update_time = values(d_update_time)
+            </if>
+        </trim>
     </insert>
 
     <insert id="addBrowserDevice">
@@ -175,7 +291,7 @@
         FROM
             vi_device d
                 LEFT JOIN vi_user u ON d.d_create_user_id = u.u_id
-        WHERE d.d_room_id is null and d.d_project_id = #{projectId}
+        WHERE (d.d_room_id is null or d.d_room_id = 0) and d.d_project_id = #{projectId}
     </select>
 
     <select id="getBindedDevice" resultType="com.vians.admin.model.DeviceBaseInfo">
@@ -192,7 +308,9 @@
             d.d_create_time AS createTime,
             d.d_ele AS ele,
             u.u_name AS bindUserName,
-            d.d_bind_time AS bindTime
+            d.d_is_default as isDefault,
+            d.d_bind_time AS bindTime,
+            d.d_is_default AS isDefault
         FROM
             vi_device d
                 LEFT JOIN vi_user u ON d.d_bind_user_id = u.u_id
@@ -276,4 +394,12 @@
           AND a.ad_ManagerUser = #{rootId}
           AND B.db_Type = 96
     </select>
+
+    <update id="setDeviceDefaultNoByRoom">
+        update vi_device set d_is_default = 0 where d_room_id = #{roomId}
+    </update>
+
+    <update id="setDeviceDefaultYesById">
+        update vi_device set d_is_default = 1 where d_id = #{deviceId}
+    </update>
 </mapper>

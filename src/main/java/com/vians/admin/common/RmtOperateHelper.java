@@ -10,7 +10,6 @@ import com.vians.admin.service.RootUserService;
 import com.vians.admin.utils.HttpUtil;
 import com.vians.admin.utils.KeyUtil;
 import com.vians.admin.web.AppBean;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +23,20 @@ import java.util.Map;
  **/
 public class RmtOperateHelper {
 
+    /**
+     * 获取响应结果，如果失败，每2秒重新获取一次，人脸重新获取4次，其他重新获取2次，超过次数仍然未获取到结果，则返回超时
+     * @param rootUserInfo
+     * @param rootUserService
+     * @param userId
+     * @param token
+     * @param cnt
+     * @param mac
+     * @param crc
+     * @param isAddFp
+     * @return
+     * @throws InterruptedException
+     */
     public static ResponseData checkAck(
-//            PropUtil propUtil,
-//            RedisService redisService,
             RootUserInfo rootUserInfo,
             RootUserService rootUserService,
             String userId,
@@ -37,9 +47,9 @@ public class RmtOperateHelper {
             boolean isAddFp) throws InterruptedException {
         int nextCnt = Integer.parseInt(cnt, 16) + 1;
         ResponseData responseData = new ResponseData();
-        int timeout = isAddFp ? 4 : 2;
+        int timeout = 3;
         while (timeout > 0) {
-            Thread.sleep(2000);
+            Thread.sleep(isAddFp? 5000 : 3000);
             // 1. 组装请求参数
             String key = KeyUtil.getAppKey(token, rootUserInfo.getPassword(), nextCnt);
             Map<String, Object> requestParam = new HashMap<>();
@@ -53,21 +63,25 @@ public class RmtOperateHelper {
             // result == 0：成功->返回成功
             // result == 1011：服务器与设备正在通讯->继续查询
             // result == 其他：异常->返回错误
-            String respCnt = respObj.get("CNT").toString();
-            if (!StringUtils.isEmpty(respCnt)) {
+            String respCnt = "";
+            if (respObj.containsKey("CNT")) {
+                respCnt = respObj.get("CNT").toString();
                 // 5. 保存cnt到DB
                 rootUserInfo.setCnt(Long.parseLong(respCnt, 16));
                 rootUserService.updateRootUser(rootUserInfo);
-            }
-            if (result == 0) {
-                return responseData.setResponseCode(ResponseCode.SUCCESS);
-            } else if (result == 1011){
-                nextCnt = Integer.parseInt(respCnt, 16) + 1;
-                timeout --;
+                if (result == 0) { // 成功
+                    return responseData.setResponseCode(ResponseCode.SUCCESS);
+                } else if (result == 1011) {
+                    nextCnt = Integer.parseInt(respCnt, 16) + 1;
+                    timeout --;
+                } else {
+                    return HttpUtil.getInstance().doResult(result);
+                }
             } else {
-                return responseData.setResponseCode(HttpUtil.getInstance().getResponseCode(result));
+                return HttpUtil.getInstance().doResult(result);
             }
         }
+        // 如果走到这里还没有return，则返回超时
         return responseData.setResponseCode(ResponseCode.ERROR_API_ACK_TIMEOUT);
     }
 
@@ -108,15 +122,10 @@ public class RmtOperateHelper {
                     rootUserInfo, rootUserService, userId, token, respCnt, mac, crc, isAddFp);
             // 如果成功，便保存到数据库，否则，直接将异常返回给客户端
             if (ResponseCode.SUCCESS.getKey().equals(responseData.getCode())) {
-                if (appBean != null) {
-                    Long createUserId = appBean.getCurrentUserId();
-                    if (createUserId == null) {
-                        return new ResponseData(ResponseCode.ERROR_UN_AUTHORIZE_LOGIN);
-                    }
-                    callback.saveToDB(createUserId);
-                }
+                return callback.onSuccess(responseData);
+            } else {
+                return responseData;
             }
-            return responseData;
         } else if (result == 1002) {
             return HttpUtil.getInstance().reLogin(
                     rootUserInfo.getPhone(),
@@ -159,6 +168,6 @@ public class RmtOperateHelper {
 
     public interface Callback {
         void addParams(Map<String, Object> requestParam, String token, String psw, long nextCnt);
-        void saveToDB(long createUserId);
+        ResponseData onSuccess(ResponseData responseData) throws InterruptedException;
     }
 }

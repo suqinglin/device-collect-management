@@ -68,6 +68,9 @@ public class ViansUserController {
     @Resource
     private ProjectService projectService;
 
+    @Resource
+    private AuthorizeService authorizeService;
+
     @PostMapping("/login")
     public ResponseData login(@Valid @RequestBody RxLogin login) {
         String userPhone = login.getUserPhone();
@@ -264,6 +267,7 @@ public class ViansUserController {
         userInfo.setDepartment(user.getDepartment());
         userInfo.setWorkNumber(user.getWorkNumber());
         userInfo.setDuty(user.getDuty());
+        userInfo.setMobile(user.getMobile());
 //        userInfo.setRootId(userId);
         userService.addUser(userInfo);
         return new ResponseData(ResponseCode.SUCCESS);
@@ -294,6 +298,8 @@ public class ViansUserController {
     @PostMapping("/delete")
     public ResponseData deleteUser(@RequestBody RxId delete) {
         userService.deleteUser(delete.getId());
+        // 删除用户下的授权内容
+        authorizeService.deleteAuthorizeByUser(delete.getId());
         return new ResponseData(ResponseCode.SUCCESS);
     }
 
@@ -319,6 +325,7 @@ public class ViansUserController {
         userInfo.setDepartment(user.getDepartment());
         userInfo.setWorkNumber(user.getWorkNumber());
         userInfo.setDuty(user.getDuty());
+        userInfo.setMobile(user.getMobile());
         userInfo.setProjectId(user.getProjectId());
         userService.editUser(userInfo);
         return new ResponseData(ResponseCode.SUCCESS);

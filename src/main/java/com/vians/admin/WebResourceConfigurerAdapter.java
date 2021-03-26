@@ -2,7 +2,7 @@ package com.vians.admin;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * @ClassName WebResourceConfigurerAdapter
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @Version 1.0
  **/
 @Configuration
-public class WebResourceConfigurerAdapter extends WebMvcConfigurerAdapter {
+public class WebResourceConfigurerAdapter implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -29,6 +29,5 @@ public class WebResourceConfigurerAdapter extends WebMvcConfigurerAdapter {
         registry.addResourceHandler("/彩页/**").addResourceLocations("file:D://resources/彩页/");
         registry.addResourceHandler("/内部资料/**").addResourceLocations("file:D://resources/内部资料/");
         registry.addResourceHandler("/images/**").addResourceLocations("file:D://resources/images/");
-        super.addResourceHandlers(registry);
     }
 }

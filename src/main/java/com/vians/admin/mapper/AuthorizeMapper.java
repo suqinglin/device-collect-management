@@ -1,5 +1,6 @@
 package com.vians.admin.mapper;
 
+import com.vians.admin.model.AuthorizeContentInfo;
 import com.vians.admin.model.AuthorizeInfo;
 import com.vians.admin.request.RxAuthorize;
 import org.apache.ibatis.annotations.Mapper;
@@ -24,4 +25,16 @@ public interface AuthorizeMapper {
     void deleteAuthorize(@Param("id") long id);
 
     void deleteAuthorizeByRoom(@Param("roomId") long roomId, @Param("type") int type);
+
+    int findEmptyPosition(@Param("roomId") long roomId, @Param("type") int type);
+
+    void addAuthorizeRoom(@Param("authorizeId") long authorizeId, @Param("roomId") long roomId, @Param("position") int position);
+
+    void addAuthorizeContent(AuthorizeContentInfo authorizeContentInfo);
+
+    void deleteAuthorizeTempContent(@Param("authorizeId") long authorizeId);
+
+    void deleteAuthorizeTempContentByRoom(@Param("roomId") long roomId, @Param("type") int type);
+
+    void deleteAuthorizeByUser(@Param("userId") long userId);
 }

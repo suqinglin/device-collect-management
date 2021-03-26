@@ -237,6 +237,12 @@ public class DeviceController {
         if (userId == null) {
             return new ResponseData(ResponseCode.ERROR_UN_AUTHORIZE_LOGIN);
         }
+        /**
+         * 如果当前IsDefault为1，则设置该房间中此设备为唯一的默认设备，其他设备均设置为非默认设备
+         */
+        if (bindDevice.getIsDefault() == 1) {
+            deviceService.modifyRoomsDefaultDevice(bindDevice.getDeviceId(), bindDevice.getRoomId());
+        }
         deviceService.bindDevice(bindDevice.getRoomId(), bindDevice.getDeviceId(), userId);
         return new ResponseData(ResponseCode.SUCCESS);
     }

@@ -49,4 +49,6 @@ public interface DeviceService {
     void addBrowserDevice(String browserUUID, String mac, long userId);
 
     String getDeviceMacByBrowser(String browserUUID);
+
+    void modifyRoomsDefaultDevice(long deviceId, long roomId);
 }

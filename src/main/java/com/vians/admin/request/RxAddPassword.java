@@ -2,6 +2,9 @@ package com.vians.admin.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+
+import java.util.List;
 
 /**
  * @ClassName RxAddPassword
@@ -10,6 +13,7 @@ import lombok.Setter;
  * @Date 2021/1/18 22:36
  * @Version 1.0
  **/
+@ToString
 public class RxAddPassword {
 
     @Getter
@@ -22,7 +26,7 @@ public class RxAddPassword {
 
     @Getter
     @Setter
-    private long roomId;
+    private List<Long> roomIds;
 
     @Getter
     @Setter
@@ -43,4 +47,8 @@ public class RxAddPassword {
     @Getter
     @Setter
     private String endTime;
+
+    @Getter
+    @Setter
+    private long authorizeId;
 }

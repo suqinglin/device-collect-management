@@ -69,8 +69,10 @@ public enum ResponseCode implements BaseEnum {
     // 房间错误
     ERROR_ROOM_NAME_EXIST("1012001", "房间名称已存在"),
     // 人员错误
-    ERROR_USER_PHONE_EXIST("1013001", "手机号码已存在"),
+    ERROR_USER_PHONE_EXIST("1013001", "账号已存在"),
     ERROR_USER_IS_ILLEGAL("1013002", "非法用户"),
+    // 用户授权
+    ERROR_AUTHORIZE_NO_ROOM("1014001", "没有需要授权的房间"),
     /***********************************************************************
      * SUCCESS
      ***********************************************************************/

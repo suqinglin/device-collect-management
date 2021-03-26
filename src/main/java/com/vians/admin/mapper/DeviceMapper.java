@@ -62,4 +62,16 @@ public interface DeviceMapper {
     void addBrowserDevice(@Param("browserUUID") String browserUUID, @Param("mac") String mac, @Param("userId") long userId);
 
     String getDeviceMacByBrowser(@Param("browserUUID") String browserUUID);
+
+    /**
+     * 设置房间中所有设备都不为默认设备
+     * @param roomId
+     */
+    void setDeviceDefaultNoByRoom(@Param("roomId") long roomId);
+
+    /**
+     * 设置指定ID的设备未默认设备
+     * @param deviceId
+     */
+    void setDeviceDefaultYesById(@Param("deviceId") long deviceId);
 }

@@ -19,4 +19,8 @@ public class RxBindDevice {
     @Getter
     @Setter
     private long roomId;
+
+    @Getter
+    @Setter
+    private int isDefault;
 }
