@@ -48,6 +48,10 @@ public class RxAuthorize {
 
     @Getter
     @Setter
+    private Date updateTime;
+
+    @Getter
+    @Setter
     private Date createTime;
 
     @Getter

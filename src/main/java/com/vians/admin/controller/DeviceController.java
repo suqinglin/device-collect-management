@@ -285,4 +285,12 @@ public class DeviceController {
         }
         return ResponseData.success();
     }
+
+    @PostMapping("/changeBlockPosition")
+    public ResponseData changeBlockPosition() {
+        List<String> changedMacList = deviceService.changeBlockPosition();
+        ResponseData responseData = ResponseData.success();
+        responseData.addData("changedMacList", changedMacList);
+        return responseData;
+    }
 }

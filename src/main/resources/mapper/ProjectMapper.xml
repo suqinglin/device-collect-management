@@ -8,7 +8,8 @@
         p_name AS projectName,
         p_project_nature_id AS natureId,
         p_create_user_id AS createUserId,
-        p_create_time AS createTime
+        p_create_time AS createTime,
+        p_root_id AS rootId
     </sql>
 
     <select id="getProjectList" resultType="com.vians.admin.model.ProjectInfo">

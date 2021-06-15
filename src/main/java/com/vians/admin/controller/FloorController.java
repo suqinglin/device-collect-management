@@ -79,7 +79,7 @@ public class FloorController {
             roomInfo.setArea(0);
             roomInfo.setRoomModelId(1);
             // 如4楼，i=2：403号房间，如5楼，i=21：522号房间
-            roomInfo.setRoomName(CommUtil.getNumChars(floor.getFloorName()) + (i < 10 ? "0" : "") + (i + 1) + "号房间");
+            roomInfo.setRoomName(CommUtil.getNumChars(floor.getFloorName()) + (i < 9 ? "0" : "") + (i + 1) + "号房间");
             roomInfo.setCreateUserId(userId);
             roomService.addRoom(roomInfo);
         }
@@ -135,7 +135,7 @@ public class FloorController {
                 roomInfo.setArea(0);
                 roomInfo.setRoomModelId(1);
                 // 如4楼，i=2：403号房间，如5楼，i=21：522号房间
-                roomInfo.setRoomName(CommUtil.getNumChars(floor.getFloorName()) + (i < 10 ? "0" : "") + (i + 1) + "号房间");
+                roomInfo.setRoomName(CommUtil.getNumChars(floor.getFloorName()) + (i < 9 ? "0" : "") + (i + 1) + "号房间");
                 roomInfo.setCreateUserId(userId);
                 roomService.addRoom(roomInfo);
             }

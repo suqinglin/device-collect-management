@@ -14,17 +14,23 @@ spring:
 #    url: jdbc:mysql://120.92.33.104/xy_unmanedhotel_1.4?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
 #    url: jdbc:mysql://8.129.15.73/ViansTest_suqinglin?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
     url: jdbc:mysql://8.129.15.73/Vians?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+#    url: jdbc:mysql://120.78.3.19/vians?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
     username: root
     #    password: xyzh2018
     password: 81BACAD41DDF1
+#    password: vians123
   # thymeleaf
   thymeleaf:
     cache: false
   # redis
   redis:
-    host: localhost
+    host: 8.129.15.73
     port: 6379
     database: 3
+#  redis:
+#    host: localhost
+#    port: 6379
+#    database: 3
 #  redis:
 #    host: 120.92.114.123
 #    port: 6379
@@ -33,6 +39,14 @@ spring:
   # application name
   application:
     name: device-collect-management
+  mqtt:
+    username: nexless
+    password: xyzh2018
+    url: tcp://8.129.15.73:1883
+    default:
+      completionTimeout: 5000
+      topicRsp: Vians/v3/Rsp/SmartHome/+/+/+/+/+/+/+
+      topicReq: Vians/v3/Req/SmartHome/+/+/+/+/+/+/+
 # port
 server:
   port: 8089

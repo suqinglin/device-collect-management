@@ -23,6 +23,8 @@ public interface AuthorizeService {
 
     void deleteAuthorize(long id);
 
+    AuthorizeInfo findAuthorizeByValue(String value, long roomId);
+
     void deleteAuthorizeTempContent(long authorizeId);
 
     void deleteAuthorizeByRoom(long roomId, int type);
@@ -34,4 +36,6 @@ public interface AuthorizeService {
     long addAuthorizeContent(AuthorizeContentInfo authorizeContentInfo);
 
     void  deleteAuthorizeByUser(long userId);
+
+    void updateAuthorizeRoom(Long authorizeId, long roomId, int position, int type);
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.vians.admin.mapper.DeviceMapper">
 
-    <sql id="Base_Column_List">
+    <sql id="Device_Product_list">
         d_id AS id,
         d_uuid AS uuid,
         d_mac AS macNum,
@@ -17,17 +17,32 @@
         d_token AS token
     </sql>
 
+    <sql id="Device_Base_List">
+        d_id AS id,
+        d_mac AS MAC,
+        d_gw_mac AS GwMac,
+        d_model AS Device,
+        d_name AS NAME,
+        d_feature AS Feature,
+        d_active AS Active,
+        d_index AS idx,
+        d_create_user_id AS userId,
+        d_create_time AS createTime,
+        d_ele AS ele,
+        d_project_id AS projectId
+    </sql>
+
     <select id="getCollectDevicesByUser" parameterType="long" resultType="com.vians.admin.model.DeviceBaseInfo">
-        select db.db_name as Name,
+        select distinct db.db_name as Name,
                db.db_Mac as MAC
         from xy_areadeviceinfo ac
         left join xy_devicebaseinfo db on ac.ad_deviceid = db.db_ID
         where ac.ad_ManagerUser = #{userId} and db.db_message = 'VI_AUT01A'
     </select>
 
-    <select id="getDeviceByMac" resultType="com.vians.admin.model.DeviceInfo">
+    <select id="getProductDeviceByMac" resultType="com.vians.admin.model.DeviceInfo">
         select
-        <include refid="Base_Column_List" />
+        <include refid="Device_Product_list" />
         from xy_dc_deviceinfo
         <where>
             d_mac = #{mac}
@@ -37,20 +52,20 @@
 
     <select id="getDeviceByRoomId" resultType="com.vians.admin.model.DeviceBaseInfo">
         select
-        d.d_id AS id,
-        d.d_mac AS MAC,
-        d.d_gw_mac AS GwMac,
-        d.d_model AS Device,
-        d.d_name AS NAME,
-        d.d_feature AS Feature,
-        d.d_active AS Active,
-        d.d_index AS idx,
-        d.d_create_user_id AS userId,
-        d.d_create_time AS createTime,
-        d.d_ele AS ele
-        from vi_device d
+            <include refid="Device_Base_List" />
+        from vi_device
         <where>
             d_room_id = #{roomId}
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="getDeviceByMac" resultType="com.vians.admin.model.DeviceBaseInfo">
+        select
+            <include refid="Device_Base_List" />
+        from vi_device
+        <where>
+            d_mac = #{mac}
         </where>
         LIMIT 1
     </select>
@@ -294,6 +309,32 @@
         WHERE (d.d_room_id is null or d.d_room_id = 0) and d.d_project_id = #{projectId}
     </select>
 
+    <select id="getBatteries" resultType="com.vians.admin.model.Battery">
+        SELECT
+            db.db_device_mac AS MAC,
+            db.db_batt AS battery,
+            db.db_update_time AS time,
+            d.d_model AS deviceModel,
+            d.d_name AS name,
+            r.r_name AS roomName,
+            f.f_name AS floorName,
+            u.u_name AS unitName,
+            b.b_name AS buildingName,
+            c.c_name AS communityName,
+            p.p_name AS projectName
+        FROM
+            ( SELECT * FROM vi_device_batt GROUP BY db_device_mac ORDER BY db_update_time DESC ) db
+                LEFT JOIN vi_device d ON db.db_device_mac = d.d_mac
+                LEFT JOIN vi_room r ON d.d_room_id = r.r_id
+                LEFT JOIN vi_floor f ON f.f_id = r.r_floor_id
+                LEFT JOIN vi_unit u ON u.u_id = f.f_unit_id
+                LEFT JOIN vi_building b ON b.b_id = u.u_building_id
+                LEFT JOIN vi_community c ON c.c_id = b.b_community_id
+                LEFT JOIN vi_project p ON p.p_id = c.c_project_id
+        WHERE
+            d.d_project_id = #{projectId}
+    </select>
+
     <select id="getBindedDevice" resultType="com.vians.admin.model.DeviceBaseInfo">
         SELECT
             d.d_id AS id,
@@ -401,5 +442,60 @@
 
     <update id="setDeviceDefaultYesById">
         update vi_device set d_is_default = 1 where d_id = #{deviceId}
+    </update>
+
+    <select id="findBlockPositionErrorRecords" resultType="com.vians.admin.model.BlockPositionErrorInfo">
+        SELECT
+            dlf.id AS blockId, dlf1.id AS lockId, dbi.db_Mac AS mac
+        FROM
+            xy_device_local_feature dlf
+                LEFT JOIN xy_device_local_feature dlf1 ON dlf.create_time = dlf1.create_time
+                RIGHT JOIN xy_devicebaseinfo dbi ON dlf.device_id = dbi.db_ID
+        WHERE
+            dlf.feature = 'BLOCK'
+          AND dlf1.feature = 'LOCK'
+          AND dlf.id > dlf1.id
+    </select>
+
+    <update id="changeBlockToLock" parameterType="long">
+        UPDATE xy_device_local_feature dlf SET dlf.feature = 'LOCK' WHERE dlf.id = #{blockId}
+    </update>
+
+    <update id="changeLockToBlock" parameterType="long">
+        UPDATE xy_device_local_feature dlf SET dlf.feature = 'BLOCK' WHERE dlf.id = #{lockId}
+    </update>
+
+    <insert id="addDeviceBatt" parameterType="com.vians.admin.model.DeviceBatt">
+        insert into vi_device_batt
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="mac != null and mac != ''">
+                db_device_mac,
+            </if>
+            <if test="batt >= 0">
+                db_batt,
+            </if>
+            <if test="updateTime != null">
+                db_update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="mac != null and mac != ''">
+                #{mac},
+            </if>
+            <if test="batt >= 0">
+                #{batt},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateDeviceBattery">
+        update vi_device
+        set
+            d_ele = #{battery},
+            d_update_time = #{updateTime}
+        where d_mac = #{mac}
     </update>
 </mapper>

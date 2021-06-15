@@ -1,12 +1,11 @@
 package com.vians.admin.service;
 
-import com.vians.admin.model.DeviceBaseInfo;
-import com.vians.admin.model.DeviceDetailInfo;
-import com.vians.admin.model.DeviceInfo;
+import com.vians.admin.model.*;
 import com.vians.admin.request.RxPage;
 import com.vians.admin.request.query.DeviceQuery;
 import com.vians.admin.response.Page;
 
+import java.util.Date;
 import java.util.List;
 
 public interface DeviceService {
@@ -19,6 +18,8 @@ public interface DeviceService {
     Page<DeviceDetailInfo> getDevicesByPage(DeviceQuery deviceQuery);
 
     Page<DeviceBaseInfo> getFreeDevicesByPage(RxPage page, Long projectId);
+
+    Page<Battery> getBatteriesByPage(RxPage page, Long projectId);
 
     List<DeviceBaseInfo> getBindedDevices(long roomId);
 
@@ -51,4 +52,12 @@ public interface DeviceService {
     String getDeviceMacByBrowser(String browserUUID);
 
     void modifyRoomsDefaultDevice(long deviceId, long roomId);
+
+    List<String> changeBlockPosition();
+
+    void addDeviceBatt(DeviceBatt deviceBatt);
+
+    long getDeviceProjectId(String mac);
+
+    void updateDeviceBattery(String mac, int battery, Date updateTime);
 }

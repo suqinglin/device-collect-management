@@ -1,27 +1,22 @@
 package com.vians.admin.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.vians.admin.common.CommConstants;
-import com.vians.admin.model.RootUserInfo;
+import com.vians.admin.model.LogDayCount;
 import com.vians.admin.model.LogHourCount;
+import com.vians.admin.model.LogMonthCount;
+import com.vians.admin.request.RxStatisticsLog;
 import com.vians.admin.response.ResponseCode;
 import com.vians.admin.response.ResponseData;
-import com.vians.admin.response.bean.CheckLogResponse;
 import com.vians.admin.service.*;
 import com.vians.admin.utils.CommUtil;
-import com.vians.admin.utils.HttpUtil;
 import com.vians.admin.web.AppBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @ClassName StatisticsController
@@ -47,9 +42,6 @@ public class StatisticsController {
 
     @Resource
     UserService userService;
-
-    @Resource
-    public RootUserService rootUserService;
 
     @Resource
     LogService logService;
@@ -118,16 +110,78 @@ public class StatisticsController {
     }
 
     @PostMapping("/unlockStatistics")
-    public ResponseData getUnlockStatistics() {
+    public ResponseData getUnlockStatistics(@RequestBody RxStatisticsLog rxStatisticsLog) {
         Long rootId = appBean.getRootUserId();
-        if (rootId == null) {
-            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
-        }
         Long projectId = appBean.getProjectId();
-        if (projectId == null) {
+        if (rootId == null || projectId == null) {
             return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
         }
-        return doCheckUnlockLog(rootId, projectId, "/api/CheckLog");
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        List<Integer> rmtUnlockCount = null;
+        List<Integer> otherUnlockCount = null;
+        List<Integer> cardUnlockCount = null;
+        List<Integer> pswUnlockCount = null;
+        List<Integer> fpUnlockCount = null;
+        List<Integer> faceUnlockCount = null;
+        List<Integer> btUnlockCount = null;
+        int timeType = Integer.parseInt(rxStatisticsLog.getTimeType());
+        long startTime = rxStatisticsLog.getStartTime() / 1000;
+        long endTime = rxStatisticsLog.getEndTime() / 1000;
+        if (timeType == CommConstants.STATISTICS_TIME_TYPE_DAY) {
+            rmtUnlockCount = parseHourCount(logService.unlockStatisticsByHour(projectId, "RMT_UNLOCK", startTime, endTime));
+            otherUnlockCount = parseHourCount(logService.unlockStatisticsByHour(projectId, "OTHER_UNLOCK", startTime, endTime));
+            cardUnlockCount = parseHourCount(logService.unlockStatisticsByHour(projectId, "CARD_UNLOCK", startTime, endTime));
+            pswUnlockCount = parseHourCount(logService.unlockStatisticsByHour(projectId, "PSW_UNLOCK", startTime, endTime));
+            fpUnlockCount = parseHourCount(logService.unlockStatisticsByHour(projectId, "FP_UNLOCK", startTime, endTime));
+            faceUnlockCount = parseHourCount(logService.unlockStatisticsByHour(projectId, "FACE_UNLOCK", startTime, endTime));
+            btUnlockCount = parseHourCount(logService.unlockStatisticsByHour(projectId, "BT_UNLOCK", startTime, endTime));
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_MONTH) {
+            int dayMax = CommUtil.getDayOfMonth();
+            rmtUnlockCount = parseDayCount(logService.unlockStatisticsByDay(projectId, "RMT_UNLOCK", startTime, endTime), dayMax);
+            otherUnlockCount = parseDayCount(logService.unlockStatisticsByDay(projectId, "OTHER_UNLOCK", startTime, endTime), dayMax);
+            cardUnlockCount = parseDayCount(logService.unlockStatisticsByDay(projectId, "CARD_UNLOCK", startTime, endTime), dayMax);
+            pswUnlockCount = parseDayCount(logService.unlockStatisticsByDay(projectId, "PSW_UNLOCK", startTime, endTime), dayMax);
+            fpUnlockCount = parseDayCount(logService.unlockStatisticsByDay(projectId, "FP_UNLOCK", startTime, endTime), dayMax);
+            faceUnlockCount = parseDayCount(logService.unlockStatisticsByDay(projectId, "FACE_UNLOCK", startTime, endTime), dayMax);
+            btUnlockCount = parseDayCount(logService.unlockStatisticsByDay(projectId, "BT_UNLOCK", startTime, endTime), dayMax);
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_YEAR) {
+            rmtUnlockCount = parseMonthCount(logService.unlockStatisticsByMonth(projectId, "RMT_UNLOCK", startTime, endTime));
+            otherUnlockCount = parseMonthCount(logService.unlockStatisticsByMonth(projectId, "OTHER_UNLOCK", startTime, endTime));
+            cardUnlockCount = parseMonthCount(logService.unlockStatisticsByMonth(projectId, "CARD_UNLOCK", startTime, endTime));
+            pswUnlockCount = parseMonthCount(logService.unlockStatisticsByMonth(projectId, "PSW_UNLOCK", startTime, endTime));
+            fpUnlockCount = parseMonthCount(logService.unlockStatisticsByMonth(projectId, "FP_UNLOCK", startTime, endTime));
+            faceUnlockCount = parseMonthCount(logService.unlockStatisticsByMonth(projectId, "FACE_UNLOCK", startTime, endTime));
+            btUnlockCount = parseMonthCount(logService.unlockStatisticsByMonth(projectId, "BT_UNLOCK", startTime, endTime));
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_WEEK) {
+            rmtUnlockCount = parseWeekDayCount(logService.unlockStatisticsByWeekDay(projectId, "RMT_UNLOCK", startTime, endTime));
+            otherUnlockCount = parseWeekDayCount(logService.unlockStatisticsByWeekDay(projectId, "OTHER_UNLOCK", startTime, endTime));
+            cardUnlockCount = parseWeekDayCount(logService.unlockStatisticsByWeekDay(projectId, "CARD_UNLOCK", startTime, endTime));
+            pswUnlockCount = parseWeekDayCount(logService.unlockStatisticsByWeekDay(projectId, "PSW_UNLOCK", startTime, endTime));
+            fpUnlockCount = parseWeekDayCount(logService.unlockStatisticsByWeekDay(projectId, "FP_UNLOCK", startTime, endTime));
+            faceUnlockCount = parseWeekDayCount(logService.unlockStatisticsByWeekDay(projectId, "FACE_UNLOCK", startTime, endTime));
+            btUnlockCount = parseWeekDayCount(logService.unlockStatisticsByWeekDay(projectId, "BT_UNLOCK", startTime, endTime));
+        }
+        // 6. 返回数据给客户端
+        responseData.addData("rmtUnlockCount", rmtUnlockCount);
+        responseData.addData("otherUnlockCount", otherUnlockCount);
+        responseData.addData("cardUnlockCount", cardUnlockCount);
+        responseData.addData("pswUnlockCount", pswUnlockCount);
+        responseData.addData("fpUnlockCount", fpUnlockCount);
+        responseData.addData("faceUnlockCount", faceUnlockCount);
+        responseData.addData("btUnlockCount", btUnlockCount);
+        // 项目名称
+        String projectName = projectService.getProjectById(projectId).getProjectName();
+        // 时间
+        String date = CommUtil.parseTime(startTime / 1000, "yyyy年MM月dd日");
+        if (timeType == CommConstants.STATISTICS_TIME_TYPE_MONTH) {
+            date = date.substring(0, 8);
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_YEAR) {
+            date = date.substring(0, 5);
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_WEEK) {
+            date = date.substring(0, 8) + "第" + Calendar.getInstance().get(Calendar.WEEK_OF_MONTH) + "周";
+        }
+        responseData.addData("title", projectName + " " + date);
+        return responseData;
     }
 
     @PostMapping("/realTimeOperateStatistics")
@@ -141,8 +195,19 @@ public class StatisticsController {
         return responseData;
     }
 
+    @PostMapping("/realTimeAlarmStatistics")
+    public ResponseData getRealTimeAlarmStatistics() {
+        Long projectId = appBean.getProjectId();
+        if (projectId == null) {
+            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        }
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        responseData.addData("Log", logService.getRealTimeAlarmStatistics(projectId));
+        return responseData;
+    }
+
     @PostMapping("/alarmStatistics")
-    public ResponseData getAlarmStatistics() {
+    public ResponseData getAlarmStatistics(@RequestBody RxStatisticsLog rxStatisticsLog) {
         Long rootId = appBean.getRootUserId();
         if (rootId == null) {
             return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
@@ -151,175 +216,66 @@ public class StatisticsController {
         if (projectId == null) {
             return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
         }
-        return doCheckAlarmLog(rootId, projectId, "/api/CheckAlarm");
-    }
-
-    private ResponseData doCheckUnlockLog(long rootId, long projectId, String url) {
-        RootUserInfo rootUserInfo = rootUserService.getRootUserById(rootId);
-        if (rootUserInfo == null) {
-            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
+        ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
+        int timeType = Integer.parseInt(rxStatisticsLog.getTimeType());
+        List<Integer> genAlarmCount = null;
+        List<Integer> pirAlarmCount = null;
+        List<Integer> smokeAlarmCount = null;
+        List<Integer> gasAlarmCount = null;
+        List<Integer> doorAlarmCount = null;
+        List<Integer> lowBattAlarmCount = null;
+        long startTime = rxStatisticsLog.getStartTime() / 1000;
+        long endTime = rxStatisticsLog.getEndTime() / 1000;
+        if (timeType == CommConstants.STATISTICS_TIME_TYPE_DAY) {
+            genAlarmCount = parseHourCount(logService.getAlarmStatisticsByHour(projectId, "GEN_ALARM", startTime, endTime));
+            pirAlarmCount = parseHourCount(logService.getAlarmStatisticsByHour(projectId, "PIR_ALARM", startTime, endTime));
+            smokeAlarmCount = parseHourCount(logService.getAlarmStatisticsByHour(projectId, "SMOKE_ALARM", startTime, endTime));
+            gasAlarmCount = parseHourCount(logService.getAlarmStatisticsByHour(projectId, "GAS_ALARM", startTime, endTime));
+            doorAlarmCount = parseHourCount(logService.getAlarmStatisticsByHour(projectId, "LOCK_ALARM", startTime, endTime));
+            lowBattAlarmCount = parseHourCount(logService.getAlarmStatisticsByHour(projectId, "LOW_BATTERY_ALARM", startTime, endTime));
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_MONTH) {
+            int dayMax = CommUtil.getDayOfMonth();
+            genAlarmCount = parseDayCount(logService.getAlarmStatisticsByDay(projectId, "GEN_ALARM", startTime, endTime), dayMax);
+            pirAlarmCount = parseDayCount(logService.getAlarmStatisticsByDay(projectId, "PIR_ALARM", startTime, endTime), dayMax);
+            smokeAlarmCount = parseDayCount(logService.getAlarmStatisticsByDay(projectId, "SMOKE_ALARM", startTime, endTime), dayMax);
+            gasAlarmCount = parseDayCount(logService.getAlarmStatisticsByDay(projectId, "GAS_ALARM", startTime, endTime), dayMax);
+            doorAlarmCount = parseDayCount(logService.getAlarmStatisticsByDay(projectId, "LOCK_ALARM", startTime, endTime), dayMax);
+            lowBattAlarmCount = parseDayCount(logService.getAlarmStatisticsByDay(projectId, "LOW_BATTERY_ALARM", startTime, endTime), dayMax);
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_YEAR) {
+            genAlarmCount = parseMonthCount(logService.getAlarmStatisticsByMonth(projectId, "GEN_ALARM", startTime, endTime));
+            pirAlarmCount = parseMonthCount(logService.getAlarmStatisticsByMonth(projectId, "PIR_ALARM", startTime, endTime));
+            smokeAlarmCount = parseMonthCount(logService.getAlarmStatisticsByMonth(projectId, "SMOKE_ALARM", startTime, endTime));
+            gasAlarmCount = parseMonthCount(logService.getAlarmStatisticsByMonth(projectId, "GAS_ALARM", startTime, endTime));
+            doorAlarmCount = parseMonthCount(logService.getAlarmStatisticsByMonth(projectId, "LOCK_ALARM", startTime, endTime));
+            lowBattAlarmCount = parseMonthCount(logService.getAlarmStatisticsByMonth(projectId, "LOW_BATTERY_ALARM", startTime, endTime));
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_WEEK) {
+            genAlarmCount = parseWeekDayCount(logService.getAlarmStatisticsByWeekDay(projectId, "GEN_ALARM", startTime, endTime));
+            pirAlarmCount = parseWeekDayCount(logService.getAlarmStatisticsByWeekDay(projectId, "PIR_ALARM", startTime, endTime));
+            smokeAlarmCount = parseWeekDayCount(logService.getAlarmStatisticsByWeekDay(projectId, "SMOKE_ALARM", startTime, endTime));
+            gasAlarmCount = parseWeekDayCount(logService.getAlarmStatisticsByWeekDay(projectId, "GAS_ALARM", startTime, endTime));
+            doorAlarmCount = parseWeekDayCount(logService.getAlarmStatisticsByWeekDay(projectId, "LOCK_ALARM", startTime, endTime));
+            lowBattAlarmCount = parseWeekDayCount(logService.getAlarmStatisticsByWeekDay(projectId, "LOW_BATTERY_ALARM", startTime, endTime));
         }
-        Map<String, Object> requestParam = HttpUtil.getInstance().getRmtOperateCommParams(
-                rootUserInfo, "0", "", "");
-        if (requestParam != null) {
-            long todayStartTime = CommUtil.getTodayStartTime() / 1000;
-            // 2. 组装特有请求参数
-            requestParam.put("BeginTime", String.valueOf(todayStartTime));
-            requestParam.put("EndTime", String.valueOf(System.currentTimeMillis() / 1000));
-            requestParam.put("Page", "1");
-            requestParam.put("MAC", "");
-            requestParam.put("PageSize", "65535");
-            // 3. 发送请求
-            JSONObject respObj =HttpUtil.getInstance().doRequest(requestParam, CommConstants.C_API_URL + url);
-            if (respObj != null) {
-                int result = (int) respObj.get("Result");
-                if (result == 0) {
-                    // 4. 解析出响应数据
-                    CheckLogResponse checkLogResponse = respObj.toJavaObject(CheckLogResponse.class);
-                    // 5. 保存cnt到DB
-                    rootUserInfo.setCnt(Long.parseLong(checkLogResponse.getCNT(), 16));
-                    rootUserService.updateRootUser(rootUserInfo);
-                    ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
-                    List<Integer> rmtUnlockCount = null;
-                    List<Integer> otherUnlockCount = null;
-                    List<Integer> cardUnlockCount = null;
-                    List<Integer> pswUnlockCount = null;
-                    List<Integer> fpUnlockCount = null;
-                    List<Integer> faceUnlockCount = null;
-                    List<Integer> btUnlockCount = null;
-                    if (checkLogResponse.getLog() != null) {
-                        // 删除
-                        logService.deleteUnlockLogsByProjectId(projectId);
-                        checkLogResponse.getLog().forEach(log -> {
-                            log.setProjectId(projectId);
-                            log.setTime(CommUtil.parseTime(Long.parseLong(log.getTime())));
-                            // 添加
-                            logService.addUnlockLog(log);
-                        });
-                        rmtUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "RMT_UNLOCK"));
-                        otherUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "OTHER_UNLOCK"));
-                        cardUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "CARD_UNLOCK"));
-                        pswUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "PSW_UNLOCK"));
-                        fpUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "FP_UNLOCK"));
-                        faceUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "FACE_UNLOCK"));
-                        btUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "BT_UNLOCK"));
-                    }
-                    // 6. 返回数据给客户端
-                    responseData.addData("rmtUnlockCount", rmtUnlockCount);
-                    responseData.addData("otherUnlockCount", otherUnlockCount);
-                    responseData.addData("cardUnlockCount", cardUnlockCount);
-                    responseData.addData("pswUnlockCount", pswUnlockCount);
-                    responseData.addData("fpUnlockCount", fpUnlockCount);
-                    responseData.addData("faceUnlockCount", faceUnlockCount);
-                    responseData.addData("btUnlockCount", btUnlockCount);
-                    responseData.addData("title", projectService.getProjectById(projectId).getProjectName() +
-                            " " + CommUtil.parseTime(new Date().getTime() / 1000, "yyyy年MM月dd日"));
-                    return responseData;
-                } else if (result == 1002) {
-                    return HttpUtil.getInstance().reLogin(rootUserInfo.getPhone(), rootUserInfo.getPassword(), rootUserService, new HttpUtil.ReLoginCallback() {
-                        @Override
-                        public ResponseData success() {
-                            return doCheckUnlockLog(rootId, projectId, url);
-                        }
-
-                        @Override
-                        public ResponseData failure(int result) {
-                            return HttpUtil.getInstance().doResult(result);
-                        }
-                    });
-                } else {
-                    return HttpUtil.getInstance().doResult(result);
-                }
-            } else {
-                return new ResponseData(ResponseCode.ERROR);
-            }
-        } else {
-            return new ResponseData(ResponseCode.ERROR);
+        // 6. 返回数据给客户端
+        responseData.addData("genAlarmCount", genAlarmCount);
+        responseData.addData("pirAlarmCount", pirAlarmCount);
+        responseData.addData("smokeAlarmCount", smokeAlarmCount);
+        responseData.addData("gasAlarmCount", gasAlarmCount);
+        responseData.addData("doorAlarmCount", doorAlarmCount);
+        responseData.addData("lowBattAlarmCount", lowBattAlarmCount);
+        // 项目名称
+        String projectName = projectService.getProjectById(projectId).getProjectName();
+        // 时间
+        String date = CommUtil.parseTime(startTime, "yyyy年MM月dd日");
+        if (timeType == CommConstants.STATISTICS_TIME_TYPE_MONTH) {
+            date = date.substring(0, 8);
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_YEAR) {
+            date = date.substring(0, 5);
+        } else if (timeType == CommConstants.STATISTICS_TIME_TYPE_WEEK) {
+            date = date.substring(0, 8) + "第" + Calendar.getInstance().get(Calendar.WEEK_OF_MONTH) + "周";
         }
-    }
-
-    private ResponseData doCheckAlarmLog(long rootId, long projectId, String url) {
-        RootUserInfo rootUserInfo = rootUserService.getRootUserById(rootId);
-        if (rootUserInfo == null) {
-            return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
-        }
-        Map<String, Object> requestParam = HttpUtil.getInstance().getRmtOperateCommParams(
-                rootUserInfo, "0", "", "");
-        if (requestParam != null) {
-            long todayStartTime = CommUtil.getTodayStartTime() / 1000;
-            // 2. 组装特有请求参数
-            requestParam.put("BeginTime", String.valueOf(todayStartTime));
-            requestParam.put("EndTime", String.valueOf(System.currentTimeMillis() / 1000));
-            requestParam.put("Page", "1");
-            requestParam.put("MAC", "");
-            requestParam.put("PageSize", "65535");
-            // 3. 发送请求
-            JSONObject respObj =HttpUtil.getInstance().doRequest(requestParam, CommConstants.C_API_URL + url);
-            if (respObj != null) {
-                int result = (int) respObj.get("Result");
-                if (result == 0) {
-                    // 4. 解析出响应数据
-                    CheckLogResponse checkLogResponse = respObj.toJavaObject(CheckLogResponse.class);
-                    // 5. 保存cnt到DB
-                    rootUserInfo.setCnt(Long.parseLong(checkLogResponse.getCNT(), 16));
-                    rootUserService.updateRootUser(rootUserInfo);
-                    ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
-                    List<Integer> rmtUnlockCount = null;
-                    List<Integer> otherUnlockCount = null;
-                    List<Integer> cardUnlockCount = null;
-                    List<Integer> pswUnlockCount = null;
-                    List<Integer> fpUnlockCount = null;
-                    List<Integer> faceUnlockCount = null;
-                    List<Integer> btUnlockCount = null;
-                    if (checkLogResponse.getLog() != null) {
-                        // 删除
-                        logService.deleteUnlockLogsByProjectId(projectId);
-                        checkLogResponse.getLog().forEach(log -> {
-                            log.setProjectId(projectId);
-                            log.setTime(CommUtil.parseTime(Long.parseLong(log.getTime())));
-                            // 添加
-                            logService.addUnlockLog(log);
-                        });
-                        rmtUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "RMT_UNLOCK"));
-                        otherUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "OTHER_UNLOCK"));
-                        cardUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "CARD_UNLOCK"));
-                        pswUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "PSW_UNLOCK"));
-                        fpUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "FP_UNLOCK"));
-                        faceUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "FACE_UNLOCK"));
-                        btUnlockCount = parseHourCount(logService.unlockStatistics(projectId, "BT_UNLOCK"));
-                    }
-                    // 6. 返回数据给客户端
-                    responseData.addData("rmtUnlockCount", rmtUnlockCount);
-                    responseData.addData("otherUnlockCount", otherUnlockCount);
-                    responseData.addData("cardUnlockCount", cardUnlockCount);
-                    responseData.addData("pswUnlockCount", pswUnlockCount);
-                    responseData.addData("fpUnlockCount", fpUnlockCount);
-                    responseData.addData("faceUnlockCount", faceUnlockCount);
-                    responseData.addData("btUnlockCount", btUnlockCount);
-                    responseData.addData("title", projectService.getProjectById(projectId).getProjectName() +
-                            " " + CommUtil.parseTime(new Date().getTime() / 1000, "yyyy年MM月dd日"));
-                    return responseData;
-                } else if (result == 1002) {
-                    return HttpUtil.getInstance().reLogin(rootUserInfo.getPhone(), rootUserInfo.getPassword(), rootUserService, new HttpUtil.ReLoginCallback() {
-                        @Override
-                        public ResponseData success() {
-                            return doCheckUnlockLog(rootId, projectId, url);
-                        }
-
-                        @Override
-                        public ResponseData failure(int result) {
-                            return HttpUtil.getInstance().doResult(result);
-                        }
-                    });
-                } else {
-                    return HttpUtil.getInstance().doResult(result);
-                }
-            } else {
-                return new ResponseData(ResponseCode.ERROR);
-            }
-        } else {
-            return new ResponseData(ResponseCode.ERROR);
-        }
+        responseData.addData("title", projectName + " " + date);
+        return responseData;
     }
 
     private List<Integer> parseHourCount(List<LogHourCount> logHourCounts) {
@@ -332,6 +288,54 @@ public class StatisticsController {
                 }
             }
             if (counts.size() <= i) {
+                counts.add(0);
+            }
+        }
+        return counts;
+    }
+
+    private List<Integer> parseDayCount(List<LogDayCount> logDayCounts, int maxDay) {
+        List<Integer> counts = new ArrayList<>();
+        for (int i = 1; i <= maxDay; i++) {
+            for (LogDayCount logDayCount : logDayCounts) {
+                if (logDayCount.getDay() == i) {
+                    counts.add(logDayCount.getCount());
+                    break;
+                }
+            }
+            if (counts.size() < i) {
+                counts.add(0);
+            }
+        }
+        return counts;
+    }
+
+    private List<Integer> parseMonthCount(List<LogMonthCount> logMonthCounts) {
+        List<Integer> counts = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            for (LogMonthCount logMonthCount : logMonthCounts) {
+                if (logMonthCount.getMonth() == i) {
+                    counts.add(logMonthCount.getCount());
+                    break;
+                }
+            }
+            if (counts.size() < i) {
+                counts.add(0);
+            }
+        }
+        return counts;
+    }
+
+    private List<Integer> parseWeekDayCount(List<LogDayCount> logDayCounts) {
+        List<Integer> counts = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            for (LogDayCount logDayCount : logDayCounts) {
+                if (logDayCount.getDay() == i) {
+                    counts.add(logDayCount.getCount());
+                    break;
+                }
+            }
+            if (counts.size() < i) {
                 counts.add(0);
             }
         }

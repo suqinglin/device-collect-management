@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,10 @@ public class AuthorizeController {
         if (rootId == null) {
             return ResponseData.error(ResponseCode.ERROR_USER_IS_ILLEGAL);
         }
+//        AuthorizeInfo authInfo = authorizeService.findAuthorizeByValue(addPassword.getPsw(), );
+//        if (authInfo != null) {
+//            return ResponseData.error(ResponseCode.ERROR_AUTHORIZE_PSW_EXIST);
+//        }
         // 保存密码授权
         RxAuthorize authorizeInfo = new RxAuthorize();
         authorizeInfo.setContent(addPassword.getPsw());
@@ -81,6 +86,9 @@ public class AuthorizeController {
         if (authorizeInfo.getTimeType() == CommConstants.TIME_TYPE_ONCE || authorizeInfo.getTimeType() == CommConstants.TIME_TYPE_PERIOD) {
             authorizeInfo.setEndTime(new Date(Long.parseLong(addPassword.getEndTime()) * 1000));
             authorizeInfo.setStartTime(new Date(Long.parseLong(addPassword.getBeginTime()) * 1000));
+        } else {
+            authorizeInfo.setStartTime(new Date(0));
+            authorizeInfo.setEndTime(new Date(0xFFFFFFFFL*1000));
         }
         authorizeInfo.setUserId(addPassword.getUserId());
         authorizeInfo.setType(CommConstants.AUTHORIZE_TYPE_PASSWORD); // 密码授权
@@ -89,6 +97,8 @@ public class AuthorizeController {
         // 将授权信息下发到房间设备
         if (addPassword.getRoomIds().size() > 0) {
             int roomTotal = addPassword.getRoomIds().size();
+            addPassword.setBeginTime(String.valueOf(authorizeInfo.getStartTime().getTime() / 1000));
+            addPassword.setEndTime(String.valueOf(authorizeInfo.getEndTime().getTime() / 1000));
             ResponseData responseData = doAddPassword(addPassword, rootId, authorizeId);
             if (!ResponseCode.SUCCESS.getKey().equals(responseData.getCode())) {
                 responseData.addData("successCount", roomTotal - addPassword.getRoomIds().size() - 1);
@@ -120,6 +130,10 @@ public class AuthorizeController {
         // 将授权信息下发到房间设备
         if (addPassword.getRoomIds().size() > 0) {
             int roomTotal = addPassword.getRoomIds().size();
+            if ("1".equals(addPassword.getPswType())) {
+                addPassword.setBeginTime(String.valueOf(0));
+                addPassword.setEndTime(String.valueOf(0xFFFFFFFFL));
+            }
             ResponseData responseData = doAddPassword(addPassword, rootId, addPassword.getAuthorizeId());
             if (!ResponseCode.SUCCESS.getKey().equals(responseData.getCode())) {
                 responseData.addData("successCount", roomTotal - addPassword.getRoomIds().size() - 1);
@@ -134,7 +148,12 @@ public class AuthorizeController {
 
     private ResponseData doAddPassword(RxAddPassword addPassword, Long rootId, Long authorizeId) throws InterruptedException {
         long roomId = addPassword.getRoomIds().get(0);
-        int position = authorizeService.findEmptyPosition(roomId, CommConstants.AUTHORIZE_TYPE_PASSWORD);
+        int position;
+        if (addPassword.getPositionType() == 1) { // 1表示自动检索位置，2表示手动输入位置
+            position = authorizeService.findEmptyPosition(roomId, CommConstants.AUTHORIZE_TYPE_PASSWORD);
+        } else {
+            position = Integer.parseInt(addPassword.getPswIdx());
+        }
         // 删除掉第一个房间
         addPassword.getRoomIds().remove(0);
         return RmtOperateHelper.rmtOperateByRoom(
@@ -150,7 +169,7 @@ public class AuthorizeController {
                     @Override
                     public void addParams(Map<String, Object> requestParam, String token, String psw, long nextCnt) {
                         String pswEncrypt = KeyUtil.encode2HashXOR(addPassword.getPsw().getBytes(), token, psw, nextCnt);
-                        String userName = KeyUtil.encode2HashXOR(addPassword.getUserName().getBytes(), token, psw, nextCnt);
+                        String userName = KeyUtil.encode2HashXOR(addPassword.getUserName().getBytes(StandardCharsets.UTF_8), token, psw, nextCnt);
                         requestParam.put("UserName", userName); // 加密后的用户名
                         requestParam.put("Psw", pswEncrypt);
                         requestParam.put("PswIdx", String.valueOf(position));
@@ -249,6 +268,9 @@ public class AuthorizeController {
         if (authorizeInfo.getTimeType() == CommConstants.TIME_TYPE_ONCE || authorizeInfo.getTimeType() == CommConstants.TIME_TYPE_PERIOD) {
             authorizeInfo.setEndTime(new Date(Long.parseLong(addCard.getEndTime()) * 1000));
             authorizeInfo.setStartTime(new Date(Long.parseLong(addCard.getBeginTime()) * 1000));
+        } else {
+            authorizeInfo.setStartTime(new Date(0));
+            authorizeInfo.setEndTime(new Date(0xFFFFFFFFL*1000));
         }
         authorizeInfo.setUserId(addCard.getUserId());
         authorizeInfo.setType(CommConstants.AUTHORIZE_TYPE_CARD); // 卡片授权
@@ -256,6 +278,8 @@ public class AuthorizeController {
         long authorizeId = authorizeService.addAuthorize(authorizeInfo);
         int roomTotal = addCard.getRoomIds().size();
         if (roomTotal > 0) {
+            addCard.setBeginTime(String.valueOf(authorizeInfo.getStartTime().getTime() / 1000));
+            addCard.setEndTime(String.valueOf(authorizeInfo.getEndTime().getTime() / 1000));
             ResponseData responseData = doAddCard(addCard, rootId, authorizeId);
             if (!ResponseCode.SUCCESS.getKey().equals(responseData.getCode())) {
                 responseData.addData("successCount", roomTotal - addCard.getRoomIds().size() - 1);
@@ -287,6 +311,10 @@ public class AuthorizeController {
         // 将授权信息下发到房间设备
         int roomTotal = addCard.getRoomIds().size();
         if (roomTotal > 0) {
+            if ("1".equals(addCard.getCardType())) {
+                addCard.setBeginTime(String.valueOf(0));
+                addCard.setEndTime(String.valueOf(0xFFFFFFFFL));
+            }
             ResponseData responseData = doAddCard(addCard, rootId, addCard.getAuthorizeId());
             if (!ResponseCode.SUCCESS.getKey().equals(responseData.getCode())) {
                 responseData.addData("successCount", roomTotal - addCard.getRoomIds().size() - 1);
@@ -300,9 +328,20 @@ public class AuthorizeController {
     }
 
     private ResponseData doAddCard(RxAddCard addCard, Long rootId, Long authorizeId) throws InterruptedException {
+//        System.out.println("addCard StartTime:" + addCard.getBeginTime());
+//        System.out.println("addCard EndTime:" + addCard.getEndTime());
         long roomId = addCard.getRoomIds().get(0);
         addCard.getRoomIds().remove(0);
-        int position = authorizeService.findEmptyPosition(roomId, CommConstants.AUTHORIZE_TYPE_CARD);
+
+        final AuthorizeInfo authorizeInfo = authorizeService.findAuthorizeByValue(addCard.getCardNum(), roomId);
+        int position;
+        if (addCard.getPositionType() == 2) { // 1表示自动检索位置，2表示手动输入位置
+            position = Integer.parseInt(addCard.getCardIdx());
+        } else if (authorizeInfo != null) {
+            position = authorizeInfo.getPosition();
+        } else {
+            position = authorizeService.findEmptyPosition(roomId, CommConstants.AUTHORIZE_TYPE_CARD);
+        }
         return RmtOperateHelper.rmtOperateByRoom(
                 rootId,
                 rootUserService,
@@ -315,7 +354,7 @@ public class AuthorizeController {
                     @Override
                     public void addParams(Map<String, Object> requestParam, String token, String psw, long nextCnt) {
                         String cardNumEncrypt = KeyUtil.encode2HashXOR(addCard.getCardNum().getBytes(), token, psw, nextCnt);
-                        String userName = KeyUtil.encode2HashXOR(addCard.getUserName().getBytes(), token, psw, nextCnt);
+                        String userName = KeyUtil.encode2HashXOR(addCard.getUserName().getBytes(StandardCharsets.UTF_8), token, psw, nextCnt);
                         requestParam.put("UserName", userName); // 加密后的用户名
                         requestParam.put("CardNum", cardNumEncrypt);
                         requestParam.put("CardIdx", String.valueOf(position));
@@ -326,7 +365,11 @@ public class AuthorizeController {
 
                     @Override
                     public ResponseData onSuccess(ResponseData responseData) throws InterruptedException {
-                        authorizeService.addAuthorizeRoom(authorizeId, roomId, position);
+                        if (authorizeInfo != null && authorizeInfo.getPosition() == position) {
+                            authorizeService.updateAuthorizeRoom(authorizeId, roomId, position, CommConstants.AUTHORIZE_TYPE_CARD);
+                        } else {
+                            authorizeService.addAuthorizeRoom(authorizeId, roomId, position);
+                        }
                         if (addCard.getRoomIds().size() > 0) {
                             return doAddCard(addCard, rootId, authorizeId);
                         } else {
@@ -353,8 +396,8 @@ public class AuthorizeController {
                 new RmtOperateHelper.Callback() {
             @Override
             public void addParams(Map<String, Object> requestParam, String token, String psw, long nextCnt) {
-                String cardNumEncrypt = KeyUtil.encode2HashXOR(deleteCard.getCardNum().getBytes(), token, psw, nextCnt);
-                requestParam.put("CardNum", cardNumEncrypt);
+//                String cardNumEncrypt = KeyUtil.encode2HashXOR(deleteCard.getCardNum().getBytes(), token, psw, nextCnt);
+                requestParam.put("CardNum", '0');
                 requestParam.put("CardIdx", deleteCard.getCardIdx());
                 requestParam.put("UserName", "None");
             }
@@ -416,6 +459,9 @@ public class AuthorizeController {
         if (authorizeInfo.getTimeType() == CommConstants.TIME_TYPE_ONCE || authorizeInfo.getTimeType() == CommConstants.TIME_TYPE_PERIOD) {
             authorizeInfo.setEndTime(new Date(Long.parseLong(addFp.getEndTime()) * 1000));
             authorizeInfo.setStartTime(new Date(Long.parseLong(addFp.getBeginTime()) * 1000));
+        } else {
+            authorizeInfo.setStartTime(new Date(0));
+            authorizeInfo.setEndTime(new Date(0xFFFFFFFFL*1000));
         }
         authorizeInfo.setUserId(addFp.getUserId());
         authorizeInfo.setType(CommConstants.AUTHORIZE_TYPE_FP); // 指纹授权
@@ -424,6 +470,8 @@ public class AuthorizeController {
         Long authorizeId = authorizeService.addAuthorize(authorizeInfo);
         int roomTotal = addFp.getRoomIds().size();
         if (roomTotal > 0) {
+            addFp.setBeginTime(String.valueOf(authorizeInfo.getStartTime().getTime() / 1000));
+            addFp.setEndTime(String.valueOf(authorizeInfo.getEndTime().getTime() / 1000));
             ResponseData responseData = doAddFp(addFp, rootId, authorizeId);
             if (!ResponseCode.SUCCESS.getKey().equals(responseData.getCode())) {
                 responseData.addData("successCount", roomTotal - addFp.getRoomIds().size() - 1);
@@ -455,6 +503,10 @@ public class AuthorizeController {
         // 将授权信息下发到房间设备
         int roomTotal = addFp.getRoomIds().size();
         if (roomTotal > 0) {
+            if ("1".equals(addFp.getFpType())) {
+                addFp.setBeginTime(String.valueOf(0));
+                addFp.setEndTime(String.valueOf(0xFFFFFFFFL));
+            }
             ResponseData responseData = doAddFp(addFp, rootId, addFp.getAuthorizeId());
             if (!ResponseCode.SUCCESS.getKey().equals(responseData.getCode())) {
                 responseData.addData("successCount", roomTotal - addFp.getRoomIds().size() - 1);
@@ -470,7 +522,12 @@ public class AuthorizeController {
     private ResponseData doAddFp(RxAddFp addFp, Long rootId, Long authorizeId) throws InterruptedException {
         long roomId = addFp.getRoomIds().get(0);
         addFp.getRoomIds().remove(0);
-        int position = authorizeService.findEmptyPosition(roomId, CommConstants.AUTHORIZE_TYPE_FP);
+        int position;
+        if (addFp.getPositionType() == 2) { // 1表示自动检索位置，2表示手动输入位置
+            position = Integer.parseInt(addFp.getFpIdx());
+        } else {
+            position = authorizeService.findEmptyPosition(roomId, CommConstants.AUTHORIZE_TYPE_FP);
+        }
         return RmtOperateHelper.rmtOperateByRoom(
                 rootId,
                 rootUserService,
@@ -483,7 +540,7 @@ public class AuthorizeController {
                     @Override
                     public void addParams(Map<String, Object> requestParam, String token, String psw, long nextCnt) {
                         String fpTempEncrypt = KeyUtil.encode2HashXOR(CommUtil.hexStringToBytes(addFp.getFpTemp()), token, psw, nextCnt);
-                        String userName = KeyUtil.encode2HashXOR(addFp.getUserName().getBytes(), token, psw, nextCnt);
+                        String userName = KeyUtil.encode2HashXOR(addFp.getUserName().getBytes(StandardCharsets.UTF_8), token, psw, nextCnt);
                         requestParam.put("UserName", userName); // 加密后的用户名
                         requestParam.put("FpTemp", fpTempEncrypt);
                         requestParam.put("FpIdx", String.valueOf(position));

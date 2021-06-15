@@ -1,5 +1,6 @@
 package com.vians.admin.utils;
 
+import cn.hutool.http.HttpException;
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -27,18 +28,23 @@ public class HttpUtil {
     }
 
     public JSONObject doRequest(Map<String, Object> requestParam, String url) {
-        String respStr;
-        respStr = HttpRequest
-                .post(url)
-                .body(JSON.toJSONString(requestParam))
-                .header("Content-Type","application/json")
-                .execute()
-                .body();
         System.out.println("reqUrl->" + url);
         System.out.println("reqStr->" + JSON.toJSONString(requestParam));
-        System.out.println("respStr->" + respStr);
-        // 成功时Result为0
-        return JSONObject.parseObject(respStr);
+        String respStr;
+        try {
+            respStr = HttpRequest
+                    .post(url)
+                    .body(JSON.toJSONString(requestParam))
+                    .header("Content-Type","application/json")
+                    .execute()
+                    .body();
+            System.out.println("respStr->" + respStr);
+            // 成功时Result为0
+            return JSONObject.parseObject(respStr);
+        } catch (HttpException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public ResponseCode getResponseCode(int result) {

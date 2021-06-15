@@ -63,5 +63,9 @@ public class ProjectInfo {
 
     @Getter
     @Setter
+    private long rootId;
+
+    @Getter
+    @Setter
     private List<CommunityInfo> communities;
 }

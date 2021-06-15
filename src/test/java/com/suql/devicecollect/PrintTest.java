@@ -1,33 +1,126 @@
 package com.suql.devicecollect;
 
+import cn.hutool.core.date.DateUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class PrintTest {
 
     static Logger logger = LoggerFactory.getLogger(RandomTest.class);
 
     @Test
-    public void printQR() {
-//        printService = new PrintServiceImpl();
-////        String path = printService.createQrCodeByMac("FRM_", "FFFFDC2C28000048", "000000072");
-////        String path = printService.createTestQrCode("507264436c720d0a".toUpperCase(), "Clear Torken");
-//        String path = printService.createTestQrCode("GWF_#4CB6BB768992", "GWF_#4CB6BB768992");
-//        printService.print(path);
+    public void TokenComputer() {
+
+//        UUID:D[0-7]:63D1E764C1903D54->A49684FA
+//        MAC:D[0-7]:150901282CDCFFFF->7237D6D3
+//        SN:00000009->CFA57F47
+//        Timestamp:608B5DF7->4A91B45D
+//        FW:1800->91AC94B4
+//        HW:0801->21D206C1
+//        ManufID:0457->88CC7F9D
+//        ToolsID:0457->B71B0D43
+//        Model:VI_ACS01A->FB006518
+        byte[] uuid = {(byte) 0x97, (byte) 0xD3, 0x71, 0x4A, (byte) 0x92, (byte) 0xBB, 0x65, (byte) 0x9C}; // BA37421B
+        byte[] mac = {(byte) 0xFF, (byte) 0xFF, (byte) 0xDC, 0x2C, 0x28, 0x01, 0x09, 0x15};
+        byte[] sn = {0x00, 0x00, 0x00, 0x09}; // 77112EFF
+        byte[] timeStamp = {0x60, (byte) 0x82, (byte) 0xB3, (byte) 0x99};
+        byte[] fw = {0x18, 0x00}; // E309CDAC
+        byte[] hw = {0x08, 0x01}; // B17E056D
+        byte[] manufId = {0x04, 0x57};
+        byte[] toolsId = {0x04, 0x57};
+        String model = "VI_ACS01A";
+        int base = 0x55555555;
+        byte[] uuid1 = {0x63, (byte) 0xD1, (byte) 0xE7, 0x64, (byte) 0xC1, (byte) 0x90, 0x3D, 0x54};
+        byte[] mac1 = {0x15, 0x09, 0x01, 0x28, 0x2C, (byte) 0xDC, (byte) 0xFF, (byte) 0xFF};
+//        int uuidCrc = crc32(base, reverseBytes(uuid));
+//        int macCrc = crc32(uuidCrc, reverseBytes(mac));
+//        int snCrc = crc32(macCrc, reverseBytes(sn));
+//        int timeStampCrc = crc32(snCrc, reverseBytes(timeStamp));
+//        int fwCrc = crc32(timeStampCrc, reverseBytes(fw));
+//        int hwCrc = crc32(fwCrc, reverseBytes(hw));
+//        int manufIdCrc = crc32(hwCrc, reverseBytes(manufId));
+//        int toolsIdCrc = crc32(manufIdCrc, reverseBytes(toolsId));
+//        int modelCrc = crc32(toolsIdCrc, model.getBytes()); // 最后这个不反转
+        int uuidCrc = crc32(base, uuid1);
+        int macCrc = crc32(uuidCrc, mac1);
+        int snCrc = crc32(macCrc, reverseBytes(sn));
+        int timeStampCrc = crc32(snCrc, reverseBytes(timeStamp));
+        int fwCrc = crc32(timeStampCrc, reverseBytes(fw));
+        int hwCrc = crc32(fwCrc, reverseBytes(hw));
+        int manufIdCrc = crc32(hwCrc, reverseBytes(manufId));
+        int toolsIdCrc = crc32(manufIdCrc, reverseBytes(toolsId));
+        int modelCrc = crc32(toolsIdCrc, model.getBytes()); // 最后这个不反转
+        System.out.println("uuidCrc=" + Integer.toHexString(uuidCrc).toUpperCase());
+        System.out.println("macCrc=" + Integer.toHexString(macCrc).toUpperCase());
+        System.out.println("snCrc=" + Integer.toHexString(snCrc).toUpperCase());
+        System.out.println("timeStampCrc=" + Integer.toHexString(timeStampCrc).toUpperCase());
+        System.out.println("fwCrc=" + Integer.toHexString(fwCrc).toUpperCase());
+        System.out.println("hwCrc=" + Integer.toHexString(hwCrc).toUpperCase());
+        System.out.println("manufIdCrc=" + Integer.toHexString(manufIdCrc).toUpperCase());
+        System.out.println("toolsIdCrc=" + Integer.toHexString(toolsIdCrc).toUpperCase());
+        System.out.println("modelCrc=" + Integer.toHexString(modelCrc).toUpperCase());
+    }
+
+    public static byte[] reverseBytes(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.allocate(data.length);
+        for (int i = data.length - 1; i >= 0; i--) {
+            buffer.put(data[i]);
+        }
+        return buffer.array();
+    }
+
+    public static int crc32(int base, byte[] data){
+        int crc  = ~base;      //initial contents of LFBSR
+        int poly = 0xEDB88320;  //reverse polynomial
+
+        for (byte b : data) {
+            int temp = (crc ^ b) & 0xff;
+
+            //read 8 bits one at a time
+            for (int i = 0; i < 8; i++) {
+                if ((temp & 1) == 1) temp = (temp >>> 1) ^ poly;
+                else                 temp = (temp >>> 1);
+            }
+            crc = (crc >>> 8) ^ temp;
+        }
+        return ~crc;
+    }
+
+    /**
+     * crc16 多项式校验方法
+     *
+     * @param buffer
+     * @return
+     */
+    private static int crc16(int base, final byte[] buffer) {
+        int crc = base;
+        for (byte buf : buffer) {
+            int i = buf;
+            i &= 0xFF;
+            crc = (((crc >> 8) & 0xFF) | (crc << 8));
+            crc ^= i;
+            crc ^= ((crc & 0xFF) >> 4) & 0xFF;
+            crc ^= (crc << 8) << 4;
+            crc ^= ((crc & 0xFF) << 4) << 1;
+            crc &= 0xffff;
+        }
+        crc &= 0xffff;
+        return crc;
     }
 
     @Test
-    public void createQR() {
-//        System.out.println(String.format("abcd %s abcd", "xxx"));
-//        printService = new PrintServiceImpl();
-//        int startSN = 119200010;
-//        for (int i = 0; i < 21; i++) {
-//            String sn = String.format("%010d", startSN + i);
-//            logger.info("sn {}", sn);
-//            String path = printService.createTestQrCode("SN:" + sn, "SN:" + sn);
-//            logger.info("path {}", path);
-//        }
+    public void test1() {
+        System.out.println(Integer.parseInt("0801", 16));
+        System.out.println(String.format("%04x", 2049));
+        System.out.println(String.format("%04X", Integer.valueOf("2049")));
+        System.out.println(0xFFFFFFFFL);
+        System.out.println(DateUtil.format(new Date(0xFFFFFFFFL*1000), "yyyy-MM-dd mm:HH:ss"));
+        System.out.println(crc32(0, "suqinglin".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -56,5 +149,22 @@ public class PrintTest {
 //        byte b = 16;
 //        System.out.println(Integer.toHexString((int) b));
 
+        System.out.println(Math.random());
     }
+
+    @Test
+    public void testUserName() {
+        // 28050D0000888888FFFFC64DB86026A0000068686700000000000000000000000000DC2C2801065CCD01
+//        byte[] data = CommUtil.hexStringToBytes("28050D0000888888FFFFC64DB86026A0000068686700000000000000000000000000DC2C2801065CCD01");
+//
+//        byte[] userNameBuff = new byte[16];
+//        System.arraycopy(data, 18, userNameBuff, 0, 16);
+////        System.out.println(CommUtil.bytes2HexString(userNameBuff));
+//        System.out.println(new String(userNameBuff));
+        byte[] a = {(byte) 0xAB, (byte) 0xCD};
+        int b = (a[0] & 0xFF) << 8 | (a[1] & 0xFF);
+        System.out.println(b);
+        System.out.println(0xABCD);
+    }
+
 }

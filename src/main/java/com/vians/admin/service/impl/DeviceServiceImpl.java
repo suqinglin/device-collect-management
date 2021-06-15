@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public DeviceInfo getDeviceInfoByMac(String mac) {
         BigInteger macNum = new BigInteger(mac, 16);
-        return deviceMapper.getDeviceByMac(macNum);
+        return deviceMapper.getProductDeviceByMac(macNum);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -79,6 +80,15 @@ public class DeviceServiceImpl implements DeviceService {
         List<DeviceBaseInfo> deviceBaseInfoList = deviceMapper.getFreeDevices(projectId);
         PageInfo<DeviceBaseInfo> pageInfo = new PageInfo<>(deviceBaseInfoList);
         return new Page<>(deviceBaseInfoList, pageInfo.getTotal(), pageable);
+    }
+
+    @Override
+    public Page<Battery> getBatteriesByPage(RxPage page, Long projectId) {
+        Pageable pageable = new Pageable(page.getPageIndex(), page.getPageSize());
+        PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize());
+        List<Battery> batteryList = deviceMapper.getBatteries(projectId);
+        PageInfo<Battery> pageInfo = new PageInfo<>(batteryList);
+        return new Page<>(batteryList, pageInfo.getTotal(), pageable);
     }
 
     /**
@@ -229,29 +239,69 @@ public class DeviceServiceImpl implements DeviceService {
         return deviceMapper.getDeviceMacsByProject(projectId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int getDevCount(long projectId, int state) {
         return deviceMapper.getDevCount(projectId, state);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public int getGwCount(long rootId, int state) {
         return deviceMapper.getGwCount(rootId, state);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void addBrowserDevice(String browserUUID, String mac, long userId) {
         deviceMapper.addBrowserDevice(browserUUID, mac, userId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public String getDeviceMacByBrowser(String browserUUID) {
         return deviceMapper.getDeviceMacByBrowser(browserUUID);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void modifyRoomsDefaultDevice(long deviceId, long roomId) {
         deviceMapper.setDeviceDefaultNoByRoom(roomId);
         deviceMapper.setDeviceDefaultYesById(deviceId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<String> changeBlockPosition() {
+        List<String> macList = new ArrayList<>();
+        List<BlockPositionErrorInfo> blockPositionErrorList = deviceMapper.findBlockPositionErrorRecords();
+        blockPositionErrorList.forEach(blockPositionErrorInfo -> {
+            deviceMapper.changeBlockToLock(blockPositionErrorInfo.getBlockId());
+            deviceMapper.changeLockToBlock(blockPositionErrorInfo.getLockId());
+            macList.add(blockPositionErrorInfo.getMac());
+        });
+        return macList;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void addDeviceBatt(DeviceBatt deviceBatt) {
+        deviceMapper.addDeviceBatt(deviceBatt);
+    }
+
+    @Override
+    public long getDeviceProjectId(String mac) {
+        DeviceBaseInfo device = deviceMapper.getDeviceByMac(mac);
+        if (device != null) {
+            return device.getProjectId();
+        } else {
+            return 0;
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateDeviceBattery(String mac, int battery, Date updateTime) {
+        deviceMapper.updateDeviceBattery(mac, battery, updateTime);
     }
 }

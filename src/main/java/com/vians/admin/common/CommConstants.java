@@ -90,4 +90,21 @@ public interface CommConstants {
      * 时间段
      */
     int TIME_TYPE_PERIOD = 2;
+    // *********************** 统计时间域类型 ***********************/
+    /**
+     * 日
+     */
+    int STATISTICS_TIME_TYPE_DAY = 1;
+    /**
+     * 月
+     */
+    int STATISTICS_TIME_TYPE_MONTH = 2;
+    /**
+     * 年
+     */
+    int STATISTICS_TIME_TYPE_YEAR = 3;
+    /**
+     * 周
+     */
+    int STATISTICS_TIME_TYPE_WEEK = 4;
 }

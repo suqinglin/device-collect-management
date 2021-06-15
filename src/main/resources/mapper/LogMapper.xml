@@ -40,40 +40,222 @@
     </select>
 
     <insert id="addUnlockLog" parameterType="com.vians.admin.model.UnlockLog">
-        insert into vi_unlock_log(ul_name, ul_mac, ul_time, ul_action, ul_value, ul_project_id)
-        values (#{name}, #{MAC}, #{time}, #{action}, #{value}, #{projectId})
+        INSERT INTO vi_unlock_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                ul_name,
+            </if>
+            <if test="MAC != null and MAC != ''">
+                ul_mac,
+            </if>
+            <if test="time != null and time != ''">
+                ul_time,
+            </if>
+            <if test="action != null and action != ''">
+                ul_action,
+            </if>
+            <if test="value != null and value != ''">
+                ul_value,
+            </if>
+            <if test="projectId != 0">
+                ul_project_id
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                #{name},
+            </if>
+            <if test="MAC != null and MAC != ''">
+                #{MAC},
+            </if>
+            <if test="time != null and time != ''">
+                #{time},
+            </if>
+            <if test="action != null and action != ''">
+                #{action},
+            </if>
+            <if test="value != null and value != ''">
+                #{value},
+            </if>
+            <if test="projectId != 0">
+                #{projectId}
+            </if>
+        </trim>
     </insert>
 
     <delete id="deleteUnlockLogsByProjectId">
         delete from vi_unlock_log where ul_project_id = #{projectId}
     </delete>
 
-    <select id="unlockStatistics" resultType="com.vians.admin.model.LogHourCount">
+    <select id="unlockStatisticsByHour" resultType="com.vians.admin.model.LogHourCount">
         select HOUR(ul.ul_time) as hour, count(*) as count
-        from vi_unlock_log ul
-        where
-              ul.ul_action = #{type} and ul.ul_project_id = #{projectId}
+        from vi_unlock_log ul left join vi_device d on d.d_mac = ul.ul_mac
+        where ul.ul_action = #{type}
+          and d.d_project_id = #{projectId}
+          and unix_timestamp(ul.ul_time) BETWEEN #{startTime} AND #{endTime}
         group by HOUR(ul.ul_time)
         order by HOUR(ul.ul_time)
     </select>
 
+    <select id="unlockStatisticsByDay" resultType="com.vians.admin.model.LogDayCount">
+        select DAY(ul.ul_time) as day, count(*) as count
+        from vi_unlock_log ul left join vi_device d on d.d_mac = ul.ul_mac
+        where ul.ul_action = #{type}
+          and d.d_project_id = #{projectId}
+          and unix_timestamp(ul.ul_time) BETWEEN #{startTime} AND #{endTime}
+        group by DAY(ul.ul_time)
+        order by DAY(ul.ul_time)
+    </select>
+
+    <select id="unlockStatisticsByWeekDay" resultType="com.vians.admin.model.LogDayCount">
+        select DAYOFWEEK(ul.ul_time) as day, count(*) as count
+        from vi_unlock_log ul left join vi_device d on d.d_mac = ul.ul_mac
+        where ul.ul_action = #{type}
+          and d.d_project_id = #{projectId}
+          and unix_timestamp(ul.ul_time) BETWEEN #{startTime} AND #{endTime}
+        group by DAYOFWEEK(ul.ul_time)
+        order by DAYOFWEEK(ul.ul_time)
+    </select>
+
+    <select id="unlockStatisticsByMonth" resultType="com.vians.admin.model.LogMonthCount">
+        select MONTH(ul.ul_time) as month, count(*) as count
+        from vi_unlock_log ul left join vi_device d on d.d_mac = ul.ul_mac
+        where ul.ul_action = #{type}
+          and d.d_project_id = #{projectId}
+          and unix_timestamp(ul.ul_time) BETWEEN #{startTime} AND #{endTime}
+        group by MONTH(ul.ul_time)
+        order by MONTH(ul.ul_time)
+    </select>
+
     <insert id="addAlarmLog" parameterType="com.vians.admin.model.UnlockLog">
-        insert into vi_alarm_log(al_mac, al_time, al_project_id, al_action)
-        values (#{MAC}, #{time}, #{projectId}, #{action})
+        INSERT INTO vi_alarm_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="MAC != null and MAC != ''">
+                al_mac,
+            </if>
+            <if test="time != null and time != ''">
+                al_time,
+            </if>
+            <if test="action != null and action != ''">
+                al_action,
+            </if>
+            <if test="projectId != 0">
+                al_project_id
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="MAC != null and MAC != ''">
+                #{MAC},
+            </if>
+            <if test="time != null and time != ''">
+                #{time},
+            </if>
+            <if test="action != null and action != ''">
+                #{action},
+            </if>
+            <if test="projectId != 0">
+                #{projectId}
+            </if>
+        </trim>
     </insert>
 
     <delete id="deleteAlarmLogsByProjectId">
         delete from vi_alarm_log where al_project_id = #{projectId}
     </delete>
 
-    <select id="getAlarmStatistics" parameterType="string" resultType="com.vians.admin.model.LogHourCount">
-        select HOUR(al.al_time) as hour, count(*) as count from vi_alarm_log al where al.al_action = #{type} group by HOUR(al.al_time) order by HOUR(al.al_time)
+    <select id="getAlarmStatisticsByHour" resultType="com.vians.admin.model.LogHourCount">
+        select HOUR(al.al_time) as hour, count(*) as count
+        from vi_alarm_log al left join vi_device d on d.d_mac = al.al_mac
+        where d.d_project_id = #{projectId}
+          <choose>
+              <when test="type == 'LOCK_ALARM'">
+                  and (al.al_action = 'DOOR_ALARM'
+                  or al.al_action = 'DOOR_BROKEN_ALARM'
+                  or al.al_action = 'DOOR_BELL_ALARM'
+                  or al.al_action = 'INPUT_ERROR_ALARM'
+                  or al.al_action = 'DOOR_OPEN_ALARM'
+                  or al.al_action = 'DOOR_LOCK_ALARM')
+              </when>
+              <otherwise>
+                  and al.al_action = #{type}
+              </otherwise>
+          </choose>
+          and (unix_timestamp(al.al_time) BETWEEN #{startTime} AND #{endTime})
+        group by HOUR(al.al_time)
+        order by HOUR(al.al_time)
+    </select>
+
+    <select id="getAlarmStatisticsByDay" resultType="com.vians.admin.model.LogDayCount">
+        select DAY(al.al_time) as day, count(*) as count
+        from vi_alarm_log al left join vi_device d on d.d_mac = al.al_mac
+        where d.d_project_id = #{projectId}
+        <choose>
+            <when test="type == 'LOCK_ALARM'">
+                and (al.al_action = 'DOOR_ALARM'
+                or al.al_action = 'DOOR_BROKEN_ALARM'
+                or al.al_action = 'DOOR_BELL_ALARM'
+                or al.al_action = 'INPUT_ERROR_ALARM'
+                or al.al_action = 'DOOR_OPEN_ALARM'
+                or al.al_action = 'DOOR_LOCK_ALARM')
+            </when>
+            <otherwise>
+                and al.al_action = #{type}
+            </otherwise>
+        </choose>
+        and (unix_timestamp(al.al_time) BETWEEN #{startTime} AND #{endTime})
+        group by DAY(al.al_time)
+        order by DAY(al.al_time)
+    </select>
+
+    <select id="getAlarmStatisticsByWeekDay" resultType="com.vians.admin.model.LogDayCount">
+        select DAYOFWEEK(al.al_time) as day, count(*) as count
+        from vi_alarm_log al left join vi_device d on d.d_mac = al.al_mac
+        where d.d_project_id = #{projectId}
+        <choose>
+            <when test="type == 'LOCK_ALARM'">
+                and (al.al_action = 'DOOR_ALARM'
+                or al.al_action = 'DOOR_BROKEN_ALARM'
+                or al.al_action = 'DOOR_BELL_ALARM'
+                or al.al_action = 'INPUT_ERROR_ALARM'
+                or al.al_action = 'DOOR_OPEN_ALARM'
+                or al.al_action = 'DOOR_LOCK_ALARM')
+            </when>
+            <otherwise>
+                and al.al_action = #{type}
+            </otherwise>
+        </choose>
+        and (unix_timestamp(al.al_time) BETWEEN #{startTime} AND #{endTime})
+        group by DAYOFWEEK(al.al_time)
+        order by DAYOFWEEK(al.al_time)
+    </select>
+
+    <select id="getAlarmStatisticsByMonth" resultType="com.vians.admin.model.LogMonthCount">
+        select MONTH(al.al_time) as month, count(*) as count
+        from vi_alarm_log al left join vi_device d on d.d_mac = al.al_mac
+        where d.d_project_id = #{projectId}
+        <choose>
+            <when test="type == 'LOCK_ALARM'">
+                and (al.al_action = 'DOOR_ALARM'
+                or al.al_action = 'DOOR_BROKEN_ALARM'
+                or al.al_action = 'DOOR_BELL_ALARM'
+                or al.al_action = 'INPUT_ERROR_ALARM'
+                or al.al_action = 'DOOR_OPEN_ALARM'
+                or al.al_action = 'DOOR_LOCK_ALARM')
+            </when>
+            <otherwise>
+                and al.al_action = #{type}
+            </otherwise>
+        </choose>
+        and (unix_timestamp(al.al_time) BETWEEN #{startTime} AND #{endTime})
+        group by MONTH(al.al_time)
+        order by MONTH(al.al_time)
     </select>
 
     <select id="getRealTimeOperateStatistics" parameterType="long" resultType="com.vians.admin.model.UnlockLog">
         SELECT
             d.d_id AS id,
             d.d_name AS deviceName,
+            d.d_mac AS MAC,
             d.d_model AS deviceModel,
             ul.ul_action AS action,
             ul.ul_time AS time,
@@ -99,6 +281,33 @@
                 LEFT JOIN vi_role vr on vr.r_id = u.u_role_id
         WHERE
             ul.ul_project_id = #{projectId}
-        ORDER BY ul.ul_time DESC;
+        ORDER BY ul.ul_time DESC LIMIT 20;
+    </select>
+    <select id="getRealTimeAlarmStatistics" parameterType="long" resultType="com.vians.admin.model.UnlockLog">
+        SELECT
+            d.d_id AS id,
+            d.d_name AS deviceName,
+            d.d_mac AS MAC,
+            d.d_model AS deviceModel,
+            al.al_action AS action,
+            al.al_time AS time,
+            r.r_name AS roomName,
+            f.f_name AS floorName,
+            vu.u_name AS unitName,
+            b.b_name AS buildingName,
+            c.c_name AS communityName,
+            p.p_name AS projectName
+        FROM
+            vi_alarm_log al
+                LEFT JOIN vi_device d on al.al_mac = d.d_mac
+                LEFT JOIN vi_room r ON d.d_room_id = r.r_id
+                LEFT JOIN vi_floor f ON f.f_id = r.r_floor_id
+                LEFT JOIN vi_unit vu ON vu.u_id = f.f_unit_id
+                LEFT JOIN vi_building b ON b.b_id = vu.u_building_id
+                LEFT JOIN vi_community c ON c.c_id = b.b_community_id
+                LEFT JOIN vi_project p ON p.p_id = c.c_project_id
+        WHERE
+            al.al_project_id = #{projectId}
+        ORDER BY al.al_time DESC LIMIT 20;
     </select>
 </mapper>

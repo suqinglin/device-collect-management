@@ -1,9 +1,11 @@
 package com.vians.admin.utils;
 
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 
 public class CommUtil {
@@ -64,19 +66,6 @@ public class CommUtil {
         return sb.toString();
     }
 
-//    /**
-//     * hex异或计算得到hex
-//     * @param hex1
-//     * @param hex2
-//     * @return
-//     */
-//    public static String hexXOR(String hex1, String hex2){
-//        BigInteger i1 = new BigInteger(hex1, 16);
-//        BigInteger i2 = new BigInteger(hex2, 16);
-//        BigInteger res = i1.xor(i2);
-//        return res.toString(16).toUpperCase();
-//    }
-
     public static byte[] bytesXorBytes(byte[] bytes1, byte[] bytes2) {
         for (int i = 0; i < bytes1.length; i++) {
             bytes1[i] = (byte) ((int) bytes1[i] ^ (int) bytes2[i]);
@@ -118,6 +107,49 @@ public class CommUtil {
         return calendar.getTime().getTime();
     }
 
+    /**
+     * 获取当月的零点时间戳
+     *
+     * @return 当天的零点时间戳
+     */
+    public static long getCurrentMonthStartTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime().getTime();
+    }
+
+    /**
+     * 获取当周的零点时间戳
+     *
+     * @return 当天的零点时间戳
+     */
+    public static long getCurrentWeekStartTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime().getTime();
+    }
+
+    /**
+     * 获取当年的零点时间戳
+     *
+     * @return 当天的零点时间戳
+     */
+    public static long getCurrentYearStartTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH, 0);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime().getTime();
+    }
+
     public static String getNumChars(String data) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < data.length(); i++) {
@@ -129,5 +161,22 @@ public class CommUtil {
             }
         }
         return new String(builder);
+    }
+
+    /**
+     * 获取当前月的天数
+     * @return 当前月份得天数
+     */
+    public static int getDayOfMonth(){
+        Calendar aCalendar = Calendar.getInstance(Locale.CHINA);
+        return aCalendar.getActualMaximum(Calendar.DATE);
+    }
+
+    public static byte[] reverseBytes(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.allocate(data.length);
+        for (int i = data.length - 1; i >= 0; i--) {
+            buffer.put(data[i]);
+        }
+        return buffer.array();
     }
 }

@@ -115,6 +115,9 @@ public class DeviceBaseInfo {
     @Setter
     private long roomId;
 
+    /**
+     * 是否为当前房间的默认显示设备
+     */
     @Getter
     @Setter
     private int isDefault;

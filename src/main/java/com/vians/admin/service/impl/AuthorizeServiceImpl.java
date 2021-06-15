@@ -3,6 +3,7 @@ package com.vians.admin.service.impl;
 import com.vians.admin.mapper.AuthorizeMapper;
 import com.vians.admin.model.AuthorizeContentInfo;
 import com.vians.admin.model.AuthorizeInfo;
+import com.vians.admin.model.AuthorizeRoomInfo;
 import com.vians.admin.request.RxAuthorize;
 import com.vians.admin.service.AuthorizeService;
 import org.springframework.stereotype.Service;
@@ -35,14 +36,26 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     @Override
     public long addAuthorize(RxAuthorize rxAuthorize) {
         rxAuthorize.setCreateTime(new Date());
-        authorizeMapper.addAuthorize(rxAuthorize);
-        return rxAuthorize.getId();
+//        AuthorizeInfo authorizeInfo = authorizeMapper.findAuthorizeByValue(rxAuthorize.getContent(), rxAuthorize.getRoomId());
+//        if (authorizeInfo != null) {
+//            rxAuthorize.setUpdateTime(new Date());
+//            authorizeMapper.updateAuthorize(rxAuthorize);
+//            return authorizeInfo.getId();
+//        } else {
+            authorizeMapper.addAuthorize(rxAuthorize);
+            return rxAuthorize.getId();
+//        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void addAuthorizeRoom(long authorizeId, long roomId, int position) {
-        authorizeMapper.addAuthorizeRoom(authorizeId, roomId, position);
+        AuthorizeRoomInfo authorizeRoomInfo = new AuthorizeRoomInfo();
+        authorizeRoomInfo.setAuthorizeId(authorizeId);
+        authorizeRoomInfo.setRoomId(roomId);
+        authorizeRoomInfo.setPosition(position);
+        authorizeRoomInfo.setCreateTime(new Date());
+        authorizeMapper.addAuthorizeRoom(authorizeRoomInfo);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -75,6 +88,12 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
+    public AuthorizeInfo findAuthorizeByValue(String value, long roomId) {
+        return authorizeMapper.findAuthorizeByValue(value, roomId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
     public long addAuthorizeContent(AuthorizeContentInfo authorizeContentInfo) {
         authorizeMapper.addAuthorizeContent(authorizeContentInfo);
         return authorizeContentInfo.getId();
@@ -84,5 +103,16 @@ public class AuthorizeServiceImpl implements AuthorizeService {
     @Override
     public void deleteAuthorizeByUser(long userId) {
         authorizeMapper.deleteAuthorizeByUser(userId);
+    }
+
+    @Override
+    public void updateAuthorizeRoom(Long authorizeId, long roomId, int position, int type) {
+        AuthorizeRoomInfo authorizeRoomInfo = new AuthorizeRoomInfo();
+        authorizeRoomInfo.setAuthorizeId(authorizeId);
+        authorizeRoomInfo.setRoomId(roomId);
+        authorizeRoomInfo.setPosition(position);
+        authorizeRoomInfo.setUpdateTime(new Date());
+        authorizeRoomInfo.setAuthorizeType(type);
+        authorizeMapper.updateAuthorizeRoom(authorizeRoomInfo);
     }
 }

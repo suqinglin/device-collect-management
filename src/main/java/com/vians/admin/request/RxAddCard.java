@@ -49,4 +49,8 @@ public class RxAddCard {
     @Getter
     @Setter
     private long authorizeId;
+
+    @Getter
+    @Setter
+    private int positionType;
 }

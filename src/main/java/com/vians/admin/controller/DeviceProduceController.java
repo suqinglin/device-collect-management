@@ -1,7 +1,6 @@
 package com.vians.admin.controller;
 
-import com.vians.admin.common.RedisKeyConstants;
-import com.vians.admin.model.DeviceInfo;
+import com.vians.admin.common.DeviceHelper;
 import com.vians.admin.request.RxDecryptPayload;
 import com.vians.admin.request.RxEncryptPayload;
 import com.vians.admin.response.ResponseCode;
@@ -29,7 +28,7 @@ public class DeviceProduceController {
     @PostMapping("/encryptPayload")
     public ResponseData encryptPayload(@RequestBody RxEncryptPayload payloadEncrypt) {
         String mac = payloadEncrypt.getMac();
-        String UUID = getUUID(mac);
+        String UUID = DeviceHelper.getUUID(deviceService, redisService, mac);
         if (StringUtils.isEmpty(UUID)) {
             return ResponseData.error(ResponseCode.ERROR_DEVICE_NOT_EXIST);
         }
@@ -42,7 +41,7 @@ public class DeviceProduceController {
     @PostMapping("/decryptPayload")
     public ResponseData decryptPayload(@RequestBody RxDecryptPayload decryptPayload) {
         String mac = decryptPayload.getMac();
-        String UUID = getUUID(mac);
+        String UUID = DeviceHelper.getUUID(deviceService, redisService, mac);
         if (StringUtils.isEmpty(UUID)) {
             return ResponseData.error(ResponseCode.ERROR_DEVICE_NOT_EXIST);
         }
@@ -55,23 +54,5 @@ public class DeviceProduceController {
         } else {
             return new ResponseData(ResponseCode.ERROR_DEVICE_CRC_ERROR);
         }
-    }
-
-    /**
-     * 根据设备MAC获取UUID
-     * @param mac
-     * @return
-     */
-    private String getUUID(String mac) {
-        String UUID = redisService.get(RedisKeyConstants.DEVICE_MAC_UUID + mac);
-        if (StringUtils.isEmpty(UUID)) {
-            DeviceInfo deviceInfo = deviceService.getDeviceInfoByMac(mac.contains("FFFF") ? mac : "FFFF" + mac);
-            if (deviceInfo == null) {
-                return null;
-            }
-            UUID = deviceInfo.getUuid();
-            redisService.set(RedisKeyConstants.DEVICE_MAC_UUID + mac, UUID);
-        }
-        return UUID;
     }
 }

@@ -360,6 +360,14 @@ public class DeviceApiController {
                 ResponseData responseData = new ResponseData(ResponseCode.SUCCESS);
                 if (checkBattResponse.getBatt() != null) {
                     checkBattResponse.getBatt().forEach(battery -> {
+                        // 此处将不再保存电量到数据库，而是在接收到mqtt推送的时候保存
+                        // 保存设备电量用于数据统计
+//                        DeviceBatt deviceBatt = new DeviceBatt();
+//                        deviceBatt.setMac(battery.getMAC());
+//                        deviceBatt.setUpdateTime(DateUtil.date(Long.parseLong(battery.getTime()) * 1000));
+//                        deviceBatt.setBatt(battery.getBattery());
+//                        deviceService.addDeviceBatt(deviceBatt);
+                        // 组装response应答数据
                         battery.setTime(CommUtil.parseTime(Long.parseLong(battery.getTime())));
                         UnlockLog logInfo = logService.getUnlockLogByMacAndName(null, battery.getMAC());
                         if (logInfo != null) {

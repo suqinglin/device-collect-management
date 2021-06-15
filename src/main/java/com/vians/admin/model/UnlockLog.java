@@ -2,10 +2,12 @@ package com.vians.admin.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * 开锁日志
  */
+@ToString
 public class UnlockLog {
 
     @Getter

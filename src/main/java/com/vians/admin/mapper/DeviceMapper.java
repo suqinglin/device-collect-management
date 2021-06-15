@@ -1,8 +1,6 @@
 package com.vians.admin.mapper;
 
-import com.vians.admin.model.DeviceBaseInfo;
-import com.vians.admin.model.DeviceDetailInfo;
-import com.vians.admin.model.DeviceInfo;
+import com.vians.admin.model.*;
 import com.vians.admin.request.query.DeviceQuery;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -16,9 +14,16 @@ public interface DeviceMapper {
 
     List<DeviceBaseInfo> getCollectDevicesByUser(@Param("userId") long userId);
 
-    DeviceInfo getDeviceByMac(BigInteger mac);
+    /**
+     * 获取设备的生产信息
+     * @param mac
+     * @return
+     */
+    DeviceInfo getProductDeviceByMac(BigInteger mac);
 
     DeviceBaseInfo getDeviceByRoomId(@Param("roomId") long roomId);
+
+    DeviceBaseInfo getDeviceByMac(@Param("mac") String mac);
 
     void addDevice(DeviceBaseInfo deviceBaseInfo);
 
@@ -30,6 +35,13 @@ public interface DeviceMapper {
      * @param projectId
      */
     List<DeviceBaseInfo> getFreeDevices(@Param("projectId") long projectId);
+
+    /**
+     * 获取设备电量
+     * @param projectId
+     * @return
+     */
+    List<Battery> getBatteries(@Param("projectId") long projectId);
 
     /**
      * 获取指定房间的已绑定设备
@@ -74,4 +86,14 @@ public interface DeviceMapper {
      * @param deviceId
      */
     void setDeviceDefaultYesById(@Param("deviceId") long deviceId);
+
+    List<BlockPositionErrorInfo> findBlockPositionErrorRecords();
+
+    void changeBlockToLock(@Param("blockId") long blockId);
+
+    void changeLockToBlock(@Param("lockId") long lockId);
+
+    void addDeviceBatt(DeviceBatt deviceBatt);
+
+    void updateDeviceBattery(@Param("mac") String mac, @Param("battery") int battery, @Param("updateTime") Date updateTime);
 }

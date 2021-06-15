@@ -2,9 +2,11 @@ package com.vians.admin.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigInteger;
 
+@ToString
 public class DeviceInfo {
 
     @Getter

@@ -57,4 +57,8 @@ public class RxAddFp {
     @Getter
     @Setter
     private long authorizeId;
+
+    @Getter
+    @Setter
+    private int positionType;
 }

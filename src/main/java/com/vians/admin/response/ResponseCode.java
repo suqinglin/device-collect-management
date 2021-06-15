@@ -73,6 +73,7 @@ public enum ResponseCode implements BaseEnum {
     ERROR_USER_IS_ILLEGAL("1013002", "非法用户"),
     // 用户授权
     ERROR_AUTHORIZE_NO_ROOM("1014001", "没有需要授权的房间"),
+    ERROR_AUTHORIZE_PSW_EXIST("1014002", "当前密码已存在"),
     /***********************************************************************
      * SUCCESS
      ***********************************************************************/
